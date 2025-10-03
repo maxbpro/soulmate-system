@@ -14,10 +14,8 @@ public class UserController {
 
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
-
     @GetMapping("")
     public String test() {
-        log.info("Test Hello World");
         return "Hello World";
     }
 }
