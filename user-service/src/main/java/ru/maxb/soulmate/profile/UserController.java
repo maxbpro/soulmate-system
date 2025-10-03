@@ -16,6 +16,6 @@ public class UserController {
 
     @GetMapping("")
     public String test() {
-        return "Hello World";
+        return "Hello World new";
     }
 }
