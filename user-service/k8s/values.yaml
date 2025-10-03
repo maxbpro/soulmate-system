@@ -1,0 +1,5 @@
+appName: user-service
+appVersion: 1.0.0
+appPort: 8082
+postgresqlHost: soulmate-postgresql-db.default.svc.cluster.local
+postgresqlPort: 5433

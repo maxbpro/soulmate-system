@@ -1,0 +1,58 @@
+import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+
+    dependencies {
+        classpath("org.openapi.generator:org.openapi.generator.gradle.plugin:7.16.0")
+    }
+}
+
+String[] ymlNames = [
+        "keycloak",
+        "profile"
+]
+for (String ymlName : ymlNames) {
+    createOpenApiGenerateTask(ymlName);
+}
+
+
+void createOpenApiGenerateTask(String ymlName) {
+    String taskName = "openApiGenerate_" + ymlName;
+    task(taskName, type: GenerateTask) {
+        generatorName = "spring"
+        inputSpec = "$rootDir/openapi/${ymlName}.yaml".toString()
+        outputDir = layout.buildDirectory.dir('generated').get().asFile.absolutePath
+        apiPackage = "ru.maxb.soulmate.${ymlName}.api"
+        modelPackage = "ru.maxb.soulmate.${ymlName}.dto"
+        configOptions = [library        : "spring-cloud",
+                         useFeignClients: "true",
+                         interfaceOnly  : "true",
+                         useJakartaEe   : "true"
+        ]
+    }
+    compileJava.dependsOn(taskName)
+}
+
+//compileJava.dependsOn 'annotateFeignClients'
+//compileJava.dependsOn 'openApiGenerate'
+
+sourceSets.main.java.srcDir layout.buildDirectory.dir('generated/src/main/java').get().asFile
+
+sourceSets {
+    main {
+        java {
+            srcDir layout.buildDirectory.dir('generated/src/main/java')
+        }
+    }
+    test {
+        java {
+            srcDir layout.buildDirectory.dir('generated/src/main/java')
+        }
+    }
+}

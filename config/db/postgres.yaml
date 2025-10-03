@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-postgresql-init-scripts
+data:
+  init.sql: |
+  
+    CREATE USER customer WITH PASSWORD 'password';
+    GRANT USAGE ON SCHEMA public TO customer;
+    GRANT CREATE ON SCHEMA public TO customer;
+    GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO customer;
+    GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO customer;
+    CREATE DATABASE profile_db WITH OWNER customer;
+    CREATE DATABASE likes_db WITH OWNER customer;
+    GRANT CONNECT, CREATE, temporary on database profile_db to customer;
+    GRANT CONNECT, CREATE, temporary on database likes_db to customer;
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: soulmate-postgresql-db
+spec:
+  serviceName: soulmate-postgresql-db-service
+  selector:
+    matchLabels:
+      app: soulmate-postgresql-db
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: soulmate-postgresql-db
+    spec:
+      containers:
+        - name: soulmate-postgresql-db
+          image: postgres:18
+          volumeMounts:
+            - mountPath: /data
+              name: cache-volume
+            - name: init-script-volume
+              mountPath: /docker-entrypoint-initdb.d
+          env:
+            - name: POSTGRES_USER
+              value: testuser
+            - name: POSTGRES_PASSWORD
+              value: testpassword
+            - name: PGDATA
+              value: /data/pgdata
+      volumes:
+        - name: cache-volume
+          emptyDir: { }
+        - name: init-script-volume
+          configMap:
+            name: my-postgresql-init-scripts
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: soulmate-postgresql-db
+spec:
+  selector:
+    app: soulmate-postgresql-db
+  type: LoadBalancer
+  ports:
+    - port: 5433
+      targetPort: 5432

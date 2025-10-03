@@ -1,0 +1,95 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.5.0'
+	id 'io.spring.dependency-management' version '1.1.4'
+}
+
+apply from: 'openapi.gradle'
+
+dependencyManagement {
+	imports {
+		mavenBom("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:2.20.1")
+	}
+}
+
+group = 'ru.maxb.soulmate'
+version = '1.0.0'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(24)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation("org.springframework.boot:spring-boot-starter-validation")
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+	implementation "io.micrometer:micrometer-registry-prometheus"
+	implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:${springdocOpenapiStarterWebfluxUiVersion}")
+	implementation "org.springframework.cloud:spring-cloud-starter-openfeign:${springCloudStarterOpenFeignVersion}"
+	implementation "io.github.resilience4j:resilience4j-spring-boot3:${resilience4jSpringBoot3Version}"
+
+
+	compileOnly("org.projectlombok:lombok")
+	compileOnly("org.mapstruct:mapstruct:${mapstructVersion}")
+	annotationProcessor("org.projectlombok:lombok")
+	annotationProcessor("org.mapstruct:mapstruct-processor:${mapstructVersion}")
+
+	implementation "net.logstash.logback:logstash-logback-encoder:$logstashVersion"
+
+	implementation 'org.hibernate:hibernate-envers:6.6.30.Final'
+	implementation("javax.validation:validation-api:${javaxValidationApiVersion}")
+	implementation 'org.postgresql:postgresql:42.7.3'
+	implementation 'org.testcontainers:postgresql:1.21.3'
+	implementation 'org.liquibase:liquibase-core:5.0.0'
+
+	implementation "org.openapitools:jackson-databind-nullable:${jacksonDatabindNullableVersion}"
+
+
+//	implementation "io.opentelemetry:opentelemetry-exporter-otlp"
+//	implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:$opentelemetrySpringBootVersion"
+
+	implementation("io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter")
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	testImplementation 'org.testcontainers:postgresql:1.21.3'
+	testImplementation("org.testcontainers:junit-jupiter:1.21.3")
+
+	testCompileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
+}
+
+
+
+
+test {
+	useJUnitPlatform()
+	include '**/*'
+}
+
+sourceSets {
+	main {
+		java {
+			srcDir layout.buildDirectory.dir('generated/src/main/java')
+		}
+	}
+	test {
+		java {
+			srcDir layout.buildDirectory.dir('generated/src/main/java')
+		}
+	}
+}

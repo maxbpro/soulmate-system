@@ -1,0 +1,155 @@
+openapi: 3.0.0
+info:
+  title: Profile API
+  description: REST API для взаимодействия с Profile сервисом.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8082
+
+paths:
+  /v1/profiles:
+    post:
+      summary: Регистрация профиля пользователя
+      operationId: "registration"
+      tags:
+        - Profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileRegistrationRequestDto'
+      responses:
+        '201':
+          description: Успешная регистрация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileRegistrationResponseDto'
+
+  /v1/profiles/{id}:
+    get:
+      summary: Get profile by id
+      operationId: "findById"
+      tags:
+        - Profile
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+          '201':
+            description: Successfully found
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ProfileDto'
+    put:
+      summary: Update profile
+      operationId: "update"
+      tags:
+        - Profile
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileRegistrationRequestDto'
+      responses:
+        '201':
+          description: Successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileRegistrationResponseDto'
+    delete:
+      summary: soft delete profile by id
+      operationId: "delete"
+      tags:
+        - Profile
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successfully deleted
+
+  /v1/profiles/compensate-registration/{id}:
+    delete:
+      summary: compensate-registration, hard delete profile by id
+      operationId: "compensateRegistration"
+      tags:
+        - Profile
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successfully deleted
+
+
+components:
+  schemas:
+    ProfileRegistrationResponseDto:
+      type: object
+      required: [ id ]
+      properties:
+        id:
+          type: string
+
+    ProfileRegistrationRequestDto:
+      type: object
+      required: [
+        email,
+        firstName,
+        phone_number,
+      ]
+      properties:
+        firstName:
+          type: string
+          format: email
+        lastName:
+          type: string
+          format: email
+        email:
+          type: string
+          format: email
+        phone_number:
+          type: string
+
+    ProfileDto:
+      type: object
+      required: [
+        firstName,
+        phone_number
+      ]
+      properties:
+        firstName:
+          type: string
+          format: email
+        lastName:
+          type: string
+          format: email
+        email:
+          type: string
+          format: email
+        phone_number:
+          type: string

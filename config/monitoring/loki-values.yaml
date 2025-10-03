@@ -1,0 +1,42 @@
+deploymentMode: SingleBinary
+
+# Number of replicas
+singleBinary:
+  replicas: 1
+
+# Component replicas
+write:
+  replicas: 0
+read:
+  replicas: 0
+backend:
+  replicas: 0
+
+# Caching
+chunksCache:
+  enabled: false
+resultsCache:
+  enabled: false
+
+# Helm test
+test:
+  enabled: false
+
+# Enable minio for storage
+minio:
+  enabled: true
+
+# All loki settings combined under one key
+loki:
+  schemaConfig:
+    configs:
+      - from: 2024-04-01
+        store: tsdb
+        object_store: s3
+        schema: v13
+        index:
+          prefix: loki_index_
+          period: 24h
+  auth_enabled: false
+  commonConfig:
+    replication_factor: 1
