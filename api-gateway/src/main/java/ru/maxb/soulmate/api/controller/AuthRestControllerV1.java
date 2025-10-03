@@ -35,8 +35,7 @@ public class AuthRestControllerV1 {
 
     @PostMapping(value = "/registration")
     public Mono<ResponseEntity<TokenResponse>> registration(@Valid @RequestBody Mono<IndividualWriteDto> body) {
-        return body.flatMap(userService::register)
-                .map(t -> ResponseEntity.status(HttpStatus.CREATED).body(t));
+        return body.flatMap(userService::register).map(t -> ResponseEntity.status(HttpStatus.CREATED).body(t));
     }
 
     @GetMapping("/me")
