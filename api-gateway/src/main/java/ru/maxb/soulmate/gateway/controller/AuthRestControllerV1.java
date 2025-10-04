@@ -7,9 +7,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
+import ru.maxb.soulmate.gateway.dto.GatewayRegistrationRequestDto;
+import ru.maxb.soulmate.gateway.dto.TokenRefreshRequest;
+import ru.maxb.soulmate.gateway.dto.TokenResponse;
+import ru.maxb.soulmate.gateway.dto.UserInfoResponse;
+import ru.maxb.soulmate.gateway.dto.UserLoginRequest;
 import ru.maxb.soulmate.gateway.service.UserService;
 import ru.maxb.soulmate.gateway.service.TokenService;
-import ru.maxb.soulmate.profile.dto.*;
 
 
 @RestController
@@ -34,13 +38,14 @@ public class AuthRestControllerV1 {
     }
 
     @PostMapping(value = "/registration")
-    public Mono<ResponseEntity<TokenResponse>> registration(@Valid @RequestBody Mono<IndividualWriteDto> body) {
+    public Mono<ResponseEntity<TokenResponse>> registration(@Valid @RequestBody Mono<GatewayRegistrationRequestDto> body) {
         return body.flatMap(userService::register).map(t -> ResponseEntity.status(HttpStatus.CREATED).body(t));
     }
 
     @GetMapping("/me")
     public Mono<ResponseEntity<UserInfoResponse>> getMe() {
-        return userService.getUserInfo().map(ResponseEntity::ok);
+        return userService.getUserInfo()
+                .map(ResponseEntity::ok);
     }
 
 }

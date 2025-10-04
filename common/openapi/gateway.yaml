@@ -17,7 +17,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ProfileRegistrationRequestDto'
+              $ref: '#/components/schemas/GatewayRegistrationRequestDto'
       responses:
         '201':
           description: Успешная регистрация
@@ -179,7 +179,7 @@ components:
           type: integer
 
     # --- Profile DTOs (read/write) ---
-    ProfileRegistrationRequestDto:
+    GatewayRegistrationRequestDto:
       type: object
       required: [
         email,
@@ -205,7 +205,7 @@ components:
         phone_number:
           type: string
 
-    ProfileRegistrationResponseDto:
+    GatewayRegistrationResponseDto:
       type: object
       required: [ id ]
       properties:
@@ -213,7 +213,7 @@ components:
           type: string
           format: uuid
 
-    ProfileDto:
+    GatewayProfileDto:
       type: object
       required: [
         firstName,

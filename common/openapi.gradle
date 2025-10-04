@@ -14,7 +14,9 @@ buildscript {
 }
 
 String[] ymlNames = [
-        "user"
+        "gateway",
+        "user",
+        "keycloak"
 ]
 for (String ymlName : ymlNames) {
     createOpenApiGenerateTask(ymlName);
@@ -25,14 +27,18 @@ void createOpenApiGenerateTask(String ymlName) {
     String taskName = "openApiGenerate_" + ymlName;
     task(taskName, type: GenerateTask) {
         generatorName = "spring"
-        inputSpec = "$rootDir/openapi/${ymlName}.yaml".toString()
+        apiNameSuffix = "ApiClient"
+        inputSpec = "$rootDir/common/openapi/${ymlName}.yaml".toString()
         outputDir = layout.buildDirectory.dir('generated').get().asFile.absolutePath
         apiPackage = "ru.maxb.soulmate.${ymlName}.api"
         modelPackage = "ru.maxb.soulmate.${ymlName}.dto"
-        configOptions = [library        : "spring-cloud",
-                         useFeignClients: "true",
-                         interfaceOnly  : "true",
-                         useJakartaEe   : "true"
+        configOptions = [library            : "spring-cloud",
+                         useFeignClients    : "true",
+                         interfaceOnly      : "true",
+                         useJakartaEe       : "true",
+                         "useTags"          : "true",
+                         "useFeignClientUrl": "true",
+                         "openApiNullable"  : "false"
         ]
     }
     compileJava.dependsOn(taskName)

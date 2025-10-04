@@ -10,11 +10,14 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import ru.maxb.soulmate.gateway.client.KeycloakClient;
+import ru.maxb.soulmate.gateway.dto.GatewayRegistrationRequestDto;
+import ru.maxb.soulmate.gateway.dto.KeycloakCredentialsRepresentation;
+import ru.maxb.soulmate.gateway.dto.KeycloakUserRepresentation;
+import ru.maxb.soulmate.gateway.dto.TokenResponse;
+import ru.maxb.soulmate.gateway.dto.UserInfoResponse;
 import ru.maxb.soulmate.gateway.exception.ApiException;
 import ru.maxb.soulmate.gateway.mapper.TokenResponseMapper;
-import ru.maxb.soulmate.profile.dto.IndividualWriteDto;
-import ru.maxb.soulmate.profile.dto.TokenResponse;
-import ru.maxb.soulmate.profile.dto.UserInfoResponse;
+import ru.maxb.soulmate.keycloak.dto.UserLoginRequest;
 
 import java.time.ZoneOffset;
 
@@ -54,12 +57,12 @@ public class UserService {
     }
 
     @WithSpan("userService.register")
-    public Mono<TokenResponse> register(IndividualWriteDto request) {
+    public Mono<TokenResponse> register(GatewayRegistrationRequestDto request) {
         return profileService.register(request) // Mono<UUID> personId
                 .flatMap(personId ->
                         keycloakClient.adminLogin()
                                 .flatMap(adminToken -> {
-                                    var kcUser = new net.proselyte.api.dto.KeycloakUserRepresentation(
+                                    var kcUser = new KeycloakUserRepresentation(
                                             null,
                                             request.getEmail(),
                                             request.getEmail(),
@@ -69,7 +72,7 @@ public class UserService {
                                     );
                                     return keycloakClient.registerUser(adminToken, kcUser)
                                             .flatMap(kcUserId -> {
-                                                var cred = new net.proselyte.api.dto.KeycloakCredentialsRepresentation(
+                                                var cred = new KeycloakCredentialsRepresentation(
                                                         "password",
                                                         request.getPassword(),
                                                         false
@@ -80,7 +83,7 @@ public class UserService {
                                             })
                                             .flatMap(r ->
                                                     keycloakClient.login(
-                                                            new net.proselyte.keycloak.dto.UserLoginRequest(
+                                                            new UserLoginRequest(
                                                                     request.getEmail(),
                                                                     request.getPassword()
                                                             )

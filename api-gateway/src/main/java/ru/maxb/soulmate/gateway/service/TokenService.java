@@ -6,11 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import ru.maxb.soulmate.gateway.client.KeycloakClient;
+import ru.maxb.soulmate.gateway.dto.TokenRefreshRequest;
+import ru.maxb.soulmate.gateway.dto.TokenResponse;
+import ru.maxb.soulmate.gateway.dto.UserLoginRequest;
 import ru.maxb.soulmate.gateway.mapper.KeycloakMapper;
 import ru.maxb.soulmate.gateway.mapper.TokenResponseMapper;
-import ru.maxb.soulmate.profile.dto.TokenRefreshRequest;
-import ru.maxb.soulmate.profile.dto.TokenResponse;
-import ru.maxb.soulmate.profile.dto.UserLoginRequest;
 
 @Slf4j
 @Service

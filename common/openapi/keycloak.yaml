@@ -11,7 +11,7 @@ servers:
   - url: http://localhost:8085
 
 tags:
-  - name: Auth
+  - name: KeycloakAuth
     description: Получение access/refresh токенов (через публичный OIDC endpoint Keycloak)
   - name: Users
     description: Операции управления пользователями (через Admin API Keycloak)
@@ -19,7 +19,7 @@ tags:
 paths:
   /v1/keycloak/token:
     post:
-      tags: [ Auth ]
+      tags: [ KeycloakAuth ]
       summary: Получить токен по паролю (Resource Owner Password Credentials)
       operationId: kcLogin
       requestBody:
@@ -53,7 +53,7 @@ paths:
 
   /v1/keycloak/token/refresh:
     post:
-      tags: [ Auth ]
+      tags: [ KeycloakAuth ]
       summary: Обновить access token по refresh token
       operationId: kcRefreshToken
       requestBody:

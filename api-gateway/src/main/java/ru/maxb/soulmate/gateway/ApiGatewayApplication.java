@@ -3,14 +3,19 @@ package ru.maxb.soulmate.gateway;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.cloud.openfeign.EnableFeignClients;
+import ru.maxb.soulmate.keycloak.api.KeycloakAuthApiClient;
+import ru.maxb.soulmate.user.api.ProfileApiClient;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackageClasses = {
+        ProfileApiClient.class,
+        KeycloakAuthApiClient.class})
 @ConfigurationPropertiesScan
-//@EnableFeignClients(basePackageClasses = {AuthApiClient.class})
+@EnableFeignClients(basePackageClasses = {KeycloakAuthApiClient.class, ProfileApiClient.class})
 public class ApiGatewayApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ApiGatewayApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(ApiGatewayApplication.class, args);
+    }
 
 }

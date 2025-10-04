@@ -1,4 +1,4 @@
-package ru.maxb.soulmate.profile;
+package ru.maxb.soulmate.profile.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;

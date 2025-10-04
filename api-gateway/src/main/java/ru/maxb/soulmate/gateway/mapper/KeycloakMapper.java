@@ -1,8 +1,10 @@
 package ru.maxb.soulmate.gateway.mapper;
 
-import org.mapstruct.*;
-import ru.maxb.soulmate.profile.dto.TokenRefreshRequest;
-import ru.maxb.soulmate.profile.dto.UserLoginRequest;
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import ru.maxb.soulmate.gateway.dto.TokenRefreshRequest;
+import ru.maxb.soulmate.gateway.dto.UserLoginRequest;
 
 import static org.mapstruct.InjectionStrategy.CONSTRUCTOR;
 import static org.mapstruct.MappingConstants.ComponentModel.SPRING;

@@ -1,0 +1,29 @@
+plugins {
+    id 'java-library'
+    id 'org.springframework.boot' version '3.5.0'
+    id 'io.spring.dependency-management' version '1.1.4'
+}
+
+apply(from: 'openapi.gradle')
+
+repositories {
+    mavenCentral()
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:2025.0.0"
+    }
+}
+
+tasks.named('bootJar') {
+    enabled = false
+}
+
+dependencies {
+//    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:${springdocOpenapiStarterWebfluxUiVersion}")
+    implementation "org.springframework.cloud:spring-cloud-starter-openfeign:${springCloudStarterOpenFeignVersion}"
+
+    implementation "org.openapitools:jackson-databind-nullable:${jacksonDatabindNullableVersion}"
+}

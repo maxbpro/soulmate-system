@@ -16,7 +16,7 @@ public interface TokenResponseMapper {
     @Mapping(target = "refreshToken", source = "refreshToken")
     @Mapping(target = "expiresIn", source = "expiresIn")
     @Mapping(target = "tokenType", source = "tokenType")
-    ru.maxb.soulmate.profile.dto.TokenResponse toTokenResponse(
+    ru.maxb.soulmate.gateway.dto.TokenResponse toTokenResponse(
             TokenResponse src
     );
 }

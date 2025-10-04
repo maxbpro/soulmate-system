@@ -4,13 +4,16 @@ import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+import ru.maxb.soulmate.gateway.dto.GatewayRegistrationRequestDto;
+import ru.maxb.soulmate.gateway.dto.GatewayRegistrationResponseDto;
 import ru.maxb.soulmate.gateway.mapper.ProfileMapper;
-import ru.maxb.soulmate.profile.api.V1Api;
-import ru.maxb.soulmate.gateway.dto.ProfileRegistrationRequestDto;
-import ru.maxb.soulmate.gateway.dto.ProfileRegistrationResponseDto;
+import ru.maxb.soulmate.user.api.ProfileApiClient;
+import ru.maxb.soulmate.user.dto.ProfileRegistrationRequestDto;
+import ru.maxb.soulmate.user.dto.ProfileRegistrationResponseDto;
 
 import java.util.UUID;
 
@@ -19,12 +22,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProfileService {
 
-    private final V1Api profileApiClient;
+    private final ProfileApiClient profileApiClient;
     private final ProfileMapper profileMapper;
 
     @WithSpan("personService.register")
-    public Mono<ProfileRegistrationResponseDto> register(ProfileRegistrationRequestDto request) {
-        return Mono.fromCallable(() -> profileApiClient.registration(profileMapper.from(request)))
+    public Mono<GatewayRegistrationResponseDto> register(GatewayRegistrationRequestDto request) {
+        ProfileRegistrationRequestDto from = profileMapper.from(request);
+        ResponseEntity<ProfileRegistrationResponseDto> response = profileApiClient.registration(from);
+        return Mono.fromCallable(() -> response)
                 .mapNotNull(HttpEntity::getBody)
                 .map(profileMapper::from)
                 .subscribeOn(Schedulers.boundedElastic())
@@ -33,7 +38,7 @@ public class ProfileService {
 
     @WithSpan("personService.compensateRegistration")
     public Mono<Void> compensateRegistration(String id) {
-        return Mono.fromRunnable(() -> personApiClient.compensateRegistration(UUID.fromString(id)))
+        return Mono.fromRunnable(() -> profileApiClient.compensateRegistration(UUID.fromString(id)))
                 .subscribeOn(Schedulers.boundedElastic())
                 .then();
     }
