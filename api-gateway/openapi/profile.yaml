@@ -213,20 +213,22 @@ components:
           type: string
           format: uuid
 
-#    IndividualDto:
-#      type: object
-#      required:
-#        - email
-#        - firstName
-#        - lastName
-#        - phone_number
-#      properties:
-#        firstName:
-#          type: string
-#        lastName:
-#          type: string
-#        email:
-#          type: string
-#          format: email
-#        phone_number:
-#          type: string
+    ProfileDto:
+      type: object
+      required: [
+        firstName,
+        phone_number
+      ]
+      properties:
+        firstName:
+          type: string
+          format: email
+        lastName:
+          type: string
+          format: email
+        email:
+          type: string
+          format: email
+        phone_number:
+          type: string
+

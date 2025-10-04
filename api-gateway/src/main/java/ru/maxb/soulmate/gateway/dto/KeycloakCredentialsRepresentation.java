@@ -1,4 +1,4 @@
-package ru.maxb.soulmate.api.dto;
+package ru.maxb.soulmate.gateway.dto;
 
 public record KeycloakCredentialsRepresentation(
         String type,

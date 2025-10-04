@@ -1,4 +1,4 @@
-package ru.maxb.soulmate.api.mapper;
+package ru.maxb.soulmate.gateway.mapper;
 
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;

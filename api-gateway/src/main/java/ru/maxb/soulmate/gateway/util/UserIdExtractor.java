@@ -1,4 +1,4 @@
-package ru.maxb.soulmate.api.util;
+package ru.maxb.soulmate.gateway.util;
 
 import lombok.experimental.UtilityClass;
 

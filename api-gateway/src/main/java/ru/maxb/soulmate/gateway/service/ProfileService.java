@@ -1,4 +1,4 @@
-package ru.maxb.soulmate.api.service;
+package ru.maxb.soulmate.gateway.service;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
@@ -7,6 +7,10 @@ import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+import ru.maxb.soulmate.gateway.mapper.ProfileMapper;
+import ru.maxb.soulmate.profile.api.V1Api;
+import ru.maxb.soulmate.gateway.dto.ProfileRegistrationRequestDto;
+import ru.maxb.soulmate.gateway.dto.ProfileRegistrationResponseDto;
 
 import java.util.UUID;
 
@@ -15,14 +19,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProfileService {
 
-    private final PersonApiClient personApiClient;
-    private final PersonMapper personMapper;
+    private final V1Api profileApiClient;
+    private final ProfileMapper profileMapper;
 
     @WithSpan("personService.register")
-    public Mono<IndividualWriteResponseDto> register(IndividualWriteDto request) {
-        return Mono.fromCallable(() -> personApiClient.registration(personMapper.from(request)))
+    public Mono<ProfileRegistrationResponseDto> register(ProfileRegistrationRequestDto request) {
+        return Mono.fromCallable(() -> profileApiClient.registration(profileMapper.from(request)))
                 .mapNotNull(HttpEntity::getBody)
-                .map(personMapper::from)
+                .map(profileMapper::from)
                 .subscribeOn(Schedulers.boundedElastic())
                 .doOnNext(t -> log.info("Person registered id = [{}]", t.getId()));
     }

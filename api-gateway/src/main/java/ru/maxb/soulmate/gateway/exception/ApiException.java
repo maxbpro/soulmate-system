@@ -1,4 +1,4 @@
-package ru.maxb.soulmate.api.exception;
+package ru.maxb.soulmate.gateway.exception;
 
 import static java.lang.String.format;
 

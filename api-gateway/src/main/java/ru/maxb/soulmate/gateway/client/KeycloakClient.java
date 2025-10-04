@@ -1,14 +1,14 @@
-package ru.maxb.soulmate.api.client;
+package ru.maxb.soulmate.gateway.client;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ru.maxb.soulmate.api.config.KeycloakProperties;
-import ru.maxb.soulmate.api.dto.KeycloakCredentialsRepresentation;
-import ru.maxb.soulmate.api.dto.KeycloakUserRepresentation;
-import ru.maxb.soulmate.api.exception.ApiException;
-import ru.maxb.soulmate.api.util.UserIdExtractor;
+import ru.maxb.soulmate.gateway.config.KeycloakProperties;
+import ru.maxb.soulmate.gateway.dto.KeycloakCredentialsRepresentation;
+import ru.maxb.soulmate.gateway.dto.KeycloakUserRepresentation;
+import ru.maxb.soulmate.gateway.exception.ApiException;
+import ru.maxb.soulmate.gateway.util.UserIdExtractor;
 import ru.maxb.soulmate.keycloak.dto.TokenRefreshRequest;
 import ru.maxb.soulmate.keycloak.dto.TokenResponse;
 import ru.maxb.soulmate.keycloak.dto.UserLoginRequest;

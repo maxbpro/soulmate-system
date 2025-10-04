@@ -1,4 +1,4 @@
-package ru.maxb.soulmate.api.controller;
+package ru.maxb.soulmate.gateway.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -7,8 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
-import ru.maxb.soulmate.api.service.UserService;
-import ru.maxb.soulmate.api.service.TokenService;
+import ru.maxb.soulmate.gateway.service.UserService;
+import ru.maxb.soulmate.gateway.service.TokenService;
 import ru.maxb.soulmate.profile.dto.*;
 
 

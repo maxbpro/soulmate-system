@@ -1,4 +1,4 @@
-package ru.maxb.soulmate.api.service;
+package ru.maxb.soulmate.gateway.service;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
@@ -9,9 +9,9 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-import ru.maxb.soulmate.api.client.KeycloakClient;
-import ru.maxb.soulmate.api.exception.ApiException;
-import ru.maxb.soulmate.api.mapper.TokenResponseMapper;
+import ru.maxb.soulmate.gateway.client.KeycloakClient;
+import ru.maxb.soulmate.gateway.exception.ApiException;
+import ru.maxb.soulmate.gateway.mapper.TokenResponseMapper;
 import ru.maxb.soulmate.profile.dto.IndividualWriteDto;
 import ru.maxb.soulmate.profile.dto.TokenResponse;
 import ru.maxb.soulmate.profile.dto.UserInfoResponse;

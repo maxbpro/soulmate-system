@@ -1,4 +1,4 @@
-package ru.maxb.soulmate.api.config;
+package ru.maxb.soulmate.gateway.config;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.core.GrantedAuthority;

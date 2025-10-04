@@ -1,4 +1,4 @@
-package ru.maxb.soulmate.api.config;
+package ru.maxb.soulmate.gateway.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
