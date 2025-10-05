@@ -18,10 +18,18 @@ configurations {
 
 repositories {
 	mavenCentral()
+	maven {
+		name = "GitHubPackages"
+		url = uri("https://maven.pkg.github.com/maxbpro/soulmate-system")
+		credentials {
+			username = System.getenv("GITHUB_ACTOR") ?: project.properties["gpr.user"]
+			password = System.getenv("PERSONAL_ACCESS_TOKEN") ?: project.properties["gpr.key"]
+		}
+	}
 }
 
 dependencies {
-	implementation project(':common')
+	implementation 'ru.maxb.soulmate.common:common:1.0.0'
 
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
