@@ -11,18 +11,16 @@ on:
 
 jobs:
   build-and-push-image:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK 24
-        uses: actions/setup-java@v2
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v4
         with:
-          java-version: '24'
-          architecture: 'aarch64'
-          distribution: 'adopt'
+          java-version: '11'
+          distribution: 'temurin'
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Tag & publish to GitHub Container Registry
