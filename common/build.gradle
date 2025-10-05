@@ -5,6 +5,9 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.4'
 }
 
+group 'ru.maxb.soulmate.common'
+version '1.0.0'
+
 apply(from: 'openapi.gradle')
 
 repositories {
@@ -17,19 +20,12 @@ dependencyManagement {
     }
 }
 
-tasks.named('bootJar') {
-    enabled = false
-}
-
 dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:${springdocOpenapiStarterWebfluxUiVersion}")
     implementation "org.springframework.cloud:spring-cloud-starter-openfeign:${springCloudStarterOpenFeignVersion}"
-
     implementation "org.openapitools:jackson-databind-nullable:${jacksonDatabindNullableVersion}"
 }
 
-group 'ru.maxb.soulmate.common'
-version '1.0.0'
 
 publishing {
     repositories {
@@ -42,4 +38,8 @@ publishing {
             }
         }
     }
+}
+
+tasks.named('bootJar') {
+    enabled = false
 }
