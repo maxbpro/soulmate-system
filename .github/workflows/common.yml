@@ -27,4 +27,4 @@ jobs:
         run: chmod +x gradlew
       - name: Tag & publish to GitHub Container Registry
         run: |
-          gradlew publish
+          ./gradlew publish
