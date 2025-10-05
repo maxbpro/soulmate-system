@@ -32,11 +32,11 @@ group 'ru.maxb.soulmate.common'
 version '1.0.0'
 
 publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-        }
-    }
+//    publications {
+//        mavenJava(MavenPublication) {
+//            from components.java
+//        }
+//    }
 
     repositories {
         maven {
