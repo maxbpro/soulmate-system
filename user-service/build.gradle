@@ -1,4 +1,8 @@
-
+plugins {
+	id 'java-library'
+	id 'org.springframework.boot' version '3.5.0'
+	id 'io.spring.dependency-management' version '1.1.4'
+}
 
 java {
 	toolchain {
@@ -55,23 +59,7 @@ dependencies {
 	testAnnotationProcessor 'org.projectlombok:lombok'
 }
 
-
-
-
 test {
 	useJUnitPlatform()
 	include '**/*'
-}
-
-sourceSets {
-	main {
-		java {
-			srcDir layout.buildDirectory.dir('generated/src/main/java')
-		}
-	}
-	test {
-		java {
-			srcDir layout.buildDirectory.dir('generated/src/main/java')
-		}
-	}
 }
