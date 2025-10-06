@@ -1,6 +1,3 @@
-ARG PERSONAL_ACCESS_TOKEN
-ENV PERSONAL_ACCESS_TOKEN=$PERSONAL_ACCESS_TOKEN
-
 FROM arm64v8/gradle:jdk24-alpine AS builder
 WORKDIR /app
 COPY --chown=gradle:gradle . .
