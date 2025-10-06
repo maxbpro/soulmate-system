@@ -16,6 +16,18 @@ configurations {
 	}
 }
 
+tasks.named('compileJava') {
+	dependsOn 'printEnvVars'
+}
+
+tasks.register('printEnvVars') {
+	doLast {
+		println "GITHUB_ACTOR: ${System.getenv('GITHUB_ACTOR')}"
+		println "PERSONAL_ACCESS_TOKEN: ${System.getenv('PERSONAL_ACCESS_TOKEN')}"
+	}
+}
+
+
 repositories {
 	mavenCentral()
 	maven {
@@ -53,9 +65,7 @@ dependencies {
 
 
 //	implementation "io.opentelemetry:opentelemetry-exporter-otlp"
-//	implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:$opentelemetrySpringBootVersion"
-
-	implementation("io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter")
+	//implementation("io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter")
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
