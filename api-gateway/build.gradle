@@ -23,6 +23,13 @@ configurations {
     }
 }
 
+tasks.register('printEnvVars') {
+    doLast {
+        println "GITHUB_ACTOR: ${System.getenv('GITHUB_ACTOR')}"
+        println "PERSONAL_ACCESS_TOKEN: ${System.getenv('PERSONAL_ACCESS_TOKEN')}"
+    }
+}
+
 repositories {
     mavenCentral()
     maven {
