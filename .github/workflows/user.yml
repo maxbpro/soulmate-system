@@ -30,7 +30,11 @@ jobs:
       - name: Login to GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
       - name: Build a container image from our Spring Boot app using Paketo.io / Cloud Native Build Packs
-        run: docker build --build-arg PERSONAL_ACCESS_TOKEN=${{ secrets.PERSONALACCESSTOKEN }} -t $IMAGE_NAME ./$ROOT_PATH
+        run: | 
+          docker build --build-arg 
+          PERSONAL_ACCESS_TOKEN=${{ secrets.PERSONALACCESSTOKEN }} 
+          GITHUB_ACTOR=${{github.actor}} 
+          -t $IMAGE_NAME ./$ROOT_PATH
       - name: Tag & publish to GitHub Container Registry
         run: |
           IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
