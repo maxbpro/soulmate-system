@@ -1,6 +1,5 @@
 package ru.maxb.soulmate.gateway.service;
 
-import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,7 +19,7 @@ public class TokenService {
     private final KeycloakMapper keycloakMapper;
     private final TokenResponseMapper tokenResponseMapper;
 
-    @WithSpan("tokenService.login")
+//    @WithSpan("tokenService.login")
     public Mono<TokenResponse> login(UserLoginRequest userLoginRequest) {
         var kcUserLoginRequest = keycloakMapper.toKeycloakUserLoginRequest(userLoginRequest);
         return keycloakClient.login(kcUserLoginRequest)

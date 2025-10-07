@@ -1,6 +1,5 @@
 package ru.maxb.soulmate.gateway.service;
 
-import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -56,7 +55,7 @@ public class UserService {
         return Mono.error(new ApiException("Can not get current user info: Invalid principal"));
     }
 
-    @WithSpan("userService.register")
+//    @WithSpan("userService.register")
     public Mono<TokenResponse> register(GatewayRegistrationRequestDto request) {
         return profileService.register(request) // Mono<UUID> personId
                 .flatMap(personId ->

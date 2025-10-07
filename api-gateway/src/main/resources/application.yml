@@ -1,6 +1,21 @@
 spring:
   application:
     name: api-gateway
+  cloud:
+    gateway:
+      server:
+        httpserver:
+          wiretap: true
+        httpclient:
+          wiretap: true
+#        webflux:
+#          routes:
+#            - id: profile-by-id-test
+#              uri: http://localhost:8082
+#              predicates:
+#                - Path=/api/users/v1/test
+#                - Method=GET
+
   security:
     oauth2:
       client:
@@ -15,6 +30,16 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${application.keycloak.serverUrl}/realms/${application.keycloak.realm}
+logging:
+  reactor:
+    netty : DEBUG
+  level:
+#    root: DEBUG
+    org:
+      springframework:
+        cloud:
+          gateway: DEBUG
+        security: DEBUG
 
 application:
   keycloak:
@@ -52,12 +77,12 @@ management:
       export:
         enabled: true
 
-otel:
-  exporter:
-    otlp:
-      endpoint: http://alloy.monitoring.svc.cluster.local:4318
-      protocol: http/protobuf
-  logs:
-    exporter: none
-  metrics:
-    exporter: none
+#otel:
+#  exporter:
+#    otlp:
+#      endpoint: http://alloy.monitoring.svc.cluster.local:4318
+#      protocol: http/protobuf
+#  logs:
+#    exporter: none
+#  metrics:
+#    exporter: none

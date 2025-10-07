@@ -1,0 +1,5 @@
+appName: swipe-service
+appVersion: 1.0.0
+appPort: 8083
+cassandraHost: soulmate-cassandra-db.default.svc.cluster.local
+cassandraPort: 9142

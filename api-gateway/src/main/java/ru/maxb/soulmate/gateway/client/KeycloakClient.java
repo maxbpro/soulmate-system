@@ -1,6 +1,5 @@
 package ru.maxb.soulmate.gateway.client;
 
-import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +40,7 @@ public class KeycloakClient {
         this.userPasswordResetUrl = userByIdUrl + "/reset-password";
     }
 
-    @WithSpan("keycloakClient.login")
+//    @WithSpan("keycloakClient.login")
     public Mono<TokenResponse> login(UserLoginRequest req) {
         var form = new LinkedMultiValueMap<String, String>();
         form.add("grant_type", "password");
@@ -59,7 +58,7 @@ public class KeycloakClient {
                 .bodyToMono(TokenResponse.class);
     }
 
-    @WithSpan("keycloakClient.adminLogin")
+//    @WithSpan("keycloakClient.adminLogin")
     public Mono<TokenResponse> adminLogin() {
         var form = new LinkedMultiValueMap<String, String>();
         form.add("grant_type", "password");
@@ -76,7 +75,7 @@ public class KeycloakClient {
                 .bodyToMono(TokenResponse.class);
     }
 
-    @WithSpan("keycloakClient.refreshToken")
+//    @WithSpan("keycloakClient.refreshToken")
     public Mono<TokenResponse> refreshToken(TokenRefreshRequest req) {
         var form = new LinkedMultiValueMap<String, String>();
         form.add("grant_type", "refresh_token");
@@ -93,7 +92,7 @@ public class KeycloakClient {
                 .bodyToMono(TokenResponse.class);
     }
 
-    @WithSpan("keycloakClient.registerUser")
+//    @WithSpan("keycloakClient.registerUser")
     public Mono<String> registerUser(TokenResponse adminToken, KeycloakUserRepresentation user) {
         return webClient.post()
                 .uri(userRegistrationUrl)
@@ -113,7 +112,7 @@ public class KeycloakClient {
                 .flatMap(body -> Mono.error(new ApiException("User creation failed: " + body)));
     }
 
-    @WithSpan("keycloakClient.resetUserPassword")
+//    @WithSpan("keycloakClient.resetUserPassword")
     public Mono<Void> resetUserPassword(String userId, KeycloakCredentialsRepresentation dto, String adminAccessToken) {
         return webClient.put()
                 .uri(userPasswordResetUrl, userId)
@@ -132,7 +131,7 @@ public class KeycloakClient {
     }
 
 
-    @WithSpan("keycloakClient.resetUserPassword.executeOnError")
+//    @WithSpan("keycloakClient.resetUserPassword.executeOnError")
     public Mono<ResponseEntity<Void>> executeOnError(String userId, String adminAccessToken, Throwable e) {
         return webClient.delete()
                 .uri(userByIdUrl, userId)

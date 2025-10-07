@@ -1,6 +1,5 @@
 package ru.maxb.soulmate.gateway.service;
 
-import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
@@ -25,7 +24,7 @@ public class ProfileService {
     private final ProfileApiClient profileApiClient;
     private final ProfileMapper profileMapper;
 
-    @WithSpan("personService.register")
+//    @WithSpan("personService.register")
     public Mono<GatewayRegistrationResponseDto> register(GatewayRegistrationRequestDto request) {
         ProfileRegistrationRequestDto from = profileMapper.from(request);
         ResponseEntity<ProfileRegistrationResponseDto> response = profileApiClient.registration(from);
@@ -36,7 +35,7 @@ public class ProfileService {
                 .doOnNext(t -> log.info("Person registered id = [{}]", t.getId()));
     }
 
-    @WithSpan("personService.compensateRegistration")
+//    @WithSpan("personService.compensateRegistration")
     public Mono<Void> compensateRegistration(String id) {
         return Mono.fromRunnable(() -> profileApiClient.compensateRegistration(UUID.fromString(id)))
                 .subscribeOn(Schedulers.boundedElastic())

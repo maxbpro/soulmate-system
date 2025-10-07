@@ -1,0 +1,43 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: swipe-service
+  cassandra:
+    keyspaceName: swipe
+    port: 9042
+    contactPoints: http://cassandra.default.svc.cluster.local
+    localDatacenter: datacenter1
+
+management:
+  server:
+    port: 8083
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    prometheus:
+      access: read_only
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+otel:
+  exporter:
+    otlp:
+      endpoint: http://alloy.monitoring.svc.cluster.local:4318
+      protocol: http/protobuf
+  logs:
+    exporter: none
+  metrics:
+    exporter: none
+
+
+
