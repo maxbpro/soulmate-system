@@ -36,9 +36,7 @@ void createOpenApiGenerateTask(String ymlName) {
                          useFeignClients    : "true",
                          interfaceOnly      : "true",
                          useJakartaEe       : "true",
-                         "useTags"          : "true",
-                         "useFeignClientUrl": "true",
-                         "openApiNullable"  : "false"
+                         "useTags"          : "true"
         ]
     }
     compileJava.dependsOn(taskName)
