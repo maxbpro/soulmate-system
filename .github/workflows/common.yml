@@ -24,6 +24,6 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Tag & publish to GitHub Container Registry
-        run: ./gradlew common:clean build annotateFeignClients publish
+        run: ./gradlew clean build annotateFeignClients publish
         env:
           PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONALACCESSTOKEN }}

@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
-import ru.maxb.soulmate.user.api.ProfileApiClient;
 
 @Configuration
 @ComponentScan("ru.maxb.soulmate")
@@ -20,8 +19,4 @@ public class AppConfig {
                 .build();
     }
 
-    @Bean
-    public ProfileApiClient profileApiClient(){
-        return new P
-    }
 }
