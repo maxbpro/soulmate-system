@@ -32,8 +32,7 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/v1/auth/registration",
                                 "/v1/auth/login",
-                                "/v1/auth/refresh-token",
-                                "/api/users/v1/test"
+                                "/v1/auth/refresh-token"
                         ).permitAll()
                         //USER
                         .pathMatchers("/v1/auth/me").hasAuthority("ROLE_individual.user")

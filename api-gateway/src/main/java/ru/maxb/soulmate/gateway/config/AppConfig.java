@@ -1,12 +1,15 @@
 package ru.maxb.soulmate.gateway.config;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
+import ru.maxb.soulmate.user.api.ProfileApiClient;
 
 @Configuration
+@ComponentScan("ru.maxb.soulmate")
 public class AppConfig {
 
     @Bean
@@ -15,5 +18,10 @@ public class AppConfig {
                 .baseUrl(keycloakProperties.realmUrl())
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                 .build();
+    }
+
+    @Bean
+    public ProfileApiClient profileApiClient(){
+        return new P
     }
 }

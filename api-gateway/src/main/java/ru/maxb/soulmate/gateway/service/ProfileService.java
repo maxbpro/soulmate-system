@@ -10,6 +10,7 @@ import reactor.core.scheduler.Schedulers;
 import ru.maxb.soulmate.gateway.dto.GatewayRegistrationRequestDto;
 import ru.maxb.soulmate.gateway.dto.GatewayRegistrationResponseDto;
 import ru.maxb.soulmate.gateway.mapper.ProfileMapper;
+import ru.maxb.soulmate.keycloak.api.KeycloakAuthApiClient;
 import ru.maxb.soulmate.user.api.ProfileApiClient;
 import ru.maxb.soulmate.user.dto.ProfileRegistrationRequestDto;
 import ru.maxb.soulmate.user.dto.ProfileRegistrationResponseDto;
@@ -22,6 +23,7 @@ import java.util.UUID;
 public class ProfileService {
 
     private final ProfileApiClient profileApiClient;
+    private final KeycloakAuthApiClient keycloakAuthApiClient;
     private final ProfileMapper profileMapper;
 
 //    @WithSpan("personService.register")

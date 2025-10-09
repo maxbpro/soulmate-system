@@ -19,12 +19,12 @@ String[] ymlNames = [
         "keycloak"
 ]
 for (String ymlName : ymlNames) {
-    createOpenApiGenerateTask(ymlName);
+    createOpenApiGenerateTask(ymlName)
 }
 
 
 void createOpenApiGenerateTask(String ymlName) {
-    String taskName = "openApiGenerate_" + ymlName;
+    String taskName = "openApiGenerate_" + ymlName
     task(taskName, type: GenerateTask) {
         generatorName = "spring"
         apiNameSuffix = "ApiClient"
@@ -44,8 +44,34 @@ void createOpenApiGenerateTask(String ymlName) {
     compileJava.dependsOn(taskName)
 }
 
-//compileJava.dependsOn 'annotateFeignClients'
-//compileJava.dependsOn 'openApiGenerate'
+tasks.register('annotateFeignClients') {
+    doLast {
+        for (String ymlName : ymlNames) {
+            annotateFeignClients(ymlName)
+        }
+    }
+}
+
+void annotateFeignClients(String ymlName) {
+    def apiDir = layout.buildDirectory.dir("generated/src/main/java/ru/maxb/soulmate/${ymlName}/api").get().asFile
+
+    apiDir.eachFile { file ->
+        if (file.name.endsWith("ApiClient.java")) {
+            def text = file.text
+            // Вставляем import сразу после package
+            if (!text.contains("import org.springframework.cloud.openfeign.FeignClient;")) {
+                text = text.replaceFirst(/(package [^;]+;\s*)/,
+                        "\$1import org.springframework.cloud.openfeign.FeignClient;\n")
+            }
+            // Вставляем аннотацию перед interface
+            if (!text.contains("@FeignClient")) {
+                text = text.replaceFirst("public interface",
+                        "@FeignClient(name = \"${ymlName}-api\", url = \"\\\${${ymlName}.api.base-url}\")\npublic interface")
+            }
+            file.write(text)
+        }
+    }
+}
 
 sourceSets.main.java.srcDir layout.buildDirectory.dir('generated/src/main/java').get().asFile
 

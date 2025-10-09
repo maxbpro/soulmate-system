@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/users/v1")
+@RequestMapping("/api/v1/users")
 public class UserController {
 
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
