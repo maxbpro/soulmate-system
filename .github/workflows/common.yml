@@ -22,8 +22,8 @@ jobs:
           java-version: '22'
           distribution: 'temurin'
       - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+        run: chmod +x ./common/gradlew
       - name: Tag & publish to GitHub Container Registry
-        run: ./gradlew clean build annotateFeignClients publish
+        run: ./common/gradlew clean build annotateFeignClients publish
         env:
           PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONALACCESSTOKEN }}
