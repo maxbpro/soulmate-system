@@ -58,12 +58,12 @@ void annotateFeignClients(String ymlName) {
     apiDir.eachFile { file ->
         if (file.name.endsWith("ApiClient.java")) {
             def text = file.text
-            // Вставляем import сразу после package
+
             if (!text.contains("import org.springframework.cloud.openfeign.FeignClient;")) {
                 text = text.replaceFirst(/(package [^;]+;\s*)/,
                         "\$1import org.springframework.cloud.openfeign.FeignClient;\n")
             }
-            // Вставляем аннотацию перед interface
+
             if (!text.contains("@FeignClient")) {
                 text = text.replaceFirst("public interface",
                         "@FeignClient(name = \"${ymlName}-api\", url = \"\\\${${ymlName}.api.base-url}\")\npublic interface")
