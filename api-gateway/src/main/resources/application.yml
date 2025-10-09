@@ -57,6 +57,28 @@ application:
 server:
   port: 8081
 
+#keycloak
+auth:
+  name: ${AUTH_API_NAME:auth}
+  url: ${AUTH_API_URL:http://localhost:8080}
+
+keycloakAuth:
+  name: ${KEYCLOAK_AUTH_API_NAME:auth}
+  url: ${KEYCLOAK_AUTH_API_URL:http://localhost:8080}
+
+users:
+  name: ${USERS_API_NAME:kcUsers}
+  url: ${USERS_API_NAME:http://localhost:8080}
+
+#end keycloak
+
+profile:
+  name: ${PROFILE_API_NAME:person}
+  url: ${PROFILE_API_URL:http://localhost:8082}
+
+swipe:
+  name: ${SWIPE_API_NAME:swipe}
+  url: ${SWIPE_API_URL:http://localhost:8083}
 
 management:
   server:

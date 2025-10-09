@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.maxb.soulmate.gateway.dto.GatewayRegistrationRequestDto;
-import ru.maxb.soulmate.gateway.dto.TokenResponse;
 import ru.maxb.soulmate.gateway.dto.UserInfoResponse;
 import ru.maxb.soulmate.gateway.service.GatewayApiTestService;
 import ru.maxb.soulmate.gateway.service.KeycloakApiTestService;
@@ -14,8 +13,9 @@ import ru.maxb.soulmate.gateway.util.Setting;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static ru.maxb.soulmate.gateway.containers.KeycloakTestContainer.KEYCLOAK_PORT;
 
 @Testcontainers
@@ -31,6 +31,14 @@ public class AuthRestControllerV1Test extends AbstractKeycloakTest {
     public void test() {
         //when
         var request = new GatewayRegistrationRequestDto();
+//        request.setFirstName("John");
+//        request.setLastName("Smith");
+        request.setFirstName("john.smith@gmail.com");
+        request.setLastName("john.smith@gmail.com");
+        request.setEmail("john.smith@gmail.com");
+        request.setPassword("password");
+        request.setConfirmPassword("password");
+        request.setPhoneNumber("1234567890");
 
         var response = gatewayApiTestService.register(request);
         var meResponse = gatewayApiTestService.getMe(response.getAccessToken());
