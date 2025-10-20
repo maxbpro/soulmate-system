@@ -1,6 +1,5 @@
 package ru.maxb.soulmate.profile.integration;
 
-import com.datastax.oss.driver.api.core.CqlSession;
 import com.jayway.jsonpath.JsonPath;
 import io.debezium.testing.testcontainers.ConnectorConfiguration;
 import io.debezium.testing.testcontainers.DebeziumContainer;
@@ -13,7 +12,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.rnorth.ducttape.unreliables.Unreliables;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -68,9 +66,6 @@ public class DebeziumTest {
                     .withKafka(network, "kafka:19092")
                     .dependsOn(kafka)
                     .withReuse(true);
-
-    @MockitoBean
-    private CqlSession cassandraSession;
 
     @BeforeAll
     public static void setUp() {

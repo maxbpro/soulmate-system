@@ -9,7 +9,6 @@ import ru.maxb.soulmate.profile.mapper.ProfileMapper;
 import ru.maxb.soulmate.profile.repository.ProfileRepository;
 import ru.maxb.soulmate.user.dto.ProfileDto;
 import ru.maxb.soulmate.user.dto.ProfileRegistrationRequestDto;
-import ru.maxb.soulmate.user.dto.ProfileRegistrationResponseDto;
 
 import java.util.UUID;
 
@@ -22,11 +21,11 @@ public class ProfileService {
     private final ProfileMapper profileMapper;
 
     @Transactional
-    public ProfileRegistrationResponseDto register(ProfileRegistrationRequestDto requestDto) {
+    public ProfileDto register(ProfileRegistrationRequestDto requestDto) {
         var profileEntity = profileMapper.to(requestDto);
         profileRepository.save(profileEntity);
         log.info("IN - register: profile: [{}] successfully registered", profileEntity.getEmail());
-        return new ProfileRegistrationResponseDto(profileEntity.getId().toString());
+        return profileMapper.from(profileEntity);
     }
 
     public ProfileDto findById(UUID id) {
@@ -51,11 +50,11 @@ public class ProfileService {
     }
 
     @Transactional
-    public ProfileRegistrationResponseDto update(UUID id, ProfileRegistrationRequestDto requestDto) {
+    public ProfileDto update(UUID id, ProfileRegistrationRequestDto requestDto) {
         var profileEntity = profileRepository.findById(id)
                 .orElseThrow(() -> new ProfileException("Profile not found by id=[%s]", id));
         profileMapper.update(profileEntity, requestDto);
         profileRepository.save(profileEntity);
-        return new ProfileRegistrationResponseDto(profileEntity.getId().toString());
+        return profileMapper.from(profileEntity);
     }
 }

@@ -38,10 +38,13 @@ repositories {
 			password = System.getenv("PERSONAL_ACCESS_TOKEN") ?: project.properties["gpr.key"]
 		}
 	}
+	maven {
+		url 'https://packages.confluent.io/maven/'
+	}
 }
 
 dependencies {
-	implementation 'ru.maxb.soulmate.common:common:1.0.9'
+	implementation 'ru.maxb.soulmate.common:common:1.0.10'
 
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -62,6 +65,10 @@ dependencies {
 	implementation 'org.postgresql:postgresql:42.7.3'
 	implementation 'org.liquibase:liquibase-core:5.0.0'
 
+	implementation "io.minio:minio:$minioVersion"
+
+	implementation 'org.springframework.kafka:spring-kafka:3.3.10'
+	implementation 'io.confluent:kafka-avro-serializer:7.9.2'
 
 //	implementation "io.opentelemetry:opentelemetry-exporter-otlp"
 	//implementation("io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter")
@@ -72,6 +79,7 @@ dependencies {
 	testImplementation 'io.debezium:debezium-testing-testcontainers:3.3.1.Final'
 	testImplementation 'org.testcontainers:postgresql:1.21.3'
 	testImplementation 'org.testcontainers:kafka:1.21.3'
+	testImplementation 'org.testcontainers:minio:1.21.3'
 	testImplementation("org.testcontainers:junit-jupiter:1.21.3")
 
 	testCompileOnly 'org.projectlombok:lombok'

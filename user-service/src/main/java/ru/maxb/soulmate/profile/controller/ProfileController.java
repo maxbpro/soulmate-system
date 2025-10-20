@@ -9,7 +9,6 @@ import ru.maxb.soulmate.profile.service.ProfileService;
 import ru.maxb.soulmate.user.api.ProfileApi;
 import ru.maxb.soulmate.user.dto.ProfileDto;
 import ru.maxb.soulmate.user.dto.ProfileRegistrationRequestDto;
-import ru.maxb.soulmate.user.dto.ProfileRegistrationResponseDto;
 
 import java.util.UUID;
 
@@ -20,7 +19,7 @@ public class ProfileController implements ProfileApi {
     private final ProfileService profileService;
 
     @Override
-    public ResponseEntity<ProfileRegistrationResponseDto> registration(@Valid ProfileRegistrationRequestDto profileRegistrationRequestDto) {
+    public ResponseEntity<ProfileDto> registration(@Valid ProfileRegistrationRequestDto profileRegistrationRequestDto) {
         var registered = profileService.register(profileRegistrationRequestDto);
         return ResponseEntity.ok(registered);
     }
@@ -32,23 +31,23 @@ public class ProfileController implements ProfileApi {
     }
 
     @Override
-    public ResponseEntity<ProfileRegistrationResponseDto> update(@NotNull UUID id, @Valid ProfileRegistrationRequestDto profileRegistrationRequestDto) {
-        ProfileRegistrationResponseDto updated = profileService.update(id, profileRegistrationRequestDto);
-        return ResponseEntity.ok(updated);
+    public ResponseEntity<ProfileDto> update(@NotNull UUID id, @Valid ProfileRegistrationRequestDto profileRegistrationRequestDto) {
+        ProfileDto profileDto = profileService.update(id, profileRegistrationRequestDto);
+        return ResponseEntity.ok(profileDto);
     }
 
 
     @Override
     public ResponseEntity<Void> compensateRegistration(@NotNull UUID id) {
-
+        profileService.hardDelete(id);
         return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<Void> delete(@NotNull UUID id) {
+        profileService.softDelete(id);
         return null;
     }
-
 
 
 }
