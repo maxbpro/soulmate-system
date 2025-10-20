@@ -6,9 +6,29 @@ spring:
     name: swipe-service
   cassandra:
     keyspaceName: swipe
-    port: 9042
-    contactPoints: http://cassandra.default.svc.cluster.local
-    localDatacenter: datacenter1
+    port: ${CASSANDRA_PORT:9042}
+    contactPoints: ${CASSANDRA_HOST:http://cassandra.default.svc.cluster.local}
+    localDatacenter: ${CASSANDRA_DATACENTER:datacenter1}
+  kafka:
+    bootstrap-servers: ${KAFKA:http://localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+    consumer:
+      group-id: my-group-id
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      enable-auto-commit: true
+      auto-commit-interval: 1000
+    properties:
+      schema.registry.url: http://schema-registry:8091
+      auto.register.schemas: true
+      specific.avro.reader: true
+      value.subject.name.strategy: io.confluent.kafka.serializers.subject.RecordNameStrategy
+
+test:
+  topic: "event"
 
 management:
   server:

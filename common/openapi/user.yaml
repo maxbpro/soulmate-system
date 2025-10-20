@@ -25,7 +25,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProfileRegistrationResponseDto'
+                $ref: '#/components/schemas/ProfileDto'
 
   /v1/profiles/{id}:
     get:
@@ -71,7 +71,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProfileRegistrationResponseDto'
+                $ref: '#/components/schemas/ProfileDto'
     delete:
       summary: soft delete profile by id
       operationId: "delete"
@@ -108,19 +108,38 @@ paths:
 
 components:
   schemas:
-    ProfileRegistrationResponseDto:
+
+    ProfileDto:
       type: object
-      required: [ id ]
       properties:
         id:
           type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        phoneNumber:
+          type: string
+        birthDate:
+          type: string
+          format: date
+          example: "2017-01-01"
+        interestedIn:
+          type: string
+        ageMin:
+          type: integer
+        ageMax:
+          type: integer
+        radius:
+          type: integer
 
     ProfileRegistrationRequestDto:
       type: object
       required: [
-        email,
         firstName,
-        phone_number,
+        phoneNumber,
       ]
       properties:
         firstName:
@@ -130,22 +149,28 @@ components:
         email:
           type: string
           format: email
-        phone_number:
+        phoneNumber:
           type: string
+        birthDate:
+          type: string
+          format: date
+          example: "2017-01-01"
+        interestedIn:
+          type: string
+          enum:
+            - male
+            - female
+        ageMin:
+          type: integer
+          minimum: 18
+          maximum: 99
+        ageMax:
+          type: integer
+          minimum: 19
+          maximum: 99
+        radius:
+          type: integer
+          minimum: 1
+          maximum: 100
 
-    ProfileDto:
-      type: object
-      required: [
-        firstName,
-        phone_number
-      ]
-      properties:
-        firstName:
-          type: string
-        lastName:
-          type: string
-        email:
-          type: string
-          format: email
-        phone_number:
-          type: string
+

@@ -5,18 +5,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.maxb.soulmate.gateway.dto.GatewayRegistrationRequestDto;
-import ru.maxb.soulmate.gateway.dto.UserInfoResponse;
+import ru.maxb.soulmate.gateway.dto.TokenRefreshRequest;
+import ru.maxb.soulmate.gateway.dto.TokenResponse;
+import ru.maxb.soulmate.gateway.dto.UserLoginRequest;
 import ru.maxb.soulmate.gateway.service.GatewayApiTestService;
 import ru.maxb.soulmate.gateway.service.KeycloakApiTestService;
-import ru.maxb.soulmate.gateway.util.Setting;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static ru.maxb.soulmate.gateway.containers.KeycloakTestContainer.KEYCLOAK_PORT;
 
 @Testcontainers
 public class AuthRestControllerV1Test extends AbstractKeycloakTest {
@@ -28,23 +25,15 @@ public class AuthRestControllerV1Test extends AbstractKeycloakTest {
     private KeycloakApiTestService keycloakApiTestService;
 
     @Test
-    public void test() {
+    public void shouldCreateNewUserAndReturnAccessToken() {
         //when
-        var request = new GatewayRegistrationRequestDto();
-//        request.setFirstName("John");
-//        request.setLastName("Smith");
-        request.setFirstName("john.smith@gmail.com");
-        request.setLastName("john.smith@gmail.com");
-        request.setEmail("john.smith@gmail.com");
-        request.setPassword("password");
-        request.setConfirmPassword("password");
-        request.setPhoneNumber("1234567890");
+        var registerRequest = getGatewayRegistrationRequestDto();
 
-        var response = gatewayApiTestService.register(request);
+        var response = gatewayApiTestService.register(registerRequest);
         var meResponse = gatewayApiTestService.getMe(response.getAccessToken());
 
         var personId = keycloakApiTestService
-                .getUserRepresentation(request.getEmail())
+                .getUserRepresentation(registerRequest.getEmail())
                 .getId();
 
         // then
@@ -52,20 +41,80 @@ public class AuthRestControllerV1Test extends AbstractKeycloakTest {
         assertNotNull(response, "Response must not be null");
         assertNotNull(response.getAccessToken(), "Access token must not be null");
         assertEquals("Bearer", response.getTokenType(), "Token type must be Bearer");
-        assertEquals(request.getEmail(), meResponse.getEmail());
+        assertEquals(registerRequest.getEmail(), meResponse.getEmail());
+    }
 
-        String kcBase = "http://" + keycloak.getHost() + ":" + keycloak.getMappedPort(KEYCLOAK_PORT);
+    @Test
+    void shouldLoginAndReturnAccessToken() {
+        // given: регистрируем пользователя
+        var registerRequest = getGatewayRegistrationRequestDto();
+        gatewayApiTestService.register(registerRequest);
 
-        Map<String, Object> p = new HashMap<>();
-        //p.put("application.person.url", wireMockBase);
-        p.put("application.keycloak.serverUrl", kcBase);
-        p.put("application.keycloak.realm", Setting.REALM);
+        // when: логинимся тем же email/password
+        var loginRequest = getUserLoginRequest();
+        var response = gatewayApiTestService.login(loginRequest);
+        var meResponse = gatewayApiTestService.getMe(response.getAccessToken());
 
-        p.put("spring.security.oauth2.resourceserver.jwt.issuer-uri", kcBase + "/realms/" + Setting.REALM);
+        // then
+        assertNotNull(response, "Response must not be null");
+        assertNotNull(response.getAccessToken(), "Access token must not be null");
+        assertEquals("Bearer", response.getTokenType(), "Token type must be Bearer");
+        assertEquals(registerRequest.getEmail(), meResponse.getEmail());
+    }
 
+    @Test
+    void shouldReturnUserInfo() {
+        // given
+        var registerRequest = getGatewayRegistrationRequestDto();
+        var registrationResponse = gatewayApiTestService.register(registerRequest);
 
-        UserInfoResponse me = gatewayApiTestService.getMe("");
+        // when
+        var meResponse = gatewayApiTestService.getMe(registrationResponse.getAccessToken());
 
-        String email = me.getEmail();
+        // then
+        assertNotNull(meResponse.getEmail(), "email in /me must be present");
+        assertEquals(registerRequest.getEmail(), meResponse.getEmail(), "emails must match");
+    }
+
+    @Test
+    void shouldRefreshToken() {
+        // given: регистрируем пользователя
+        var registerRequest = getGatewayRegistrationRequestDto();
+        TokenResponse tokenResponse = gatewayApiTestService.register(registerRequest);
+        var tokenRefreshRequest = getTokenRefreshRequest(tokenResponse.getRefreshToken());
+
+        // when
+        TokenResponse response = gatewayApiTestService.refreshToken(tokenRefreshRequest);
+        var meResponse = gatewayApiTestService.getMe(response.getAccessToken());
+
+        // then
+        assertNotNull(response, "Response must not be null");
+        assertNotNull(response.getAccessToken(), "Access token must not be null");
+        assertEquals("Bearer", response.getTokenType(), "Token type must be Bearer");
+        assertEquals(registerRequest.getEmail(), meResponse.getEmail());
+    }
+
+    private GatewayRegistrationRequestDto getGatewayRegistrationRequestDto() {
+        var request = new GatewayRegistrationRequestDto();
+        request.setFirstName("John");
+        request.setLastName("Smith");
+        request.setEmail("john.smith@gmail.com");
+        request.setPassword("password");
+        request.setConfirmPassword("password");
+        request.setPhoneNumber("1234567890");
+        return request;
+    }
+
+    private UserLoginRequest getUserLoginRequest() {
+        var request = new UserLoginRequest();
+        request.setEmail("john.smith@gmail.com");
+        request.setPassword("password");
+        return request;
+    }
+
+    private TokenRefreshRequest getTokenRefreshRequest(String refreshToken) {
+        var request = new TokenRefreshRequest();
+        request.setRefreshToken(refreshToken);
+        return request;
     }
 }

@@ -7,4 +7,5 @@ CREATE TABLE IF NOT EXISTS swipe
     userId       uuid,
     swipedUserId uuid,
     liked        boolean
-);
+)
+            WITH cdc = true;

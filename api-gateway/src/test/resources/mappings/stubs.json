@@ -2,13 +2,25 @@
   "mappings": [
     {
       "request": {
-        "method": "GET",
-        "urlPathPattern": "/api/v1/users/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})"
+        "method": "POST",
+        "urlPath": "/v1/profiles",
+        "bodyPatterns": [
+          { "matchesJsonPath": "$[?(@.email =~ /.+@.+\\..+/)]" }
+        ]
       },
       "response": {
-        "status": 200,
+        "status": 201,
         "body": "{ \"id\": \"3ddcecd5-5004-4a8a-9447-ed110912b7ee\" }",
         "headers": { "Content-Type": "application/json" }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "urlPathPattern": "/v1/profiles/compensate-registration/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})"
+      },
+      "response": {
+        "status": 200
       }
     }
   ]

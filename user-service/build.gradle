@@ -6,7 +6,7 @@ plugins {
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(24)
+		languageVersion = JavaLanguageVersion.of(22)
 	}
 }
 
@@ -41,7 +41,7 @@ repositories {
 }
 
 dependencies {
-	implementation 'ru.maxb.soulmate.common:common:1.0.0'
+	implementation 'ru.maxb.soulmate.common:common:1.0.9'
 
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -69,7 +69,9 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+	testImplementation 'io.debezium:debezium-testing-testcontainers:3.3.1.Final'
 	testImplementation 'org.testcontainers:postgresql:1.21.3'
+	testImplementation 'org.testcontainers:kafka:1.21.3'
 	testImplementation("org.testcontainers:junit-jupiter:1.21.3")
 
 	testCompileOnly 'org.projectlombok:lombok'

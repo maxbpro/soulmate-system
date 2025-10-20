@@ -1,5 +1,6 @@
 package ru.maxb.soulmate.gateway.service;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
@@ -26,10 +27,20 @@ public class ProfileService {
     private final KeycloakAuthApiClient keycloakAuthApiClient;
     private final ProfileMapper profileMapper;
 
-//    @WithSpan("personService.register")
     public Mono<GatewayRegistrationResponseDto> register(GatewayRegistrationRequestDto request) {
         ProfileRegistrationRequestDto from = profileMapper.from(request);
+        ResponseEntity<ProfileRegistrationResponseDto> response2 = null;
+//        try {
+
+            response2 = profileApiClient.registration(from);
+
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            // Handle the specific FeignException
+//        }
+
         ResponseEntity<ProfileRegistrationResponseDto> response = profileApiClient.registration(from);
+
         return Mono.fromCallable(() -> response)
                 .mapNotNull(HttpEntity::getBody)
                 .map(profileMapper::from)
@@ -37,7 +48,7 @@ public class ProfileService {
                 .doOnNext(t -> log.info("Person registered id = [{}]", t.getId()));
     }
 
-//    @WithSpan("personService.compensateRegistration")
+    //    @WithSpan("personService.compensateRegistration")
     public Mono<Void> compensateRegistration(String id) {
         return Mono.fromRunnable(() -> profileApiClient.compensateRegistration(UUID.fromString(id)))
                 .subscribeOn(Schedulers.boundedElastic())

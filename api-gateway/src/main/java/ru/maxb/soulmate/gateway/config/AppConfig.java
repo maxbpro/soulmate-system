@@ -1,5 +1,6 @@
 package ru.maxb.soulmate.gateway.config;
 
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +18,11 @@ public class AppConfig {
                 .baseUrl(keycloakProperties.realmUrl())
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                 .build();
+    }
+
+    @Bean
+    public HttpMessageConverters httpMessageConverters() {
+        return new HttpMessageConverters();
     }
 
 }

@@ -1,0 +1,10 @@
+{
+  "type": "record",
+  "name": "Event",
+  "namespace": "ru.maxb.soulmate.avro",
+  "fields": [
+    { "name": "uid", "type": "string" },
+    { "name": "subject", "type": "string" },
+    { "name": "description", "type": "string" }
+  ]
+}

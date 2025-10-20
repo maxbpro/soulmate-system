@@ -1,0 +1,90 @@
+plugins {
+	id 'java-library'
+	id 'org.springframework.boot' version '3.5.0'
+	id 'io.spring.dependency-management' version '1.1.4'
+	id "com.github.davidmc24.gradle.plugin.avro" version "1.9.1"
+}
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(22)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+tasks.named('compileJava') {
+	dependsOn 'printEnvVars'
+}
+
+tasks.register('printEnvVars') {
+	doLast {
+		println "GITHUB_ACTOR: ${System.getenv('GITHUB_ACTOR')}"
+		println "PERSONAL_ACCESS_TOKEN: ${System.getenv('PERSONAL_ACCESS_TOKEN')}"
+	}
+}
+
+
+repositories {
+	mavenCentral()
+	maven {
+		name = "GitHubPackages"
+		url = uri("https://maven.pkg.github.com/maxbpro/soulmate-system")
+		credentials {
+			username = System.getenv("GITHUB_ACTOR") ?: project.properties["gpr.user"]
+			password = System.getenv("PERSONAL_ACCESS_TOKEN") ?: project.properties["gpr.key"]
+		}
+	}
+	maven {
+		url 'https://packages.confluent.io/maven/'
+	}
+}
+
+avro {
+	createSetters = true
+	fieldVisibility = 'PRIVATE'
+}
+
+dependencies {
+	implementation 'ru.maxb.soulmate.common:common:1.0.9'
+
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.data:spring-data-elasticsearch'
+
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation("org.springframework.boot:spring-boot-starter-validation")
+	implementation "io.micrometer:micrometer-registry-prometheus"
+	implementation "io.github.resilience4j:resilience4j-spring-boot3:${resilience4jSpringBoot3Version}"
+
+	implementation 'org.springframework.kafka:spring-kafka:3.3.10'
+	implementation 'io.confluent:kafka-avro-serializer:7.9.2'
+
+	compileOnly("org.projectlombok:lombok")
+	compileOnly("org.mapstruct:mapstruct:${mapstructVersion}")
+	annotationProcessor("org.projectlombok:lombok")
+	annotationProcessor("org.mapstruct:mapstruct-processor:${mapstructVersion}")
+
+	implementation "net.logstash.logback:logstash-logback-encoder:$logstashVersion"
+	implementation("javax.validation:validation-api:${javaxValidationApiVersion}")
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	testImplementation 'org.testcontainers:elasticsearch:1.21.3'
+	testImplementation 'org.testcontainers:kafka:1.21.3'
+	testImplementation 'org.testcontainers:postgresql:1.21.3'
+	testImplementation("org.testcontainers:junit-jupiter:1.21.3")
+
+	testCompileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
+
+}
+
+test {
+	useJUnitPlatform()
+	include '**/*'
+}

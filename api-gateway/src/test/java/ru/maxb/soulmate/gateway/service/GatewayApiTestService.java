@@ -7,10 +7,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import ru.maxb.soulmate.gateway.dto.GatewayRegistrationRequestDto;
-import ru.maxb.soulmate.gateway.dto.TokenResponse;
-import ru.maxb.soulmate.gateway.dto.UserInfoResponse;
-import ru.maxb.soulmate.gateway.dto.UserLoginRequest;
+import ru.maxb.soulmate.gateway.dto.*;
 
 @Component
 public class GatewayApiTestService {
@@ -45,5 +42,9 @@ public class GatewayApiTestService {
         var resp = restTemplate.exchange(baseUrl() + "/v1/auth/me", HttpMethod.GET, new HttpEntity<>(headers),
                 UserInfoResponse.class);
         return resp.getBody();
+    }
+
+    public TokenResponse refreshToken(TokenRefreshRequest request) {
+        return restTemplate.postForObject(baseUrl() + "/v1/auth/refresh-token", request, TokenResponse.class);
     }
 }

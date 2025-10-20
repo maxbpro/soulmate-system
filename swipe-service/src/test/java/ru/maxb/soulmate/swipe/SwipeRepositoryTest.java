@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import ru.maxb.soulmate.swipe.common.AbstractCassandraTest;
 import ru.maxb.soulmate.swipe.model.SwipeEntity;
 import ru.maxb.soulmate.swipe.repository.SwipeRepository;
 import ru.maxb.soulmate.swipe.util.DateTimeUtil;

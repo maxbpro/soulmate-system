@@ -79,7 +79,7 @@ public class AbstractKeycloakTest {
 
         r.add("auth.url", () -> kcBase);
         r.add("users.url", () -> kcBase);
-        // r.add("person.url", () -> wireMockBase);
+        r.add("profile.url", () -> wireMockBase);
     }
 
 
