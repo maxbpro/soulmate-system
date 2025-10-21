@@ -11,7 +11,9 @@ import ru.maxb.soulmate.profile.repository.ProfileRepository;
 import ru.maxb.soulmate.profile.util.DateTimeUtil;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -44,6 +46,7 @@ public class ProfileRepositoryTest extends AbstractPostgresqlTest {
         profileEntity.setActive(true);
         profileEntity.setCreated(dateTimeUtil.now());
         profileEntity.setUpdated(dateTimeUtil.now());
+        profileEntity.setPhotos(List.of(UUID.randomUUID().toString()));
         profileRepository.save(profileEntity);
 
         Optional<ProfileEntity> byId = profileRepository.findById(profileEntity.getId());
@@ -57,6 +60,7 @@ public class ProfileRepositoryTest extends AbstractPostgresqlTest {
         assertEquals(profileEntity.getInterestedIn(), byId.get().getInterestedIn());
         assertEquals(profileEntity.getAgeMax(), byId.get().getAgeMax());
         assertEquals(profileEntity.getAgeMin(), byId.get().getAgeMin());
+        assertEquals(1, byId.get().getPhotos().size());
     }
 
 }

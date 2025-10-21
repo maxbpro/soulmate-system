@@ -66,6 +66,7 @@ dependencies {
 	implementation 'org.liquibase:liquibase-core:5.0.0'
 
 	implementation "io.minio:minio:$minioVersion"
+//	implementation 'io.hypersistence:hypersistence-utils-hibernate-63:3.11.0'
 
 	implementation 'org.springframework.kafka:spring-kafka:3.3.10'
 	implementation 'io.confluent:kafka-avro-serializer:7.9.2'

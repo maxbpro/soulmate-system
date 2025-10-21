@@ -104,6 +104,36 @@ paths:
       responses:
         '200':
           description: Successfully deleted
+  /v1/profiles/{id}/upload:
+    post:
+      summary: upload photos for users
+      operationId: "uploadImage"
+      tags:
+        - Profile
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: The image file to upload
+              required:
+                - image
+      responses:
+        '200':
+          description: File uploaded successfully
+
 
 
 components:

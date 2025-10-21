@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import ru.maxb.soulmate.profile.service.ProfileService;
 import ru.maxb.soulmate.user.api.ProfileApi;
 import ru.maxb.soulmate.user.dto.ProfileDto;
@@ -50,4 +51,7 @@ public class ProfileController implements ProfileApi {
     }
 
 
+//    public ResponseEntity<Void> uploadImage(@NotNull UUID id, MultipartFile file) {
+//        //profileService.uploadImage()
+//    }
 }

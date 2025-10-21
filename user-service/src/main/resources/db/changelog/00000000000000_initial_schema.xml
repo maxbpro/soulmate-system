@@ -26,7 +26,8 @@
                 radius        INTEGER    NOT NULL DEFAULT 10,
                 age_min       INTEGER    NOT NULL DEFAULT 18,
                 age_max       INTEGER    NOT NULL DEFAULT 99,
-                interested_in VARCHAR(64) NOT NULL
+                interested_in VARCHAR(64) NOT NULL,
+                photos        VARCHAR(64)[]
             );
 
             CREATE TABLE profile_service_history.revinfo
@@ -52,6 +53,7 @@
                 age_min       INTEGER    NOT NULL DEFAULT 18,
                 age_max       INTEGER    NOT NULL DEFAULT 99,
                 interested_in VARCHAR(64) NOT NULL,
+                photos        VARCHAR(64)[],
 
                 CONSTRAINT pk_profiles_history PRIMARY KEY (id, revision),
                 CONSTRAINT fk_profiles_history_rev FOREIGN KEY (revision) REFERENCES profile_service_history.revinfo (rev)

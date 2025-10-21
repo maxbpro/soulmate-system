@@ -2,14 +2,18 @@ package ru.maxb.soulmate.profile.integration;
 
 import jakarta.persistence.EntityManagerFactory;
 import liquibase.integration.spring.SpringLiquibase;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.web.multipart.MultipartFile;
 import org.testcontainers.containers.MinIOContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -17,6 +21,10 @@ import org.testcontainers.lifecycle.Startables;
 import ru.maxb.soulmate.profile.repository.ProfileRepository;
 import ru.maxb.soulmate.profile.service.ObjectStorageService;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -61,7 +69,7 @@ public class MinioTest {
 
     @DynamicPropertySource
     public static void overrideProperties(DynamicPropertyRegistry dynamicPropertyRegistry) {
-        dynamicPropertyRegistry.add("minio.endoint", minIOContainer::getS3URL);
+        dynamicPropertyRegistry.add("minio.endpoint", minIOContainer::getS3URL);
         dynamicPropertyRegistry.add("minio.accessKey", minIOContainer::getUserName);
         dynamicPropertyRegistry.add("minio.secretKey", minIOContainer::getPassword);
     }
@@ -72,7 +80,25 @@ public class MinioTest {
     }
 
     @Test
+    @SneakyThrows
     void saveImage() {
-        objectStorageService.saveObject("testIamge", null);
+        String objectName = UUID.randomUUID().toString();
+        MultipartFile multipartFileFromResource = createMultipartFileFromResource();
+        objectStorageService.saveObject(objectName + ".jpg", multipartFileFromResource);
+
+        List<String> photos = objectStorageService.listObjects();
+
+        assertThat(photos).hasSize(1);
+        assertThat(photos.get(0)).endsWith(".jpg");
+        assertThat(photos.get(0)).startsWith(objectName);
+    }
+
+    public MultipartFile createMultipartFileFromResource() throws IOException {
+        return new MockMultipartFile(
+                "image",         // The name of the parameter in the multipart form (e.g., "file")
+                "originalTest.txt",      // The original filename in the client's filesystem
+                "image/jpeg",           // The content type of the file (e.g., "application/json", "image/jpeg")
+                new ClassPathResource("photo.jpeg").getInputStream() // The content of the file as an InputStream
+        );
     }
 }

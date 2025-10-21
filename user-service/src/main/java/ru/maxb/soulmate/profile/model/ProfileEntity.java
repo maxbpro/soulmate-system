@@ -1,12 +1,17 @@
 package ru.maxb.soulmate.profile.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.envers.Audited;
 
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.List;
 
 
 @Setter
@@ -47,4 +52,7 @@ public class ProfileEntity extends BaseEntity {
 
     @Column(name = "age_max", nullable = false)
     private int ageMax;
+
+    @Column(name = "photos", columnDefinition = "VARCHAR(64)[]")
+    private List<String> photos;
 }

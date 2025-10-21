@@ -1,15 +1,16 @@
 package ru.maxb.soulmate.profile.service;
 
-import io.minio.MakeBucketArgs;
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
-import io.minio.errors.MinioException;
+import io.minio.*;
+import io.minio.messages.Item;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -25,27 +26,53 @@ public class ObjectStorageService {
     }
 
     @SneakyThrows
-    public void saveObject(String objectName, InputStream inputStream) {
-        objectName = objectName.trim();
-//        try (InputStream is = new FileInputStream(filePath)) {
-//            // Get the file size
-//            long fileSize = new java.io.File(filePath).length();
-//
-//
-//            PutObjectArgs args = PutObjectArgs.builder()
-//                    .bucket(bucketName)
-//                    .object(objectName)
-//                    .stream(is, fileSize, -1) // -1 indicates unknown part size for multipart upload
-//                    .contentType("image/jpeg")
-//                    .build();
-//
-//            // Upload the image
-//            minioClient.putObject(args);
-//
-//
-//        } catch (MinioException e) {
-//           //todo
-//        }
+    public void saveObject(String objectName, MultipartFile file) {
+        boolean found = minioClient.bucketExists(BucketExistsArgs.builder()
+                .bucket(bucketName)
+                .build());
+        if (!found) {
+            minioClient.makeBucket(MakeBucketArgs.builder()
+                    .bucket(bucketName)
+                    .build());
+        }
 
+        PutObjectArgs args = PutObjectArgs.builder()
+                .bucket(bucketName)
+                .object(objectName)
+                .stream(file.getInputStream(), file.getSize(), -1)
+                .contentType(file.getContentType())
+                .build();
+
+        minioClient.putObject(args);
+    }
+
+    public InputStream findObject(String objectName) {
+        try {
+            return minioClient.getObject(GetObjectArgs.builder()
+                    .bucket(bucketName)
+                    .object(objectName)
+                    .build());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void deleteFile(String objectName) throws Exception {
+        minioClient.removeObject(
+                RemoveObjectArgs.builder()
+                        .bucket(bucketName)
+                        .object(objectName)
+                        .build());
+    }
+
+    public List<String> listObjects() throws Exception {
+        List<String> objectNames = new ArrayList<>();
+        Iterable<Result<Item>> results = minioClient.listObjects(ListObjectsArgs.builder()
+                .bucket(bucketName)
+                .build());
+        for (Result<Item> result : results) {
+            objectNames.add(result.get().objectName());
+        }
+        return objectNames;
     }
 }
