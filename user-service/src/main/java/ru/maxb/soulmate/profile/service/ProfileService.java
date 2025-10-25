@@ -19,6 +19,7 @@ public class ProfileService {
 
     private final ProfileRepository profileRepository;
     private final ProfileMapper profileMapper;
+    private final FaceLandmarkService faceLandmarkService;
 
     @Transactional
     public ProfileDto register(ProfileRegistrationRequestDto requestDto) {

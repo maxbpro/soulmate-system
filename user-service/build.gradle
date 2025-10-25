@@ -44,7 +44,7 @@ repositories {
 }
 
 dependencies {
-	implementation 'ru.maxb.soulmate.common:common:1.0.10'
+	implementation 'ru.maxb.soulmate.common:common:1.0.12'
 
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -66,7 +66,8 @@ dependencies {
 	implementation 'org.liquibase:liquibase-core:5.0.0'
 
 	implementation "io.minio:minio:$minioVersion"
-//	implementation 'io.hypersistence:hypersistence-utils-hibernate-63:3.11.0'
+
+	implementation "org.springframework.cloud:spring-cloud-starter-openfeign:${springCloudStarterOpenFeignVersion}"
 
 	implementation 'org.springframework.kafka:spring-kafka:3.3.10'
 	implementation 'io.confluent:kafka-avro-serializer:7.9.2'

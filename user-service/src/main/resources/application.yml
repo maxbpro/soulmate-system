@@ -62,6 +62,10 @@ minio:
   bucket:
       name: photos
 
+face:
+  key: ${FACE_API_KEY:test}
+  secret: ${FACE_API_SECRET:secret}
+
 otel:
   exporter:
     otlp:

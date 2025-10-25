@@ -16,9 +16,25 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/ProfileRegistrationRequestDto'
+              type: object
+              properties:
+                image_file:
+                  type: string
+                  format: binary
+                  description: image to get face landmarks
+                profileRequestDto:
+                  $ref: '#/components/schemas/ProfileRegistrationRequestDto'
+              required:
+                - image_file
+            encoding:
+              profileRequestDto:
+                contentType: application/json
+
+
+
+
       responses:
         '201':
           description: Успешная регистрация
