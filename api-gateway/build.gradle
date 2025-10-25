@@ -43,7 +43,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'ru.maxb.soulmate.common:common:1.0.9'
+    implementation 'ru.maxb.soulmate.common:common:1.0.13'
 
     implementation("org.springframework.cloud:spring-cloud-starter-gateway")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -56,9 +56,6 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:${springdocOpenapiStarterWebfluxUiVersion}")
     implementation "org.springframework.cloud:spring-cloud-starter-openfeign:${springCloudStarterOpenFeignVersion}"
     implementation "io.github.resilience4j:resilience4j-spring-boot3:${resilience4jSpringBoot3Version}"
-
-//    implementation("io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter")
-//    implementation("io.opentelemetry:opentelemetry-exporter-otlp")
 
     implementation "io.github.openfeign:feign-okhttp:${feignOkhttpVersion}"
     implementation "io.github.openfeign:feign-jackson:${feignJacksonVersion}"
