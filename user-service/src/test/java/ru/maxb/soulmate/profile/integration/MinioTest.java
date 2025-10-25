@@ -18,6 +18,8 @@ import org.testcontainers.containers.MinIOContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.lifecycle.Startables;
+import org.testcontainers.utility.DockerImageName;
+import org.wiremock.integrations.testcontainers.WireMockContainer;
 import ru.maxb.soulmate.profile.repository.ProfileRepository;
 import ru.maxb.soulmate.profile.service.ObjectStorageService;
 
@@ -35,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class MinioTest {
 
     private static final int MINIO_PORT = 9000;
+    private static final Integer WIREMOCK_PORT = 8099;
 
     public static Network network = Network.newNetwork();
 
@@ -46,6 +49,12 @@ public class MinioTest {
             .withExposedPorts(MINIO_PORT)
             .withNetworkAliases("minio")
             .withNetwork(network);
+
+
+    public static final WireMockContainer wireMockContainer = new WireMockContainer(DockerImageName.parse("wiremock/wiremock:3.13.0"))
+            .withExposedPorts(WIREMOCK_PORT)
+                .withReuse(true)
+                .withMappingFromResource("face-service", "mappings/stubs.json");
 
     @MockitoBean
     private SpringLiquibase liquibase;
@@ -61,10 +70,11 @@ public class MinioTest {
 
     @BeforeAll
     public static void setUp() {
-        Startables.deepStart(Stream.of(minIOContainer))
+        Startables.deepStart(Stream.of(minIOContainer, wireMockContainer))
                 .join();
 
         log.info("minIO started on port {}", minIOContainer.getMappedPort(MINIO_PORT));
+        log.info("WireMock server started on port {}", wireMockContainer.getMappedPort(WIREMOCK_PORT));
     }
 
     @DynamicPropertySource
@@ -77,6 +87,7 @@ public class MinioTest {
     @Test
     void testContainerAreRunningWithNoExceptions() {
         assertThat(minIOContainer.isRunning()).isTrue();
+        assertThat(wireMockContainer.isRunning()).isTrue();
     }
 
     @Test
@@ -87,6 +98,8 @@ public class MinioTest {
         objectStorageService.saveObject(objectName + ".jpg", multipartFileFromResource);
 
         List<String> photos = objectStorageService.listObjects();
+
+        //final String wireMockBase = "http://" + wireMockContainer.getHost() + ":" + wireMockContainer.getFirstMappedPort();
 
         assertThat(photos).hasSize(1);
         assertThat(photos.get(0)).endsWith(".jpg");
