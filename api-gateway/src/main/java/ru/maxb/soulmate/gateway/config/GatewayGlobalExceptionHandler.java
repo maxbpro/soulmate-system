@@ -20,33 +20,34 @@ import reactor.core.publisher.Mono;
 import java.util.Map;
 
 @Component
-public class GatewayGlobalExceptionHandler extends AbstractErrorWebExceptionHandler {
+public class GatewayGlobalExceptionHandler  {
+        //extends AbstractErrorWebExceptionHandler {
 
-    public GatewayGlobalExceptionHandler(ErrorAttributes errorAttributes,
-                                         WebProperties webProperties,
-                                         ApplicationContext applicationContext,
-                                         ServerCodecConfigurer serverCodecConfigurer) {
-        super(errorAttributes, webProperties.getResources(), applicationContext);
-        super.setMessageWriters(serverCodecConfigurer.getWriters());
-        super.setMessageReaders(serverCodecConfigurer.getReaders());
-    }
-
-    @Override
-    protected RouterFunction<ServerResponse> getRoutingFunction(ErrorAttributes errorAttributes) {
-        return RouterFunctions.route(RequestPredicates.all(), this::renderErrorResponse);
-    }
-
-    private Mono<ServerResponse> renderErrorResponse(ServerRequest request) {
-        Map<String, Object> errorPropertiesMap = getErrorAttributes(request,
-                ErrorAttributeOptions.of(ErrorAttributeOptions.Include.STACK_TRACE));
-
-        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
-        if (errorPropertiesMap.containsKey("status")) {
-            status = HttpStatus.valueOf((Integer) errorPropertiesMap.get("status"));
-        }
-
-        return ServerResponse.status(status)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromValue(errorPropertiesMap));
-    }
+//    public GatewayGlobalExceptionHandler(ErrorAttributes errorAttributes,
+//                                         WebProperties webProperties,
+//                                         ApplicationContext applicationContext,
+//                                         ServerCodecConfigurer serverCodecConfigurer) {
+//        super(errorAttributes, webProperties.getResources(), applicationContext);
+//        super.setMessageWriters(serverCodecConfigurer.getWriters());
+//        super.setMessageReaders(serverCodecConfigurer.getReaders());
+//    }
+//
+//    @Override
+//    protected RouterFunction<ServerResponse> getRoutingFunction(ErrorAttributes errorAttributes) {
+//        return RouterFunctions.route(RequestPredicates.all(), this::renderErrorResponse);
+//    }
+//
+//    private Mono<ServerResponse> renderErrorResponse(ServerRequest request) {
+//        Map<String, Object> errorPropertiesMap = getErrorAttributes(request,
+//                ErrorAttributeOptions.of(ErrorAttributeOptions.Include.STACK_TRACE));
+//
+//        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+//        if (errorPropertiesMap.containsKey("status")) {
+//            status = HttpStatus.valueOf((Integer) errorPropertiesMap.get("status"));
+//        }
+//
+//        return ServerResponse.status(status)
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .body(BodyInserters.fromValue(errorPropertiesMap));
+//    }
 }

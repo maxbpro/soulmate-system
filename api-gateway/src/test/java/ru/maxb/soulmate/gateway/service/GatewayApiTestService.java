@@ -1,12 +1,21 @@
 package ru.maxb.soulmate.gateway.service;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import org.springframework.core.env.Environment;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.*;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.ResourceHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 import ru.maxb.soulmate.gateway.dto.*;
 
 @Component
@@ -28,8 +37,40 @@ public class GatewayApiTestService {
         return "http://localhost:" + port;
     }
 
-    public TokenResponse register(GatewayRegistrationRequestDto request) {
-        return restTemplate.postForObject(baseUrl() + "/v1/auth/registration", request, TokenResponse.class);
+    @SneakyThrows
+    public TokenResponse register(MultipartFile imageFile,
+                                  GatewayRegistrationRequestDto request) {
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(request);
+
+        HttpHeaders jsonHeaders = new HttpHeaders();
+        jsonHeaders.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> jsonPart = new HttpEntity<>(json, jsonHeaders);
+        body.add("profileRequestDto", jsonPart);
+
+        //ByteArrayResource byteArrayResource = new ByteArrayResource(imageFile.getBytes());
+        body.add("image_file", imageFile.getBytes());
+
+//        HttpMessageConverter<Object> jackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter();
+//                new MappingJackson2HttpMessageConverter();
+//
+//        HttpMessageConverter<Resource> resourceHttpMessageConverter = new ResourceHttpMessageConverter();
+//                new ResourceHttpMessageConverter();
+//
+        HttpHeaders requestHeaders = new HttpHeaders();
+        requestHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, requestHeaders);
+
+        //restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+        //restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
+        ResponseEntity<TokenResponse> tokenResponseResponseEntity = restTemplate.postForEntity(
+                baseUrl() + "/v1/auth/registration", requestEntity, TokenResponse.class);
+
+        return tokenResponseResponseEntity.getBody();
     }
 
     public TokenResponse login(UserLoginRequest request) {

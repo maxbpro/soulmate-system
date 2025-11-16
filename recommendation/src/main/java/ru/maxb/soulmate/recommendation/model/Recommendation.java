@@ -15,4 +15,7 @@ public class Recommendation {
     private String id;
     private String title;
     private GeoPoint location;
+
+    //todo
+    private String[] landmark;
 }

@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.maxb.soulmate.face.api.FaceApiClient;
 import ru.maxb.soulmate.face.dto.FaceResponse;
+import ru.maxb.soulmate.face.dto.FaceResponseFacesInner;
+import ru.maxb.soulmate.face.dto.FaceResponseFacesInnerLandmark;
 import ru.maxb.soulmate.profile.exception.ProfileException;
 
 import java.util.Optional;
@@ -28,8 +30,13 @@ public class FaceLandmarkService {
     public void getLandmarks(MultipartFile file) {
         ResponseEntity<FaceResponse> faceResponseResponseEntity = FaceApiClient.faceDetection(key, secret, file, 1);
 
-        Optional.ofNullable(faceResponseResponseEntity.getBody())
-                //.map(faceResponse -> faceResponse.)
+        FaceResponseFacesInnerLandmark landmarksDto = Optional.ofNullable(faceResponseResponseEntity.getBody())
+                .map(FaceResponse::getFaces)
+                .map(v -> v.stream().findFirst().orElseThrow())
+                .map(FaceResponseFacesInner::getLandmark)
                 .orElseThrow(() -> new ProfileException("Face API response has issues"));
+
+
+        landmarksDto.get
     }
 }

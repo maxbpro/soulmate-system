@@ -20,7 +20,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.utility.DockerImageName;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
+import ru.maxb.soulmate.face.dto.FaceResponse;
 import ru.maxb.soulmate.profile.repository.ProfileRepository;
+import ru.maxb.soulmate.profile.service.FaceLandmarkService;
 import ru.maxb.soulmate.profile.service.ObjectStorageService;
 
 import java.io.IOException;
@@ -68,6 +70,9 @@ public class MinioTest {
     @Autowired
     private ObjectStorageService objectStorageService;
 
+    @Autowired
+    private FaceLandmarkService faceLandmarkService;
+
     @BeforeAll
     public static void setUp() {
         Startables.deepStart(Stream.of(minIOContainer, wireMockContainer))
@@ -82,6 +87,12 @@ public class MinioTest {
         dynamicPropertyRegistry.add("minio.endpoint", minIOContainer::getS3URL);
         dynamicPropertyRegistry.add("minio.accessKey", minIOContainer::getUserName);
         dynamicPropertyRegistry.add("minio.secretKey", minIOContainer::getPassword);
+
+        final String wireMockFaceApiBase = "http://" + wireMockContainer.getHost() + ":"
+                + wireMockContainer.getFirstMappedPort();
+
+
+        dynamicPropertyRegistry.add("minio.secretKey", () -> wireMockFaceApiBase);
     }
 
     @Test
@@ -97,13 +108,13 @@ public class MinioTest {
         MultipartFile multipartFileFromResource = createMultipartFileFromResource();
         objectStorageService.saveObject(objectName + ".jpg", multipartFileFromResource);
 
-        List<String> photos = objectStorageService.listObjects();
+        try (InputStream imageInputStream = objectStorageService.findObject(objectName + ".jpg")) {
+            assertThat(imageInputStream).isNotNull();
+        }
 
-        //final String wireMockBase = "http://" + wireMockContainer.getHost() + ":" + wireMockContainer.getFirstMappedPort();
+        FaceResponse landmarks = faceLandmarkService.getLandmarks(multipartFileFromResource);
 
-        assertThat(photos).hasSize(1);
-        assertThat(photos.get(0)).endsWith(".jpg");
-        assertThat(photos.get(0)).startsWith(objectName);
+        assertThat(landmarks).isNotNull();
     }
 
     public MultipartFile createMultipartFileFromResource() throws IOException {

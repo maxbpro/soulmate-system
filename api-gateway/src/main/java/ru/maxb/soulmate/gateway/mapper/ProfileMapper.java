@@ -6,7 +6,6 @@ import ru.maxb.soulmate.gateway.dto.GatewayRegistrationRequestDto;
 import ru.maxb.soulmate.gateway.dto.GatewayRegistrationResponseDto;
 import ru.maxb.soulmate.user.dto.ProfileDto;
 import ru.maxb.soulmate.user.dto.ProfileRegistrationRequestDto;
-import ru.maxb.soulmate.user.dto.ProfileRegistrationResponseDto;
 
 import static org.mapstruct.InjectionStrategy.CONSTRUCTOR;
 import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
@@ -15,7 +14,7 @@ import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
 public interface ProfileMapper {
 
     ProfileRegistrationRequestDto from(GatewayRegistrationRequestDto dto);
-    GatewayRegistrationResponseDto from(ProfileRegistrationResponseDto dto);
+    GatewayRegistrationResponseDto fromProfileDto(ProfileDto dto);
 
     GatewayProfileDto from(ProfileDto dto);
     ProfileDto from(GatewayProfileDto dto);

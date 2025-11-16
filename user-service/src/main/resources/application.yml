@@ -63,6 +63,7 @@ minio:
       name: photos
 
 face:
+  url: ${FACE_API_URL:https://api-us.faceplusplus.com}
   key: ${FACE_API_KEY:test}
   secret: ${FACE_API_SECRET:secret}
 
