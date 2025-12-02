@@ -15,9 +15,22 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/GatewayRegistrationRequestDto'
+              type: object
+              properties:
+                image_file:
+                  type: string
+                  format: binary
+                  description: image to get face landmarks
+                profileRequestDto:
+                  $ref: '#/components/schemas/GatewayRegistrationRequestDto'
+              required:
+                - image_file
+            encoding:
+              profileRequestDto:
+                contentType: application/json
+
       responses:
         '201':
           description: Успешная регистрация
@@ -178,30 +191,50 @@ components:
         status:
           type: integer
 
-    # --- Profile DTOs (read/write) ---
     GatewayRegistrationRequestDto:
       type: object
       required: [
-        email,
-        password,
-        confirm_password,
         firstName,
-        phone_number,
+        phoneNumber,
+        password,
+        confirm_password
       ]
       properties:
-        email:
-          type: string
-          format: email
-        password:
-          type: string
-        confirm_password:
-          type: string
         firstName:
           type: string
         lastName:
           type: string
-        phone_number:
+        email:
           type: string
+          format: email
+        phoneNumber:
+          type: string
+        birthDate:
+          type: string
+          format: date
+          example: "2017-01-01"
+        interestedIn:
+          type: string
+          enum:
+            - male
+            - female
+        ageMin:
+          type: integer
+          minimum: 18
+          maximum: 99
+        ageMax:
+          type: integer
+          minimum: 19
+          maximum: 99
+        radius:
+          type: integer
+          minimum: 1
+          maximum: 100
+        password:
+          type: string
+        confirm_password:
+          type: string
+
 
     GatewayRegistrationResponseDto:
       type: object

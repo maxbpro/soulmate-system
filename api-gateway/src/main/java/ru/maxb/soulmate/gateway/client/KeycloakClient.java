@@ -7,7 +7,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import ru.maxb.soulmate.gateway.config.KeycloakProperties;
 import ru.maxb.soulmate.gateway.dto.KeycloakCredentialsRepresentation;
 import ru.maxb.soulmate.gateway.dto.KeycloakUserRepresentation;
@@ -44,7 +43,7 @@ public class KeycloakClient {
         this.userPasswordResetUrl = userByIdUrl + "/reset-password";
     }
 
-//    @WithSpan("keycloakClient.login")
+    //    @WithSpan("keycloakClient.login")
     public TokenResponse login(UserLoginRequest req) {
         var form = new LinkedMultiValueMap<String, String>();
         form.add("grant_type", "password");
@@ -63,7 +62,7 @@ public class KeycloakClient {
                 .block();
     }
 
-//    @WithSpan("keycloakClient.adminLogin")
+    //    @WithSpan("keycloakClient.adminLogin")
     public TokenResponse adminLogin() {
         var form = new LinkedMultiValueMap<String, String>();
         form.add("grant_type", "password");
@@ -81,7 +80,7 @@ public class KeycloakClient {
                 .block();
     }
 
-//    @WithSpan("keycloakClient.refreshToken")
+    //    @WithSpan("keycloakClient.refreshToken")
     public TokenResponse refreshToken(TokenRefreshRequest req) {
         var form = new LinkedMultiValueMap<String, String>();
         form.add("grant_type", "refresh_token");
@@ -99,30 +98,31 @@ public class KeycloakClient {
                 .block();
     }
 
-//    @WithSpan("keycloakClient.registerUser")
+    //    @WithSpan("keycloakClient.registerUser")
     public String registerUser(TokenResponse adminToken, KeycloakUserRepresentation user) {
         return webClient.post()
                 .uri(userRegistrationUrl)
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + adminToken.getAccessToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(user)
-                .exchangeToMono(this::extractIdFromPath)
+                .exchangeToMono((ClientResponse response) -> extractIdFromPath(response))
                 .block();
     }
 
     private Mono<String> extractIdFromPath(ClientResponse response) {
         if (response.statusCode().equals(HttpStatus.CREATED)) {
             var location = response.headers().asHttpHeaders().getLocation();
-            if (location == null) return Mono.error(new ApiException("Location header missing"));
+            if (location == null)
+                throw new ApiException("Location header missing");
             return Mono.just(UserIdExtractor.extractIdFromPath(location.getPath()));
         }
         return response.bodyToMono(String.class)
                 .flatMap(body -> Mono.error(new ApiException("User creation failed: " + body)));
     }
 
-//    @WithSpan("keycloakClient.resetUserPassword")
+    //    @WithSpan("keycloakClient.resetUserPassword")
     public void resetUserPassword(String userId, KeycloakCredentialsRepresentation dto, String adminAccessToken) {
-         webClient.put()
+        webClient.put()
                 .uri(userPasswordResetUrl, userId)
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + adminAccessToken)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -139,14 +139,15 @@ public class KeycloakClient {
     }
 
 
-//    @WithSpan("keycloakClient.resetUserPassword.executeOnError")
-    public Mono<ResponseEntity<Void>> executeOnError(String userId, String adminAccessToken, Throwable e) {
-        return webClient.delete()
+    //    @WithSpan("keycloakClient.resetUserPassword.executeOnError")
+    public void executeOnError(String userId, String adminAccessToken, Throwable e) {
+        webClient.delete()
                 .uri(userByIdUrl, userId)
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + adminAccessToken)
                 .retrieve()
                 .toBodilessEntity()
-                .then(Mono.error(e));
+                .then(Mono.error(e))
+                .block();
     }
 
     private static void addIfNotBlank(LinkedMultiValueMap<String, String> form, String key, String value) {

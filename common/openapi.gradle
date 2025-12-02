@@ -16,7 +16,8 @@ buildscript {
 String[] ymlNames = [
         "gateway",
         "user",
-        "keycloak"
+        "keycloak",
+        "face"
 ]
 for (String ymlName : ymlNames) {
     createOpenApiGenerateTask(ymlName)

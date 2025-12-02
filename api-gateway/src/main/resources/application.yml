@@ -16,6 +16,12 @@ spring:
 #                - Path=/api/users/v1/test
 #                - Method=GET
 
+  servlet:
+    multipart:
+      max-file-size: 128KB
+      max-request-size: 128KB
+      enabled: true
+
   security:
     oauth2:
       client:

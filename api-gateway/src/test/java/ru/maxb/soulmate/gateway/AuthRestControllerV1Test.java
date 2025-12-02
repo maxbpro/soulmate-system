@@ -1,8 +1,12 @@
 package ru.maxb.soulmate.gateway;
 
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.maxb.soulmate.gateway.dto.GatewayRegistrationRequestDto;
 import ru.maxb.soulmate.gateway.dto.TokenRefreshRequest;
@@ -10,6 +14,8 @@ import ru.maxb.soulmate.gateway.dto.TokenResponse;
 import ru.maxb.soulmate.gateway.dto.UserLoginRequest;
 import ru.maxb.soulmate.gateway.service.GatewayApiTestService;
 import ru.maxb.soulmate.gateway.service.KeycloakApiTestService;
+
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -24,12 +30,13 @@ public class AuthRestControllerV1Test extends AbstractKeycloakTest {
     @Autowired
     private KeycloakApiTestService keycloakApiTestService;
 
+    @SneakyThrows
     @Test
     public void shouldCreateNewUserAndReturnAccessToken() {
         //when
         var registerRequest = getGatewayRegistrationRequestDto();
 
-        var response = gatewayApiTestService.register(registerRequest);
+        var response =  gatewayApiTestService.register(createMultipartFileFromResource(), registerRequest);
         var meResponse = gatewayApiTestService.getMe(response.getAccessToken());
 
         var personId = keycloakApiTestService
@@ -44,11 +51,12 @@ public class AuthRestControllerV1Test extends AbstractKeycloakTest {
         assertEquals(registerRequest.getEmail(), meResponse.getEmail());
     }
 
+    @SneakyThrows
     @Test
     void shouldLoginAndReturnAccessToken() {
         // given: регистрируем пользователя
         var registerRequest = getGatewayRegistrationRequestDto();
-        gatewayApiTestService.register(registerRequest);
+        gatewayApiTestService.register(createMultipartFileFromResource(), registerRequest);
 
         // when: логинимся тем же email/password
         var loginRequest = getUserLoginRequest();
@@ -62,11 +70,13 @@ public class AuthRestControllerV1Test extends AbstractKeycloakTest {
         assertEquals(registerRequest.getEmail(), meResponse.getEmail());
     }
 
+    @SneakyThrows
     @Test
     void shouldReturnUserInfo() {
         // given
         var registerRequest = getGatewayRegistrationRequestDto();
-        var registrationResponse = gatewayApiTestService.register(registerRequest);
+        var registrationResponse = gatewayApiTestService.register(createMultipartFileFromResource(),
+                registerRequest);
 
         // when
         var meResponse = gatewayApiTestService.getMe(registrationResponse.getAccessToken());
@@ -76,11 +86,14 @@ public class AuthRestControllerV1Test extends AbstractKeycloakTest {
         assertEquals(registerRequest.getEmail(), meResponse.getEmail(), "emails must match");
     }
 
+    @SneakyThrows
     @Test
     void shouldRefreshToken() {
         // given: регистрируем пользователя
         var registerRequest = getGatewayRegistrationRequestDto();
-        TokenResponse tokenResponse = gatewayApiTestService.register(registerRequest);
+        TokenResponse tokenResponse = gatewayApiTestService.register(
+                createMultipartFileFromResource(),
+                registerRequest);
         var tokenRefreshRequest = getTokenRefreshRequest(tokenResponse.getRefreshToken());
 
         // when
@@ -116,5 +129,14 @@ public class AuthRestControllerV1Test extends AbstractKeycloakTest {
         var request = new TokenRefreshRequest();
         request.setRefreshToken(refreshToken);
         return request;
+    }
+
+    public MultipartFile createMultipartFileFromResource() throws IOException {
+        return new MockMultipartFile(
+                "image",         // The name of the parameter in the multipart form (e.g., "file")
+                "originalTest.txt",      // The original filename in the client's filesystem
+                "image/jpeg",           // The content type of the file (e.g., "application/json", "image/jpeg")
+                new ClassPathResource("photo.jpeg").getInputStream() // The content of the file as an InputStream
+        );
     }
 }

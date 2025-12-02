@@ -14,5 +14,8 @@ public class Profile {
     @Id
     private String id;
     private String userId;
-    private GeoPoint swipedUserId;
+    private String swipedUserId;
+    private GeoPoint location;
+    //todo
+    private String[] landmark;
 }
