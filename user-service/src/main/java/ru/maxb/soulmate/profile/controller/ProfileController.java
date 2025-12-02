@@ -50,8 +50,9 @@ public class ProfileController implements ProfileApi {
         return null;
     }
 
-
-//    public ResponseEntity<Void> uploadImage(@NotNull UUID id, MultipartFile file) {
-//        //profileService.uploadImage()
-//    }
+    @Override
+    public ResponseEntity<Void> uploadImage(@NotNull UUID id, MultipartFile file) {
+        profileService.uploadImage(id, file);
+        return ResponseEntity.ok().build();
+    }
 }

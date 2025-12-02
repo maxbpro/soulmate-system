@@ -5,7 +5,6 @@ import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Service;
 import ru.maxb.soulmate.gateway.config.KeycloakProperties;
-import ru.maxb.soulmate.gateway.dto.UserLoginRequest;
 import ru.maxb.soulmate.gateway.exception.ApiException;
 
 @Service
@@ -14,7 +13,6 @@ public class KeycloakApiTestService {
 
     private final Keycloak keycloak;
     private final KeycloakProperties keycloakProperties;
-//    private final GatewayApiTestService gatewayApiTestService;
 
     public UserRepresentation getUserRepresentation(String email) {
         var users = keycloak.realm(keycloakProperties.realm()).users().list();
@@ -37,8 +35,4 @@ public class KeycloakApiTestService {
         }
     }
 
-//    public String getAdminAccessToken() {
-//        return gatewayApiTestService.login(new UserLoginRequest(keycloakProperties.adminUsername(), keycloakProperties.adminPassword()))
-//                .getAccessToken();
-//    }
 }

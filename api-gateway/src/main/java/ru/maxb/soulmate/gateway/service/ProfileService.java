@@ -1,13 +1,9 @@
 package ru.maxb.soulmate.gateway.service;
 
-import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 import ru.maxb.soulmate.gateway.dto.GatewayRegistrationRequestDto;
 import ru.maxb.soulmate.gateway.dto.GatewayRegistrationResponseDto;
 import ru.maxb.soulmate.gateway.mapper.ProfileMapper;
@@ -27,12 +23,12 @@ public class ProfileService {
     private final KeycloakAuthApiClient keycloakAuthApiClient;
     private final ProfileMapper profileMapper;
 
-    public Mono<GatewayRegistrationResponseDto> register(GatewayRegistrationRequestDto request) {
+    public GatewayRegistrationResponseDto register(GatewayRegistrationRequestDto request) {
         ProfileRegistrationRequestDto from = profileMapper.from(request);
         ResponseEntity<ProfileRegistrationResponseDto> response2 = null;
 //        try {
 
-            response2 = profileApiClient.registration(from);
+        response2 = profileApiClient.registration(from);
 
 //        } catch (Exception e) {
 //            e.printStackTrace();
@@ -40,18 +36,15 @@ public class ProfileService {
 //        }
 
         ResponseEntity<ProfileRegistrationResponseDto> response = profileApiClient.registration(from);
+        ProfileRegistrationResponseDto profileRegistrationResponseDto = response.getBody();
+        GatewayRegistrationResponseDto gatewayRegistrationResponseDto = profileMapper.from(profileRegistrationResponseDto);
 
-        return Mono.fromCallable(() -> response)
-                .mapNotNull(HttpEntity::getBody)
-                .map(profileMapper::from)
-                .subscribeOn(Schedulers.boundedElastic())
-                .doOnNext(t -> log.info("Person registered id = [{}]", t.getId()));
+        log.info("Person registered id = [{}]", gatewayRegistrationResponseDto.getId());
+        return gatewayRegistrationResponseDto;
     }
 
     //    @WithSpan("personService.compensateRegistration")
-    public Mono<Void> compensateRegistration(String id) {
-        return Mono.fromRunnable(() -> profileApiClient.compensateRegistration(UUID.fromString(id)))
-                .subscribeOn(Schedulers.boundedElastic())
-                .then();
+    public void compensateRegistration(String id) {
+        profileApiClient.compensateRegistration(UUID.fromString(id));
     }
 }

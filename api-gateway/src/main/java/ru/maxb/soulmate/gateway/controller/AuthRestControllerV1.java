@@ -5,7 +5,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 import ru.maxb.soulmate.gateway.dto.GatewayRegistrationRequestDto;
 import ru.maxb.soulmate.gateway.dto.TokenRefreshRequest;
@@ -26,26 +30,25 @@ public class AuthRestControllerV1 {
     private final UserService userService;
 
     @PostMapping(value = "/login")
-    public Mono<ResponseEntity<TokenResponse>> login(@Valid @RequestBody Mono<UserLoginRequest> body) {
-        return body.flatMap(tokenService::login)
-                .map(ResponseEntity::ok);
+    public TokenResponse login(@Valid @RequestBody UserLoginRequest request) {
+        return tokenService.login(request);
     }
 
 
     @PostMapping(value = "/refresh-token")
-    public Mono<ResponseEntity<TokenResponse>> refreshToken(@Valid @RequestBody Mono<TokenRefreshRequest> body) {
-        return body.flatMap(tokenService::refreshToken).map(ResponseEntity::ok);
+    public TokenResponse refreshToken(@Valid @RequestBody TokenRefreshRequest request) {
+        return tokenService.refreshToken(request);
     }
 
     @PostMapping(value = "/registration")
-    public Mono<ResponseEntity<TokenResponse>> registration(@Valid @RequestBody Mono<GatewayRegistrationRequestDto> body) {
-        return body.flatMap(userService::register).map(t -> ResponseEntity.status(HttpStatus.CREATED).body(t));
+    public ResponseEntity<TokenResponse> registration(@Valid @RequestBody GatewayRegistrationRequestDto request) {
+        TokenResponse tokenResponse = userService.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(tokenResponse);
     }
 
     @GetMapping("/me")
-    public Mono<ResponseEntity<UserInfoResponse>> getMe() {
-        return userService.getUserInfo()
-                .map(ResponseEntity::ok);
+    public UserInfoResponse getMe() {
+        return userService.getUserInfo();
     }
 
 }

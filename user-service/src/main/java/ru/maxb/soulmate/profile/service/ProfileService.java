@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import ru.maxb.soulmate.profile.exception.ProfileException;
 import ru.maxb.soulmate.profile.mapper.ProfileMapper;
 import ru.maxb.soulmate.profile.repository.ProfileRepository;
@@ -19,6 +20,7 @@ public class ProfileService {
 
     private final ProfileRepository profileRepository;
     private final ProfileMapper profileMapper;
+    private final ObjectStorageService objectStorageService;
 
     @Transactional
     public ProfileDto register(ProfileRegistrationRequestDto requestDto) {
@@ -56,5 +58,15 @@ public class ProfileService {
         profileMapper.update(profileEntity, requestDto);
         profileRepository.save(profileEntity);
         return profileMapper.from(profileEntity);
+    }
+
+    @Transactional
+    public void uploadImage(UUID id, MultipartFile file) {
+        var profileEntity = profileRepository.findById(id)
+                .orElseThrow(() -> new ProfileException("Profile not found by id=[%s]", id));
+
+        String photoId = UUID.randomUUID().toString();
+        profileEntity.getPhotos().add(photoId);
+        objectStorageService.saveObject(photoId, file);
     }
 }

@@ -1,7 +1,9 @@
 package ru.maxb.soulmate.gateway;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.TestInstance;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -36,6 +38,9 @@ public class AbstractKeycloakTest {
     public static PostgreSQLContainer postgres = postgresTestContainer;
     public static GenericContainer keycloak = keycloakTestContainer;
     public static WireMockContainer wireMockServer = wireMockContainer;
+
+    @Autowired
+    protected KeycloakApiTestService keycloakApiTestService;
 
     static {
         postgres.start();
@@ -83,4 +88,8 @@ public class AbstractKeycloakTest {
     }
 
 
+    @AfterEach
+    public void clear() {
+        keycloakApiTestService.clear();
+    }
 }

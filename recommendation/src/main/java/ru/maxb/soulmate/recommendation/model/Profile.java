@@ -8,11 +8,11 @@ import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 
 @Getter
 @Setter
-@Document(indexName = "recommendation")
-public class Recommendation {
+@Document(indexName = "profile")
+public class Profile {
 
     @Id
     private String id;
-    private String title;
-    private GeoPoint location;
+    private String userId;
+    private GeoPoint swipedUserId;
 }
