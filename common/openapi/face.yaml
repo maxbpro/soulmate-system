@@ -24,15 +24,21 @@ paths:
           schema:
             type: string
         - in: query
-          name: image_base64
-          required: true
-          schema:
-            type: string
-        - in: query
           name: return_landmark
           required: false
           schema:
             type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FaceRequest'
+            examples:
+              ok:
+                value:
+                  email: user@example.com
+                  password: secret
 
       responses:
         '201':
@@ -44,6 +50,15 @@ paths:
 
 components:
   schemas:
+    FaceRequest:
+      type: object
+      required: [ image_base64 ]
+      properties:
+        image_base64:
+          type: string
+        return_landmark:
+          type: integer
+
     FaceResponse:
       type: object
       properties:
