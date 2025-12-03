@@ -24,23 +24,16 @@ paths:
           schema:
             type: string
         - in: query
+          name: image_base64
+          required: true
+          schema:
+            type: string
+        - in: query
           name: return_landmark
           required: false
           schema:
             type: integer
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                image_file:
-                  type: string
-                  format: binary
-                  description: The image file to upload
-              required:
-                - image_file
+
       responses:
         '201':
           description: Успешная регистрация
@@ -48,13 +41,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FaceResponse'
-#        '400':
-#          description: Ошибка валидации
-#          content:
-#            application/json:
-#              schema:
-#                $ref: '#/components/schemas/ErrorResponse'
-
 
 components:
   schemas:

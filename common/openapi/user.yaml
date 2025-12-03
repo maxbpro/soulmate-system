@@ -16,24 +16,9 @@ paths:
       requestBody:
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
-              type: object
-              properties:
-                image_file:
-                  type: string
-                  format: binary
-                  description: image to get face landmarks
-                profileRequestDto:
-                  $ref: '#/components/schemas/ProfileRegistrationRequestDto'
-              required:
-                - image_file
-            encoding:
-              profileRequestDto:
-                contentType: application/json
-
-
-
+              $ref: '#/components/schemas/ProfileRegistrationRequestDto'
 
       responses:
         '201':
@@ -120,6 +105,7 @@ paths:
       responses:
         '200':
           description: Successfully deleted
+
   /v1/profiles/{id}/upload:
     post:
       summary: upload photos for users
@@ -154,7 +140,6 @@ paths:
 
 components:
   schemas:
-
     ProfileDto:
       type: object
       properties:
@@ -186,6 +171,7 @@ components:
       required: [
         firstName,
         phoneNumber,
+        photo,
       ]
       properties:
         firstName:
@@ -196,6 +182,8 @@ components:
           type: string
           format: email
         phoneNumber:
+          type: string
+        photo:
           type: string
         birthDate:
           type: string
