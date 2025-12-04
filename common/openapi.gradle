@@ -17,7 +17,9 @@ String[] ymlNames = [
         "gateway",
         "user",
         "keycloak",
-        "face"
+        "face",
+        "landmark",
+        "swipe"
 ]
 for (String ymlName : ymlNames) {
     createOpenApiGenerateTask(ymlName)

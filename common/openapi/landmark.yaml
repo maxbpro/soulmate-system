@@ -1,0 +1,63 @@
+openapi: 3.0.0
+info:
+  title: Landmark API
+  description: REST API для взаимодействия с Landmark сервисом.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8084
+
+paths:
+  /v1/landmarks:
+    post:
+      summary: Создание LandmarkMatch со статусом NEW
+      operationId: "createLandmarkMatch"
+      tags:
+        - Landmarks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LandmarkMatchRequestDto'
+
+      responses:
+        '201':
+          description: Успешная создание записи
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LandmarkMatchDto'
+
+
+components:
+  schemas:
+    LandmarkMatchRequestDto:
+      type: object
+      properties:
+        profileId:
+          type: string
+          format: uuid
+        landmarksOfProfileId:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        gender:
+          type: string
+        birthDate:
+          type: string
+          format: date
+          example: "2017-01-01"
+        lat:
+          type: number
+          format: double
+        lon:
+          type: number
+          format: double
+
+    LandmarkMatchDto:
+      type: object
+      properties:
+        id:
+          type: string
