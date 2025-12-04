@@ -44,6 +44,10 @@ public class ProfileEntity extends BaseEntity {
     @Column(name = "interested_in", nullable = false, length = 64)
     private Gender interestedIn;
 
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "gender", nullable = false, length = 64)
+    private Gender gender;
+
     @Column(name = "radius", nullable = false)
     private int radius;
 
@@ -55,4 +59,7 @@ public class ProfileEntity extends BaseEntity {
 
     @Column(name = "photos", columnDefinition = "VARCHAR(64)[]")
     private List<String> photos;
+
+    @Column(name = "landmarks")
+    private String landmarks;
 }

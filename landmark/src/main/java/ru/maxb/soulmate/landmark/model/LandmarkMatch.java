@@ -1,0 +1,34 @@
+package ru.maxb.soulmate.landmark.model;
+
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.DateFormat;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.core.geo.GeoPoint;
+
+import java.time.LocalDate;
+
+@Getter
+@Setter
+@Document(indexName = "landmark_match")
+public class LandmarkMatch {
+
+    @Id
+    private String id;
+
+    private String userId;
+    private String soulmateId;
+
+    private GeoPoint location;
+
+    @Field(type = FieldType.Date, format = DateFormat.date)
+    private LocalDate dateOfBirth;
+
+    private String gender;
+
+    private String landmarkUserId;
+    private String landmarkSoulmateId;
+}

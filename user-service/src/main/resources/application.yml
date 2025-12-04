@@ -13,6 +13,10 @@ spring:
     change-log: db/changelog/master.xml
     default-schema: profile
     liquibase-schema: public
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URIS:http://localhost:9200}
+    username: elastic
+    password: password
   jpa:
     hibernate:
       ddl-auto: validate
@@ -63,9 +67,12 @@ minio:
       name: photos
 
 face:
+  name: face
   url: ${FACE_API_URL:https://api-us.faceplusplus.com}
   key: ${FACE_API_KEY:test}
   secret: ${FACE_API_SECRET:secret}
+
+
 
 otel:
   exporter:

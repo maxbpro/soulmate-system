@@ -1,12 +1,13 @@
 package ru.maxb.soulmate.profile.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import ru.maxb.soulmate.face.api.FaceApiClient;
+import ru.maxb.soulmate.face.dto.FaceRequest;
 import ru.maxb.soulmate.face.dto.FaceResponse;
 import ru.maxb.soulmate.face.dto.FaceResponseFacesInner;
 import ru.maxb.soulmate.face.dto.FaceResponseFacesInnerLandmark;
@@ -27,16 +28,19 @@ public class FaceLandmarkService {
     @Value("${face.secret}")
     private String secret;
 
-    public void getLandmarks(MultipartFile file) {
-        ResponseEntity<FaceResponse> faceResponseResponseEntity = FaceApiClient.faceDetection(key, secret, file, 1);
+    @SneakyThrows
+    public FaceResponseFacesInnerLandmark getLandmarks(String base64Image) {
+        FaceRequest faceRequest = new FaceRequest();
+        faceRequest.setImageBase64(base64Image);
+        faceRequest.setReturnLandmark(1);
 
-        FaceResponseFacesInnerLandmark landmarksDto = Optional.ofNullable(faceResponseResponseEntity.getBody())
+        ResponseEntity<FaceResponse> faceResponseResponseEntity = FaceApiClient.faceDetection(key, secret,
+                faceRequest, 1);
+
+        return Optional.ofNullable(faceResponseResponseEntity.getBody())
                 .map(FaceResponse::getFaces)
                 .map(v -> v.stream().findFirst().orElseThrow())
                 .map(FaceResponseFacesInner::getLandmark)
                 .orElseThrow(() -> new ProfileException("Face API response has issues"));
-
-
-        landmarksDto.get
     }
 }

@@ -20,7 +20,7 @@ public class KeycloakTestContainer {
         keycloakTestContainer = new GenericContainer<>(DockerImageName.parse("quay.io/keycloak/keycloak:26.2"))
                 //.dependsOn(Containers.postgres)
                 .withExposedPorts(KEYCLOAK_PORT)
-                //.withReuse(true)
+                .withReuse(true)
                 .withEnv("KEYCLOAK_ADMIN", "admin")
                 .withEnv("KEYCLOAK_ADMIN_PASSWORD", "admin")
                 .withEnv("KC_DB", "postgres")

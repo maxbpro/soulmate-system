@@ -6,6 +6,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.maxb.soulmate.profile.model.ProfileEntity;
+import ru.maxb.soulmate.profile.model.ProfileSearch;
 import ru.maxb.soulmate.profile.util.DateTimeUtil;
 import ru.maxb.soulmate.user.dto.ProfileDto;
 import ru.maxb.soulmate.user.dto.ProfileRegistrationRequestDto;
@@ -28,7 +29,8 @@ public abstract class ProfileMapper {
     @Mapping(target = "active", constant = "true")
     @Mapping(target = "created", expression = "java(dateTimeUtil.now())")
     @Mapping(target = "updated", expression = "java(dateTimeUtil.now())")
-    public abstract ProfileEntity to(ProfileRegistrationRequestDto registrationRequestDto);
+    @Mapping(target = "landmarks", source = "landmarks")
+    public abstract ProfileEntity to(ProfileRegistrationRequestDto registrationRequestDto, String landmarks);
 
     public abstract ProfileDto from(ProfileEntity profileEntity);
 
@@ -38,4 +40,7 @@ public abstract class ProfileMapper {
             ProfileEntity profileEntity,
             ProfileRegistrationRequestDto dto
     );
+
+    //@Mapping(target = "updated", expression = "java(dateTimeUtil.now())")
+    public abstract ProfileSearch toProfileSearch(ProfileEntity profileEntity);
 }

@@ -5,8 +5,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.maxb.soulmate.gateway.dto.GatewayRegistrationRequestDto;
 import ru.maxb.soulmate.gateway.dto.TokenRefreshRequest;
@@ -15,7 +13,7 @@ import ru.maxb.soulmate.gateway.dto.UserLoginRequest;
 import ru.maxb.soulmate.gateway.service.GatewayApiTestService;
 import ru.maxb.soulmate.gateway.service.KeycloakApiTestService;
 
-import java.io.IOException;
+import java.util.Base64;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -36,7 +34,7 @@ public class AuthRestControllerV1Test extends AbstractKeycloakTest {
         //when
         var registerRequest = getGatewayRegistrationRequestDto();
 
-        var response =  gatewayApiTestService.register(createMultipartFileFromResource(), registerRequest);
+        var response = gatewayApiTestService.register(registerRequest);
         var meResponse = gatewayApiTestService.getMe(response.getAccessToken());
 
         var personId = keycloakApiTestService
@@ -56,7 +54,7 @@ public class AuthRestControllerV1Test extends AbstractKeycloakTest {
     void shouldLoginAndReturnAccessToken() {
         // given: регистрируем пользователя
         var registerRequest = getGatewayRegistrationRequestDto();
-        gatewayApiTestService.register(createMultipartFileFromResource(), registerRequest);
+        gatewayApiTestService.register(registerRequest);
 
         // when: логинимся тем же email/password
         var loginRequest = getUserLoginRequest();
@@ -75,8 +73,7 @@ public class AuthRestControllerV1Test extends AbstractKeycloakTest {
     void shouldReturnUserInfo() {
         // given
         var registerRequest = getGatewayRegistrationRequestDto();
-        var registrationResponse = gatewayApiTestService.register(createMultipartFileFromResource(),
-                registerRequest);
+        var registrationResponse = gatewayApiTestService.register(registerRequest);
 
         // when
         var meResponse = gatewayApiTestService.getMe(registrationResponse.getAccessToken());
@@ -91,9 +88,7 @@ public class AuthRestControllerV1Test extends AbstractKeycloakTest {
     void shouldRefreshToken() {
         // given: регистрируем пользователя
         var registerRequest = getGatewayRegistrationRequestDto();
-        TokenResponse tokenResponse = gatewayApiTestService.register(
-                createMultipartFileFromResource(),
-                registerRequest);
+        TokenResponse tokenResponse = gatewayApiTestService.register(registerRequest);
         var tokenRefreshRequest = getTokenRefreshRequest(tokenResponse.getRefreshToken());
 
         // when
@@ -115,6 +110,7 @@ public class AuthRestControllerV1Test extends AbstractKeycloakTest {
         request.setPassword("password");
         request.setConfirmPassword("password");
         request.setPhoneNumber("1234567890");
+        request.setPhoto(getBase64Image());
         return request;
     }
 
@@ -131,12 +127,9 @@ public class AuthRestControllerV1Test extends AbstractKeycloakTest {
         return request;
     }
 
-    public MultipartFile createMultipartFileFromResource() throws IOException {
-        return new MockMultipartFile(
-                "image",         // The name of the parameter in the multipart form (e.g., "file")
-                "originalTest.txt",      // The original filename in the client's filesystem
-                "image/jpeg",           // The content type of the file (e.g., "application/json", "image/jpeg")
-                new ClassPathResource("photo.jpeg").getInputStream() // The content of the file as an InputStream
-        );
+    @SneakyThrows
+    public String getBase64Image() {
+        return Base64.getEncoder().encodeToString(
+                new ClassPathResource("photo.jpeg").getContentAsByteArray());
     }
 }

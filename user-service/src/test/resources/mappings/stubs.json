@@ -3,28 +3,15 @@
     {
       "request": {
         "method": "POST",
-        "urlPath": "/facepp/v3/detect",
+        "urlPattern": "/facepp/v3/detect?.*",
         "headers": {
           "Content-Type": {
-            "matches": "multipart/form-data;.*"
+            "equalTo": "application/json"
           }
         },
-        "multipartPatterns": [
-          {
-            "name": "image_file",
-            "headers": {
-              "Content-Disposition": {
-                "matches": "form-data; name=\"image_file\"; filename=\"img.jpeg\""
-              },
-              "Content-Type": {
-                "equalTo": "image/jpeg"
-              }
-            }
-          }
-        ],
         "bodyPatterns": [
           {
-            "equalToJson": "{\"api_key\": \"key\", \"api_secret\": \"secret\", \"return_landmark\": 1}",
+            "equalToJson": "{}",
             "ignoreArrayOrder": true,
             "ignoreExtraElements": true
           }

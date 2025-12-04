@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import ru.maxb.soulmate.gateway.dto.GatewayRegistrationRequestDto;
 import ru.maxb.soulmate.gateway.dto.GatewayRegistrationResponseDto;
 import ru.maxb.soulmate.gateway.mapper.ProfileMapper;
@@ -24,20 +23,19 @@ public class ProfileService {
     private final KeycloakAuthApiClient keycloakAuthApiClient;
     private final ProfileMapper profileMapper;
 
-    public GatewayRegistrationResponseDto register(MultipartFile multipartFile,
-                                                   GatewayRegistrationRequestDto request) {
+    public GatewayRegistrationResponseDto register(GatewayRegistrationRequestDto request) {
         ProfileRegistrationRequestDto from = profileMapper.from(request);
         ResponseEntity<ProfileDto> response2 = null;
 //        try {
 
-        response2 = profileApiClient.registration(null, from);
+        response2 = profileApiClient.registration( from);
 
 //        } catch (Exception e) {
 //            e.printStackTrace();
 //            // Handle the specific FeignException
 //        }
 
-        ResponseEntity<ProfileDto> response = profileApiClient.registration(multipartFile, from);
+        ResponseEntity<ProfileDto> response = profileApiClient.registration( from);
         ProfileDto profileDto = response.getBody();
 
         GatewayRegistrationResponseDto responseDto = profileMapper.fromProfileDto(profileDto);

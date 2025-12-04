@@ -1,6 +1,7 @@
 package ru.maxb.soulmate.profile.service;
 
 import io.minio.*;
+import io.minio.errors.*;
 import io.minio.messages.Item;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -8,7 +9,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,6 +45,28 @@ public class ObjectStorageService {
                 .object(objectName)
                 .stream(file.getInputStream(), file.getSize(), -1)
                 .contentType(file.getContentType())
+                .build();
+
+        minioClient.putObject(args);
+    }
+
+    public void saveObject(String objectName, InputStream inputStream, String contentType) throws IOException, MinioException, NoSuchAlgorithmException, InvalidKeyException {
+        boolean found = minioClient.bucketExists(BucketExistsArgs.builder()
+                .bucket(bucketName)
+                .build());
+        if (!found) {
+            minioClient.makeBucket(MakeBucketArgs.builder()
+                    .bucket(bucketName)
+                    .build());
+        }
+
+        long objectSize = inputStream.available();
+
+        PutObjectArgs args = PutObjectArgs.builder()
+                .bucket(bucketName)
+                .object(objectName)
+                .stream(inputStream, objectSize, -1)
+                .contentType(contentType)
                 .build();
 
         minioClient.putObject(args);

@@ -3,9 +3,7 @@ package ru.maxb.soulmate.gateway.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 import ru.maxb.soulmate.gateway.api.AuthApi;
 import ru.maxb.soulmate.gateway.dto.GatewayRegistrationRequestDto;
 import ru.maxb.soulmate.gateway.dto.TokenRefreshRequest;
@@ -34,13 +32,13 @@ public class AuthRestControllerV1 implements AuthApi {
     }
 
     @Override
-    public ResponseEntity<TokenResponse> registration(MultipartFile imageFile,
-                                                      GatewayRegistrationRequestDto profileRequestDto) {
+    public ResponseEntity<TokenResponse> registration(GatewayRegistrationRequestDto profileRequestDto) {
+        TokenResponse tokenResponse = userService.register(profileRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body( userService.register(imageFile, profileRequestDto));
+                .body(tokenResponse);
     }
 
-    @GetMapping("/v1/auth/me")
+    @Override
     public ResponseEntity<UserInfoResponse> getMe() {
         return ResponseEntity.ok(userService.getUserInfo());
     }

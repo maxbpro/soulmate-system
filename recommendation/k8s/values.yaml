@@ -1,4 +1,0 @@
-appName: recommendation-service
-appVersion: 1.0.0
-appPort: 8084
-elasticSearchUris: soulmate-elasticsearch-db.default.svc.cluster.local:9200
