@@ -28,6 +28,33 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProfileDto'
 
+  /v1/profiles/feed:
+    get:
+      summary: Get feed of profiles
+      operationId: "getFeed"
+      tags:
+      - Feed
+      parameters:
+        - in: query
+          name: lat
+          required: true
+          schema:
+            type: number
+        - in: query
+          name: lng
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Feed of profiles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProfileDto'
+
   /v1/profiles/{id}:
     get:
       summary: Get profile by id
@@ -159,6 +186,8 @@ components:
           example: "2017-01-01"
         interestedIn:
           type: string
+        gender:
+          type: string
         ageMin:
           type: integer
         ageMax:
@@ -190,6 +219,11 @@ components:
           format: date
           example: "2017-01-01"
         interestedIn:
+          type: string
+          enum:
+            - male
+            - female
+        gender:
           type: string
           enum:
             - male

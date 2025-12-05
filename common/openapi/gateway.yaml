@@ -207,6 +207,11 @@ components:
           enum:
             - male
             - female
+        gender:
+          type: string
+          enum:
+            - male
+            - female
         ageMin:
           type: integer
           minimum: 18
