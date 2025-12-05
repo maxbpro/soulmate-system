@@ -205,13 +205,13 @@ components:
         interestedIn:
           type: string
           enum:
-            - male
-            - female
+            - MALE
+            - FEMALE
         gender:
           type: string
           enum:
-            - male
-            - female
+            - MALE
+            - FEMALE
         ageMin:
           type: integer
           minimum: 18
