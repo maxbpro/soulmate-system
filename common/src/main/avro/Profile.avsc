@@ -1,0 +1,41 @@
+{
+  "type": "record",
+  "name": "Profile",
+  "namespace": "ru.maxb.soulmate.avro",
+  "fields": [
+    {
+      "name": "profileId",
+      "type": {
+        "type": "string",
+        "logicalType": "uuid"
+      }
+    },
+    {
+      "name": "firstName",
+      "type": "string"
+    },
+    {
+      "name": "lastName",
+      "type": "string"
+    },
+    {
+      "name": "interestedIn",
+      "type": "string"
+    },
+    {
+      "name": "gender",
+      "type": "string"
+    },
+    {
+      "name": "birthDate",
+      "type": {
+        "type": "int",
+        "logicalType": "date"
+      }
+    },
+    {
+      "name": "landmarks",
+      "type": "string"
+    }
+  ]
+}

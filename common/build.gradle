@@ -3,15 +3,19 @@ plugins {
     id 'maven-publish'
     id 'org.springframework.boot' version '3.5.0'
     id 'io.spring.dependency-management' version '1.1.4'
+    id "com.github.davidmc24.gradle.plugin.avro" version "1.9.1"
 }
 
 group 'ru.maxb.soulmate.common'
-version '1.0.20'
+version '1.0.21'
 
 apply(from: 'openapi.gradle')
 
 repositories {
     mavenCentral()
+    maven {
+        url 'https://packages.confluent.io/maven/'
+    }
 }
 
 dependencyManagement {
@@ -24,6 +28,9 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:${springdocOpenapiStarterWebfluxUiVersion}")
     implementation "org.springframework.cloud:spring-cloud-starter-openfeign:${springCloudStarterOpenFeignVersion}"
     implementation "org.openapitools:jackson-databind-nullable:${jacksonDatabindNullableVersion}"
+
+    implementation 'io.confluent:kafka-avro-serializer:7.9.5'
+    implementation 'io.swagger.core.v3:swagger-annotations-jakarta:2.2.41'
 }
 
 
@@ -47,4 +54,9 @@ publishing {
 
 tasks.named('bootJar') {
     enabled = false
+}
+
+avro {
+    createSetters = true
+    fieldVisibility = 'PRIVATE'
 }
