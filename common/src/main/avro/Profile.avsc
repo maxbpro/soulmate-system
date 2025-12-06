@@ -27,6 +27,18 @@
       "type": "string"
     },
     {
+      "name": "minAge",
+      "type": "int"
+    },
+    {
+      "name": "maxAge",
+      "type": "int"
+    },
+    {
+      "name": "radius",
+      "type": "int"
+    },
+    {
       "name": "birthDate",
       "type": {
         "type": "int",
