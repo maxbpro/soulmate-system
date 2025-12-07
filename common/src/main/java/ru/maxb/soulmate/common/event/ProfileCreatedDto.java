@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 public record ProfileCreatedDto(
-        UUID profileId,
+        UUID id,
         String firstName,
         String lastName,
         String interestedIn,
