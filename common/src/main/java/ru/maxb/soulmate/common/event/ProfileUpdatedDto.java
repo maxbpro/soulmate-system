@@ -5,8 +5,8 @@ public record ProfileUpdatedDto(
         String lastName,
         String interestedIn,
         String gender,
-        int minAge,
-        int maxAge,
+        int ageMin,
+        int ageMax,
         int radius
 ) {
 }

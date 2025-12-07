@@ -9,8 +9,8 @@ public record ProfileCreatedDto(
         String lastName,
         String interestedIn,
         String gender,
-        int minAge,
-        int maxAge,
+        int ageMin,
+        int ageMax,
         int radius,
         LocalDate birthDate,
         String landmarks
