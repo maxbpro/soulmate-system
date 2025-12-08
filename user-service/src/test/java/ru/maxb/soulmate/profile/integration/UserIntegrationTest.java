@@ -1,22 +1,30 @@
 package ru.maxb.soulmate.profile.integration;
 
+import com.jayway.jsonpath.JsonPath;
+import io.debezium.testing.testcontainers.ConnectorConfiguration;
+import io.debezium.testing.testcontainers.DebeziumContainer;
 import io.minio.errors.MinioException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.rnorth.ducttape.unreliables.Unreliables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MinIOContainer;
-import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.utility.DockerImageName;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
-import ru.maxb.soulmate.face.dto.FaceResponse;
 import ru.maxb.soulmate.profile.common.AbstractPostgresqlTest;
 import ru.maxb.soulmate.profile.service.FaceLandmarkService;
 import ru.maxb.soulmate.profile.service.ObjectStorageService;
@@ -29,9 +37,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.time.LocalDate;
-import java.util.Base64;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,8 +51,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class UserIntegrationTest extends AbstractPostgresqlTest {
 
     private static final int WIREMOCK_PORT = 8099;
-    private static final int ELASTICSEARCH_PORT = 9200;
     private static final int MINIO_PORT = 9000;
+    private static final int KAFKA_PORT = 9092;
+    private static final int DEBEZIUM_PORT = 8083;
 
     public static final WireMockContainer wireMockContainer = new WireMockContainer(DockerImageName.parse("wiremock/wiremock:3.13.0"))
             .withExposedPorts(WIREMOCK_PORT)
@@ -60,14 +70,20 @@ public class UserIntegrationTest extends AbstractPostgresqlTest {
             .withNetworkAliases("minio")
             .withNetwork(network);
 
-    public static final ElasticsearchContainer elasticsearch =
-            new ElasticsearchContainer("elasticsearch:7.17.10")
-                    .withExposedPorts(ELASTICSEARCH_PORT)
-                    .withReuse(true)
-                    .withEnv("xpack.security.enabled", "false")
-                    .withPassword("password") //elastic
-                    .withNetworkAliases("elasticsearch")
-                    .withNetwork(network);
+    public static KafkaContainer kafka = new KafkaContainer("apache/kafka-native:3.8.0")
+            .withExposedPorts(KAFKA_PORT)
+            .withNetworkAliases("kafka")
+            .withNetwork(network)
+            .withReuse(true)
+            .withListener("kafka:19092");
+
+    public static DebeziumContainer debeziumContainer =
+            new DebeziumContainer("quay.io/debezium/connect:3.3.1.Final")
+                    .withExposedPorts(DEBEZIUM_PORT)
+                    .withNetwork(network)
+                    .withKafka(network, "kafka:19092")
+                    .dependsOn(kafka)
+                    .withReuse(true);
 
     @Autowired
     private ProfileService profileService;
@@ -78,21 +94,19 @@ public class UserIntegrationTest extends AbstractPostgresqlTest {
     @Autowired
     private ObjectStorageService objectStorageService;
 
-
     @BeforeAll
     public static void setUp() {
-        Startables.deepStart(Stream.of(elasticsearch, minIOContainer, wireMockContainer))
-                .join();
+        Startables.deepStart(Stream.of(minIOContainer, wireMockContainer, kafka,
+                debeziumContainer)).join();
 
-        log.info("Elasticsearch server started on port {}", elasticsearch.getMappedPort(ELASTICSEARCH_PORT));
+        log.info("Kafka started on port {}", kafka.getMappedPort(KAFKA_PORT));
+        log.info("Debezium started on port {}", debeziumContainer.getMappedPort(DEBEZIUM_PORT));
         log.info("minIO started on port {}", minIOContainer.getMappedPort(MINIO_PORT));
         log.info("WireMock server started on port {}", wireMockContainer.getMappedPort(WIREMOCK_PORT));
     }
 
     @DynamicPropertySource
     public static void overrideProperties(DynamicPropertyRegistry dynamicPropertyRegistry) {
-        dynamicPropertyRegistry.add("spring.elasticsearch.uris", elasticsearch::getHttpHostAddress);
-
         dynamicPropertyRegistry.add("minio.endpoint", minIOContainer::getS3URL);
         dynamicPropertyRegistry.add("minio.accessKey", minIOContainer::getUserName);
         dynamicPropertyRegistry.add("minio.secretKey", minIOContainer::getPassword);
@@ -103,23 +117,88 @@ public class UserIntegrationTest extends AbstractPostgresqlTest {
         dynamicPropertyRegistry.add("face.url", () -> wireMockFaceApiBase);
 
         dynamicPropertyRegistry.add("minio.secretKey", () -> wireMockFaceApiBase);
+
     }
 
     @Test
-    void testContainerAreRunningWithNoExceptions() {
-        assertThat(elasticsearch.isRunning()).isTrue();
-        assertThat(minIOContainer.isRunning()).isTrue();
+    void testContainerAreRunning() {
+        assertThat(kafka.isRunning()).isTrue();
+        assertThat(debeziumContainer.isRunning()).isTrue();
+        assertThat(wireMockContainer.isRunning()).isTrue();
         assertThat(wireMockContainer.isRunning()).isTrue();
     }
 
     @Test
     void testRegistration() {
-
         var request = getProfileRegistrationRequestDto();
 
         ProfileDto registerProfileDto = profileService.register(request);
 
         assertThat(registerProfileDto).isNotNull();
+
+        checkKafka();
+    }
+
+    private void checkKafka() {
+        String schema = "profile";
+        String table = "outbox";
+        String topic = String.format("dbserver.%s.%s", schema, table);
+        debeziumContainer.registerConnector("profile-connector", getTestConnectorConfiguration());
+
+        try (KafkaConsumer<String, String> consumer = getConsumer(kafka)) {
+            consumer.subscribe(List.of(topic));
+
+            List<ConsumerRecord<String, String>> changeEvents = drain(consumer, 1);
+
+            ConsumerRecord<String, String> stringStringConsumerRecord = changeEvents.get(0);
+
+            assertThat(stringStringConsumerRecord.topic()).isEqualTo(topic);
+            assertThat(JsonPath.<String>read(changeEvents.get(0).key(), "$.id")).isNotBlank();
+            assertThat(JsonPath.<String>read(changeEvents.get(0).key(), "$.id")).isNotBlank();
+
+            String value = changeEvents.get(0).value();
+            assertThat(JsonPath.<String>read(value, "$.after.aggregatetype")).isEqualTo("ProfileEntity");
+            assertThat(JsonPath.<String>read(value, "$.after.type")).isEqualTo("Profile created");
+
+            consumer.unsubscribe();
+        }
+    }
+
+    private ConnectorConfiguration getTestConnectorConfiguration() {
+        return ConnectorConfiguration
+                .forJdbcContainer(postgresqlContainer)
+                .with("plugin.name", "pgoutput") //todo
+                .with("topic.prefix", "dbserver");
+    }
+
+    private KafkaConsumer<String, String> getConsumer(KafkaContainer kafkaContainer) {
+        return new KafkaConsumer<>(
+                Map.of(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaContainer.getBootstrapServers(),
+                        ConsumerConfig.GROUP_ID_CONFIG, "tc-" + UUID.randomUUID(),
+                        ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest",
+                        ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class,
+                        ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class)
+        );
+    }
+
+    private List<ConsumerRecord<String, String>> drain(
+            KafkaConsumer<String, String> consumer,
+            int expectedRecordCount) {
+
+        List<ConsumerRecord<String, String>> allRecords = new ArrayList<>();
+
+        Unreliables.retryUntilTrue(10, TimeUnit.SECONDS, () -> {
+
+            ConsumerRecords<String, String> consumerRecords = consumer.poll(Duration.ofMillis(50));
+
+            consumerRecords
+                    .iterator()
+                    .forEachRemaining(allRecords::add);
+
+            return allRecords.size() == expectedRecordCount;
+        });
+
+        return allRecords;
     }
 
     private void getLandmarks() {
@@ -156,8 +235,8 @@ public class UserIntegrationTest extends AbstractPostgresqlTest {
 
     private ProfileRegistrationRequestDto getProfileRegistrationRequestDto() {
         var request = new ProfileRegistrationRequestDto();
-        request.setAgeMax(99);
         request.setAgeMin(18);
+        request.setAgeMax(99);
         request.setFirstName("John");
         request.setLastName("Smith");
         request.setEmail("john.smith@gmail.com");
@@ -166,6 +245,7 @@ public class UserIntegrationTest extends AbstractPostgresqlTest {
         request.setPhoto(getBase64Image());
         request.setBirthDate(LocalDate.of(1990, 11, 14));
         request.interestedIn(ProfileRegistrationRequestDto.InterestedInEnum.FEMALE);
+        request.setGender(ProfileRegistrationRequestDto.GenderEnum.MALE);
         return request;
     }
 }

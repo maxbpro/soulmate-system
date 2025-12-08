@@ -13,18 +13,14 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-@Document(indexName = "landmark_match")
-public class LandmarkMatch {
+@Document(indexName = "profile")
+public class Profile {
 
     @Id
     private String id;
 
     private String profileId;
-    private String landmarksOfProfileId;
-
-    private String soulmateId;
-    private String landmarksOfSoulmateId;
-
+    private String landmarks;
     private GeoPoint location;
     private Gender gender;
     private Integer ageMin;
@@ -33,4 +29,5 @@ public class LandmarkMatch {
 
     @Field(type = FieldType.Date, format = DateFormat.date)
     private LocalDate dateOfBirth;
+
 }

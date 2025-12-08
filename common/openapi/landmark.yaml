@@ -7,26 +7,34 @@ servers:
   - url: http://localhost:8084
 
 paths:
-  /v1/landmarks:
-    post:
-      summary: Создание LandmarkMatch со статусом NEW
-      operationId: "createLandmarkMatch"
+  /v1/landmarks/mathes:
+    get:
+      summary: запрос LandmarkMatch для построения списка рекомендаций
+      operationId: "getLandmarkMatches"
       tags:
         - Landmarks
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LandmarkMatchRequestDto'
-
+      parameters:
+        - in: query
+          name: lat
+          required: true
+          schema:
+            type: number
+            format: double
+        - in: query
+          name: lng
+          required: true
+          schema:
+            type: number
+            format: double
       responses:
-        '201':
-          description: Успешная создание записи
+        '200':
+          description: Список матчей
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LandmarkMatchDto'
+                type: array
+                items:
+                  $ref: '#/components/schemas/LandmarkMatchDto'
 
 
 components:

@@ -1,4 +1,4 @@
-package ru.maxb.soulmate.profile.service;
+package ru.maxb.soulmate.landmark.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;

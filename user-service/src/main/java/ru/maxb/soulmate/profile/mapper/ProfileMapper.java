@@ -6,7 +6,6 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.maxb.soulmate.profile.model.ProfileEntity;
-import ru.maxb.soulmate.profile.model.ProfileSearch;
 import ru.maxb.soulmate.profile.util.DateTimeUtil;
 import ru.maxb.soulmate.user.dto.ProfileDto;
 import ru.maxb.soulmate.user.dto.ProfileRegistrationRequestDto;
@@ -16,10 +15,7 @@ import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
 
 @Mapper(
         componentModel = SPRING,
-        injectionStrategy = CONSTRUCTOR,
-        uses = {
-                GenderMapper.class
-        }
+        injectionStrategy = CONSTRUCTOR
 )
 @Setter(onMethod_ = @Autowired)
 public abstract class ProfileMapper {
@@ -41,6 +37,4 @@ public abstract class ProfileMapper {
             ProfileRegistrationRequestDto dto
     );
 
-    //@Mapping(target = "updated", expression = "java(dateTimeUtil.now())")
-    public abstract ProfileSearch toProfileSearch(ProfileEntity profileEntity);
 }

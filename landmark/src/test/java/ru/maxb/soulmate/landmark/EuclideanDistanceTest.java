@@ -1,4 +1,4 @@
-package ru.maxb.soulmate.profile;
+package ru.maxb.soulmate.landmark;
 
 import org.apache.commons.math3.ml.distance.EuclideanDistance;
 import org.junit.jupiter.api.Test;

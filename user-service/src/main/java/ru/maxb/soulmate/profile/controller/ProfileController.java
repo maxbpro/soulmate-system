@@ -55,4 +55,6 @@ public class ProfileController implements ProfileApi {
         profileService.uploadImage(id, file);
         return ResponseEntity.ok().build();
     }
+
+
 }

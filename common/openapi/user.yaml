@@ -40,11 +40,13 @@ paths:
           required: true
           schema:
             type: number
+            format: double
         - in: query
           name: lng
           required: true
           schema:
             type: number
+            format: double
       responses:
         '200':
           description: Feed of profiles

@@ -50,7 +50,7 @@ avro {
 }
 
 dependencies {
-	implementation 'ru.maxb.soulmate.common:common:1.0.9'
+	implementation 'ru.maxb.soulmate.common:common:1.0.18'
 
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.data:spring-data-cassandra:4.5.4'

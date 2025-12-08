@@ -24,14 +24,16 @@ public class AbstractPostgresqlTest {
 
     protected static Network network = Network.newNetwork();
 
-    private static PostgreSQLContainer postgresqlContainer =
+    protected static PostgreSQLContainer postgresqlContainer =
             new PostgreSQLContainer<>("postgres:18-alpine")
                     .withExposedPorts(POSTGRES_PORT)
                     .withDatabaseName(POSTGRES_DATABASE_NAME)
                     .withUsername("customer")
                     .withPassword("password")
                     .withReuse(true)
-                    .withNetworkAliases("postgres");
+                    .withNetwork(network)
+                    .withNetworkAliases("postgres")
+                    .withEnv("POSTGRES_INITDB_ARGS", "-c wal_level=logical");
 
     @BeforeAll
     public static void setUp() {

@@ -103,6 +103,11 @@ public class DebeziumTest {
 //    }
 
     @Test
+    public void test() throws Exception {
+
+    }
+
+    @Test
     public void canRegisterPostgreSqlConnector() throws Exception {
         try (Connection connection = getConnection(postgresqlContainer);
              Statement statement = connection.createStatement();

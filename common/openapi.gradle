@@ -18,7 +18,7 @@ String[] ymlNames = [
         "user",
         "keycloak",
         "face",
-//        "landmark",
+        "landmark",
         "swipe"
 ]
 for (String ymlName : ymlNames) {

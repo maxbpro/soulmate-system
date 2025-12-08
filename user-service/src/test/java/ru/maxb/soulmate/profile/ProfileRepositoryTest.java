@@ -55,7 +55,7 @@ public class ProfileRepositoryTest extends AbstractPostgresqlTest {
         profileEntity.setAgeMax(20);
         profileEntity.setRadius(10);
         profileEntity.setBirthDate(LocalDate.of(1990, 11, 14));
-        profileEntity.setInterestedIn(Gender.female);
+        profileEntity.setInterestedIn(Gender.FEMALE);
         profileEntity.setFirstName("firstName");
         profileEntity.setLastName("lastName");
         profileEntity.setActive(true);

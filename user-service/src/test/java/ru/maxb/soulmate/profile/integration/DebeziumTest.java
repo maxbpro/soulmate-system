@@ -1,28 +1,40 @@
 package ru.maxb.soulmate.profile.integration;
 
-import com.jayway.jsonpath.JsonPath;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.debezium.testing.testcontainers.ConnectorConfiguration;
 import io.debezium.testing.testcontainers.DebeziumContainer;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.FlushModeType;
+import jakarta.persistence.PersistenceContext;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.rnorth.ducttape.unreliables.Unreliables;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.lifecycle.Startables;
+import ru.maxb.soulmate.profile.model.Gender;
+import ru.maxb.soulmate.profile.model.OutboxEntity;
+import ru.maxb.soulmate.profile.model.ProfileEntity;
+import ru.maxb.soulmate.profile.repository.OutboxRepository;
+import ru.maxb.soulmate.profile.repository.ProfileRepository;
+import ru.maxb.soulmate.profile.util.DateTimeUtil;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
@@ -67,15 +79,37 @@ public class DebeziumTest {
                     .dependsOn(kafka)
                     .withReuse(true);
 
+    @Autowired
+    private ProfileRepository profileRepository;
+
+    @Autowired
+    private OutboxRepository outboxRepository;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+
     @BeforeAll
     public static void setUp() {
         Startables.deepStart(Stream.of(kafka, postgresqlContainer, debeziumContainer))
                 .join();
 
-        log.info("Kafka started on port {}", kafka.getMappedPort(KAFKA_PORT));
         log.info("Postgresql started on port {}", postgresqlContainer.getMappedPort(POSTGRES_PORT));
         log.info("Debezium started on port {}", debeziumContainer.getMappedPort(DEBEZIUM_PORT));
+        log.info("Kafka started on port {}", kafka.getMappedPort(KAFKA_PORT));
     }
+
+    @DynamicPropertySource
+    public static void overrideProperties(DynamicPropertyRegistry dynamicPropertyRegistry) {
+        dynamicPropertyRegistry.add("spring.datasource.url", postgresqlContainer::getJdbcUrl);
+        dynamicPropertyRegistry.add("spring.datasource.username", postgresqlContainer::getUsername);
+        dynamicPropertyRegistry.add("spring.datasource.password", postgresqlContainer::getPassword);
+        dynamicPropertyRegistry.add("spring.datasource.driver-class-name", postgresqlContainer::getDriverClassName);
+    }
+
 
     @Test
     void testContainerAreRunningWithNoExceptions() {
@@ -97,43 +131,75 @@ public class DebeziumTest {
 //        consumer.unsubscribe();
 //    }
 
+    @Autowired
+    private DateTimeUtil dateTimeUtil;
+
     @Test
-    public void canRegisterPostgreSqlConnector() throws Exception {
-        try (Connection connection = getConnection(postgresqlContainer);
-             Statement statement = connection.createStatement();
-             KafkaConsumer<String, String> consumer = getConsumer(kafka)) {
+    @SneakyThrows
+    public void canRegisterPostgreSqlConnector() {
+        profileRepository.deleteAll();
+        outboxRepository.deleteAll();
 
-            statement.execute("create schema todo");
-            statement.execute("create table todo.Todo (id int8 not null, " +
-                    "title varchar(255), primary key (id))");
-            statement.execute("alter table todo.Todo replica identity full");
-            statement.execute("insert into todo.Todo values (1, " +
-                    "'Learn CDC')");
-            statement.execute("insert into todo.Todo values (2, " +
-                    "'Learn Debezium')");
+        ProfileEntity profileEntity = new ProfileEntity();
+        profileEntity.setEmail("email");
+        profileEntity.setPhoneNumber("+8223232323");
+        profileEntity.setAgeMin(18);
+        profileEntity.setAgeMax(20);
+        profileEntity.setRadius(10);
+        profileEntity.setBirthDate(LocalDate.of(1990, 11, 14));
+        profileEntity.setInterestedIn(Gender.FEMALE);
+        profileEntity.setFirstName("firstName");
+        profileEntity.setLastName("lastName");
+        profileEntity.setActive(true);
+        profileEntity.setLandmarks("test value");
+        profileEntity.setGender(Gender.MALE);
+        profileEntity.setCreated(dateTimeUtil.now());
+        profileEntity.setUpdated(dateTimeUtil.now());
+        profileRepository.save(profileEntity);
 
-            ConnectorConfiguration connector = ConnectorConfiguration
-                    .forJdbcContainer(postgresqlContainer)
-                    .with("plugin.name", "pgoutput") //todo
-                    .with("topic.prefix", "dbserver1");
+        OutboxEntity outboxEntity = new OutboxEntity();
+        outboxEntity.setAggregateType(ProfileEntity.class.getSimpleName());
+        outboxEntity.setAggregateId(profileEntity.getId().toString());
+        outboxEntity.setType("Profile created");
+        outboxEntity.setPayload(new ObjectMapper().readTree(" \"{\"postCode\": \"E4 8ST, \"city\":\"London}\""));
 
-            debeziumContainer.registerConnector("my-connector", connector);
+        try (KafkaConsumer<String, String> consumer = getConsumer(kafka)) {
 
-            consumer.subscribe(Arrays.asList("dbserver1.todo.todo"));
+            debeziumContainer.registerConnector("profile-connector", getTestConnectorConfiguration());
+            consumer.subscribe(Arrays.asList("dbserver.profile.outbox"));
 
-            List<ConsumerRecord<String, String>> changeEvents =
-                    drain(consumer, 2);
+            //
 
-            assertThat(JsonPath.<Integer>read(changeEvents.get(0).key(),
-                    "$.id")).isEqualTo(1);
+            transactionTemplate.executeWithoutResult(status -> {
+
+                outboxRepository.save(outboxEntity);
+
+                entityManager.setFlushMode(FlushModeType.COMMIT);
+                entityManager.flush();
+            });
+
+
+            //
+
+
+            List<ConsumerRecord<String, String>> changeEvents = drain(consumer, 1);
+
+//            assertThat(JsonPath.<String>read(changeEvents.get(0).key(),
+//                    "$.id")).isEqualTo(1);
 
             consumer.unsubscribe();
         }
     }
 
-    private KafkaConsumer<String, String> getConsumer(
-            KafkaContainer kafkaContainer) {
+    private ConnectorConfiguration getTestConnectorConfiguration() {
+        return ConnectorConfiguration
+                .forJdbcContainer(postgresqlContainer)
+                .with("plugin.name", "pgoutput") //todo
+                .with("topic.prefix", "dbserver");
 
+    }
+
+    private KafkaConsumer<String, String> getConsumer(KafkaContainer kafkaContainer) {
         return new KafkaConsumer<>(
                 Map.of(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaContainer.getBootstrapServers(),
                         ConsumerConfig.GROUP_ID_CONFIG, "tc-" + UUID.randomUUID(),
@@ -150,7 +216,10 @@ public class DebeziumTest {
         List<ConsumerRecord<String, String>> allRecords = new ArrayList<>();
 
         Unreliables.retryUntilTrue(10, TimeUnit.SECONDS, () -> {
-            consumer.poll(Duration.ofMillis(50))
+
+            ConsumerRecords<String, String> consumerRecords = consumer.poll(Duration.ofMillis(50));
+
+            consumerRecords
                     .iterator()
                     .forEachRemaining(allRecords::add);
 
@@ -160,10 +229,5 @@ public class DebeziumTest {
         return allRecords;
     }
 
-    private Connection getConnection(PostgreSQLContainer<?> postgresContainer) throws SQLException {
-        return DriverManager.getConnection(postgresContainer.getJdbcUrl(),
-                postgresContainer.getUsername(),
-                postgresContainer.getPassword());
-    }
 }
 

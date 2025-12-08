@@ -7,12 +7,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import ru.maxb.soulmate.face.dto.FaceResponse;
 import ru.maxb.soulmate.profile.exception.ProfileException;
 import ru.maxb.soulmate.profile.mapper.ProfileMapper;
-import ru.maxb.soulmate.profile.model.ProfileSearch;
+import ru.maxb.soulmate.profile.model.OutboxEntity;
+import ru.maxb.soulmate.profile.model.ProfileEntity;
+import ru.maxb.soulmate.profile.repository.OutboxRepository;
 import ru.maxb.soulmate.profile.repository.ProfileRepository;
-import ru.maxb.soulmate.profile.repository.ProfileSearchRepository;
 import ru.maxb.soulmate.user.dto.ProfileDto;
 import ru.maxb.soulmate.user.dto.ProfileRegistrationRequestDto;
 
@@ -27,9 +27,8 @@ public class ProfileService {
     private final ProfileMapper profileMapper;
     private final ObjectStorageService objectStorageService;
     private final FaceLandmarkService faceLandmarkService;
-    private final ProfileSearchRepository profileSearchRepository;
     private final ObjectMapper objectMapper;
-
+    private final OutboxRepository outboxRepository;
 
 
     @Transactional
@@ -40,8 +39,14 @@ public class ProfileService {
         profileRepository.save(profileEntity);
         log.info("IN - register: profile: [{}] successfully registered", profileEntity.getEmail());
 
-        ProfileSearch profileSearch = profileMapper.toProfileSearch(profileEntity);
-        profileSearchRepository.save(profileSearch);
+
+        //out box
+        OutboxEntity outboxEntity = new OutboxEntity();
+        outboxEntity.setAggregateType(ProfileEntity.class.getSimpleName());
+        outboxEntity.setAggregateId(profileEntity.getId().toString());
+        outboxEntity.setType("Profile created");
+        outboxEntity.setPayload(objectMapper.valueToTree(profileEntity));
+        outboxRepository.save(outboxEntity);
 
         return profileMapper.from(profileEntity);
     }

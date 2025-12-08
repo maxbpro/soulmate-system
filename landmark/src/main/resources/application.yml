@@ -12,23 +12,21 @@ spring:
     bootstrap-servers: ${KAFKA:http://localhost:9092}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
     consumer:
-      group-id: my-group-id
+      group-id: landmark-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
-      enable-auto-commit: true
-      auto-commit-interval: 1000
-    properties:
-      schema.registry.url: http://schema-registry:8091
-      auto.register.schemas: true
-      specific.avro.reader: true
-      value.subject.name.strategy: io.confluent.kafka.serializers.subject.RecordNameStrategy
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      enable-auto-commit: false
+#      enable-auto-commit: true
+#      auto-commit-interval: 1000
 
 
-test:
-  topic: "event"
+profile:
+  topic: "profile"
+  outbox: "dbserver.profile.outbox"
+
 
 management:
   server:
