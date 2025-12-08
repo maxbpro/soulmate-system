@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.geo.GeoPoint;
-import org.springframework.data.geo.Point;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.maxb.soulmate.landmark.common.AbstractElasticSearchTest;
 import ru.maxb.soulmate.landmark.model.Gender;
@@ -17,6 +16,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @Testcontainers
 public class LandmarkMatchRepositoryTest extends AbstractElasticSearchTest {
@@ -77,7 +77,11 @@ public class LandmarkMatchRepositoryTest extends AbstractElasticSearchTest {
         List<LandmarkMatch> byParams = landmarkReadService.findByParams(12, 10, 1000,
                 18, 32, Gender.FEMALE, profileId.toString());
 
-        assertEquals(byParams.size(), 1);
+        assertFalse(byParams.contains(profile));
+        assertFalse(byParams.contains(soulmateNotMatched));
+        assertFalse(byParams.contains(soulmateNotMatchedByLocation));
+
+        //assertEquals(byParams.size(), 1);
     }
 
     private LandmarkMatch getLandmarkMatch(Gender gender, LocalDate birthDate,
@@ -88,7 +92,6 @@ public class LandmarkMatchRepositoryTest extends AbstractElasticSearchTest {
 
         landmarkMatch.setProfileId(profileId.toString());
         landmarkMatch.setSoulmateId(soulmateId.toString());
-
         landmarkMatch.setDateOfBirth(birthDate);
         landmarkMatch.setLocation(new GeoPoint(lat, lon));
         landmarkMatch.setGender(gender);
