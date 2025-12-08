@@ -26,6 +26,29 @@ paths:
           schema:
             type: number
             format: double
+        - in: query
+          name: radius
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: ageMin
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: ageMax
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: interestedIn
+          required: true
+          schema:
+            type: string
+            enum:
+              - MALE
+              - FEMALE
       responses:
         '200':
           description: Список матчей
@@ -35,37 +58,16 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/LandmarkMatchDto'
-
-
 components:
   schemas:
-    LandmarkMatchRequestDto:
-      type: object
-      properties:
-        profileId:
-          type: string
-          format: uuid
-        landmarksOfProfileId:
-          type: string
-        firstName:
-          type: string
-        lastName:
-          type: string
-        gender:
-          type: string
-        birthDate:
-          type: string
-          format: date
-          example: "2017-01-01"
-        lat:
-          type: number
-          format: double
-        lon:
-          type: number
-          format: double
-
     LandmarkMatchDto:
       type: object
       properties:
         id:
           type: string
+        profileId:
+          type: string
+          format: uuid
+        soulmateId:
+          type: string
+          format: uuid
