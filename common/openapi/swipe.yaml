@@ -50,5 +50,5 @@ components:
         swipedUserId:
           type: string
           format: uuid
-        likes:
+        liked:
           type: boolean
