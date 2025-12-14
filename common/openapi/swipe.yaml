@@ -7,7 +7,7 @@ servers:
   - url: http://localhost:8083
 
 paths:
-  /v1/swipes:
+  /api/v1/swipes:
     post:
       summary: Создание записи о swipe
       operationId: "swipe"
@@ -28,6 +28,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/SwipeDto'
 
+  /api/v1/matches:
+    get:
+      summary: Список матчей для пользователя
+      operationId: "match"
+      tags:
+        - Match
+      responses:
+        '200':
+          description: список матчей
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchDto'
 components:
   schemas:
     SwipeRequestDto:
@@ -52,3 +65,16 @@ components:
           format: uuid
         liked:
           type: boolean
+
+    MatchDto:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+          format: uuid
+        soulmateId:
+          type: string
+          format: uuid
+
