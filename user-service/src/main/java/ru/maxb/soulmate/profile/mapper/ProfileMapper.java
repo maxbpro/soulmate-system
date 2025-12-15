@@ -5,6 +5,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.springframework.beans.factory.annotation.Autowired;
+import ru.maxb.soulmate.landmark.dto.LandmarkMatchDto;
 import ru.maxb.soulmate.profile.model.ProfileEntity;
 import ru.maxb.soulmate.profile.util.DateTimeUtil;
 import ru.maxb.soulmate.user.dto.ProfileDto;
@@ -37,4 +38,15 @@ public abstract class ProfileMapper {
             ProfileRegistrationRequestDto dto
     );
 
+    @Mapping(target = "radius", ignore = true)
+    @Mapping(target = "phoneNumber", ignore = true)
+    @Mapping(target = "lastName", ignore = true)
+    @Mapping(target = "interestedIn", ignore = true)
+    @Mapping(target = "gender", ignore = true)
+    @Mapping(target = "firstName", ignore = true)
+    @Mapping(target = "email", ignore = true)
+    @Mapping(target = "birthDate", ignore = true)
+    @Mapping(target = "ageMin", ignore = true)
+    @Mapping(target = "ageMax", ignore = true)
+    public abstract ProfileDto toProfileDto(LandmarkMatchDto landmarkMatchDto);
 }
