@@ -1,5 +1,6 @@
 package ru.maxb.soulmate.landmark;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -47,7 +49,7 @@ public class LandmarkMatchRepositoryTest extends AbstractElasticSearchTest {
                 profileId, UUID.randomUUID());
 
         LandmarkMatch soulmateMatch1 = getLandmarkMatch(Gender.FEMALE,
-                LocalDate.of(1990, 11, 12), 10, 12,
+                LocalDate.of(2006, 11, 12), 10, 12,
                 soulmateId1, profileId);
 
         LandmarkMatch soulmateMatch2 = getLandmarkMatch(Gender.FEMALE,
@@ -75,13 +77,16 @@ public class LandmarkMatchRepositoryTest extends AbstractElasticSearchTest {
 
 
         List<LandmarkMatch> byParams = landmarkReadService.findByParams(12, 10, 1000,
-                18, 32, Gender.FEMALE, profileId.toString());
+                18, 35, Gender.FEMALE, profileId.toString());
 
         assertFalse(byParams.contains(profile));
         assertFalse(byParams.contains(soulmateNotMatched));
         assertFalse(byParams.contains(soulmateNotMatchedByLocation));
+        assertFalse(byParams.contains(soulmateIdNotMatchedByAge));
 
-        //assertEquals(byParams.size(), 1);
+        Assertions.assertTrue(byParams.contains(soulmateMatch1));
+        Assertions.assertTrue(byParams.contains(soulmateMatch2));
+
     }
 
     private LandmarkMatch getLandmarkMatch(Gender gender, LocalDate birthDate,

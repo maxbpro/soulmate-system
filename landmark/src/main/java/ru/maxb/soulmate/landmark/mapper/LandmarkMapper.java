@@ -2,6 +2,7 @@ package ru.maxb.soulmate.landmark.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import ru.maxb.soulmate.landmark.dto.LandmarkMatchDto;
 import ru.maxb.soulmate.landmark.model.Profile;
 import ru.maxb.soulmate.landmark.model.LandmarkMatch;
 
@@ -23,4 +24,6 @@ public interface LandmarkMapper {
     @Mapping(target = "radius", source = "profile.radius")
     @Mapping(target = "dateOfBirth", source = "profile.dateOfBirth")
     LandmarkMatch toLandmarkMatch(Profile profile, Profile otherProfile);
+
+    LandmarkMatchDto toLandmarkMatchDto(LandmarkMatch landmarkMatch);
 }

@@ -2,12 +2,14 @@ package ru.maxb.soulmate.landmark.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.kafka.listener.CommonErrorHandler;
 
 import java.time.Clock;
 import java.time.ZoneOffset;
 
 @Configuration
+@Import({ElasticsearchConfiguration.class})
 public class AppConfig {
 
     @Bean

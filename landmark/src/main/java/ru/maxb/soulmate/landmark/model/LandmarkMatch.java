@@ -1,5 +1,6 @@
 package ru.maxb.soulmate.landmark.model;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
@@ -14,6 +15,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Document(indexName = "landmark_match")
+@EqualsAndHashCode
 public class LandmarkMatch {
 
     @Id
