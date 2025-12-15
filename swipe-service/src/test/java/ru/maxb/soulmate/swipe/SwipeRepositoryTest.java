@@ -3,6 +3,8 @@ package ru.maxb.soulmate.swipe;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.cassandra.core.mapping.BasicMapId;
+import org.springframework.data.cassandra.core.mapping.MapId;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.maxb.soulmate.swipe.common.AbstractCassandraTest;
 import ru.maxb.soulmate.swipe.model.SwipeEntity;
@@ -31,17 +33,26 @@ public class SwipeRepositoryTest extends AbstractCassandraTest {
     @Test
     public void createSwipe() {
         UUID userId = UUID.randomUUID();
+        UUID swipedUserId = UUID.randomUUID();
+
+        String userPair = String.format("%s:%s", userId, swipedUserId);
+
         SwipeEntity swipe = new SwipeEntity();
-        swipe.setId("id " + UUID.randomUUID());
-        swipe.setLiked(true);
+        swipe.setUserPair(userPair);
         swipe.setUserId(userId);
-        swipe.setSwipedUserId(UUID.randomUUID());
+        swipe.setSwipedUserId(swipedUserId);
+        swipe.setLiked(true);
+        swipe.setCreatedAt(dateTimeUtil.now());
         swipeRepository.save(swipe);
 
-        Optional<SwipeEntity> byId = swipeRepository.findById(swipe.getId());
+        MapId mapId = BasicMapId.id("userPair", userPair)
+                .with("userId", userId)
+                .with("swipedUserId", swipedUserId);
 
-        assertEquals(swipe.getId(), byId.get().getId());
-        assertEquals(swipe.getUserId(), byId.get().getUserId());
+        Optional<SwipeEntity> byId = swipeRepository.findById(mapId);
+
+        assertEquals(byId.get().getUserPair(), userPair);
+        assertEquals(byId.get().getUserId(), userId);
     }
 
 //    @Test

@@ -3,8 +3,8 @@ package ru.maxb.soulmate.swipe.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
-import ru.maxb.soulmate.swipe.dto.SwipeDto;
-import ru.maxb.soulmate.swipe.dto.SwipeRequestDto;
+import ru.maxb.soulmate.swipe.dto.MatchDto;
+import ru.maxb.soulmate.swipe.model.MatchEntity;
 import ru.maxb.soulmate.swipe.model.SwipeEntity;
 import ru.maxb.soulmate.swipe.util.DateTimeUtil;
 
@@ -13,14 +13,14 @@ import java.util.UUID;
 import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
 
 @Mapper(componentModel = SPRING)
-public abstract class SwipeMapper {
+public abstract class MatchMapper {
 
     @Autowired
     public DateTimeUtil dateTimeUtil;
 
-    @Mapping(target = "createdAt", expression = "java(dateTimeUtil.now())")
-    public abstract SwipeEntity from(String userPair, UUID userId, SwipeRequestDto dto);
+    public abstract MatchDto toDto(MatchEntity match);
 
-    @Mapping(target = "id", source = "userPair")
-    public abstract SwipeDto from(SwipeEntity swipeEntity);
+    @Mapping(target = "soulmateId", source = "swipeEntity.swipedUserId")
+    @Mapping(target = "createdAt", expression = "java(dateTimeUtil.now())")
+    public abstract MatchEntity toEntity(UUID id, SwipeEntity swipeEntity);
 }

@@ -10,22 +10,19 @@ import org.springframework.data.cassandra.core.mapping.Table;
 import java.time.Instant;
 import java.util.UUID;
 
-
 @Getter
 @Setter
-@Table(value = "swipe", keyspace = "swipe")
-public class SwipeEntity {
+@Table(value = "match", keyspace = "swipe")
+public class MatchEntity {
+
 
     @PrimaryKeyColumn(type = PrimaryKeyType.PARTITIONED, ordinal = 0)
-    private String userPair;
+    private UUID id;
 
     @PrimaryKeyColumn(type = PrimaryKeyType.CLUSTERED, ordinal = 1, ordering = Ordering.ASCENDING)
     private UUID userId;
 
-    @PrimaryKeyColumn(type = PrimaryKeyType.CLUSTERED, ordinal = 2, ordering = Ordering.DESCENDING)
-    private UUID swipedUserId;
-
-    private Boolean liked;
+    private UUID soulmateId;
 
     private Instant createdAt;
 }

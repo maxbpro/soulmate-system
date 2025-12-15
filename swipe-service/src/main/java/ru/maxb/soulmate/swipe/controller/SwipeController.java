@@ -9,6 +9,8 @@ import ru.maxb.soulmate.swipe.dto.SwipeDto;
 import ru.maxb.soulmate.swipe.dto.SwipeRequestDto;
 import ru.maxb.soulmate.swipe.service.SwipeService;
 
+import java.util.UUID;
+
 @RestController
 @RequiredArgsConstructor
 public class SwipeController implements SwipeApi {
@@ -17,6 +19,7 @@ public class SwipeController implements SwipeApi {
 
     @Override
     public ResponseEntity<SwipeDto> swipe(@Valid SwipeRequestDto swipeRequestDto) {
-        return ResponseEntity.ok(swipeService.createSwipe(swipeRequestDto));
+        UUID userId = null; //todo
+        return ResponseEntity.ok(swipeService.createSwipe(userId, swipeRequestDto));
     }
 }
