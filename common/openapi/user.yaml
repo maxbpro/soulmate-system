@@ -33,7 +33,7 @@ paths:
       summary: Get feed of profiles
       operationId: "getFeed"
       tags:
-      - Feed
+        - Feed
       parameters:
         - in: query
           name: lat
@@ -71,12 +71,12 @@ paths:
             type: string
             format: uuid
       responses:
-          '201':
-            description: Successfully found
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/ProfileDto'
+        '201':
+          description: Successfully found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileDto'
     put:
       summary: Update profile
       operationId: "update"
@@ -200,11 +200,15 @@ components:
     ProfileRegistrationRequestDto:
       type: object
       required: [
+        id,
         firstName,
         phoneNumber,
         photo,
       ]
       properties:
+        id:
+          type: string
+          format: uuid
         firstName:
           type: string
         lastName:

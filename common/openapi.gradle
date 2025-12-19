@@ -9,7 +9,7 @@ buildscript {
     }
 
     dependencies {
-        classpath("org.openapi.generator:org.openapi.generator.gradle.plugin:7.16.0")
+        classpath("org.openapi.generator:org.openapi.generator.gradle.plugin:7.17.0")
     }
 }
 
@@ -41,7 +41,9 @@ void createOpenApiGenerateTask(String ymlName) {
                          useJakartaEe       : "true",
                          "useTags"          : "true",
                          "useFeignClientUrl": "true",
-                         "openApiNullable"  : "false"
+                         "openApiNullable"  : "false",
+//                         "reactive"         : "true",
+//                         "useSpringBoot3"   : "true",
         ]
     }
     compileJava.dependsOn(taskName)
