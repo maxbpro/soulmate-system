@@ -200,13 +200,13 @@ components:
     ProfileRegistrationRequestDto:
       type: object
       required: [
-        id,
+        principalId,
         firstName,
         phoneNumber,
         photo,
       ]
       properties:
-        id:
+        principalId:
           type: string
           format: uuid
         firstName:
