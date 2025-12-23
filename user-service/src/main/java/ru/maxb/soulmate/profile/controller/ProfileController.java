@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import ru.maxb.soulmate.profile.model.OutboxType;
+import ru.maxb.soulmate.profile.service.OutboxService;
 import ru.maxb.soulmate.profile.service.ProfileService;
 import ru.maxb.soulmate.user.api.ProfileApi;
 import ru.maxb.soulmate.user.dto.ProfileDto;
@@ -18,6 +20,7 @@ import java.util.UUID;
 public class ProfileController implements ProfileApi {
 
     private final ProfileService profileService;
+    private final OutboxService outboxService;
 
     @Override
     public ResponseEntity<ProfileDto> registration(@Valid ProfileRegistrationRequestDto profileRegistrationRequestDto) {
@@ -37,10 +40,10 @@ public class ProfileController implements ProfileApi {
         return ResponseEntity.ok(profileDto);
     }
 
-
     @Override
     public ResponseEntity<Void> compensateRegistration(@NotNull UUID id) {
         profileService.hardDelete(id);
+        outboxService.hardDelete(id, OutboxType.PROFILE_CREATED);
         return ResponseEntity.ok().build();
     }
 

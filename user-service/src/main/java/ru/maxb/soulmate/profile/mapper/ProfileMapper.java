@@ -23,14 +23,21 @@ public abstract class ProfileMapper {
 
     protected DateTimeUtil dateTimeUtil;
 
+    @Mapping(target = "id", source = "request.principalId")
     @Mapping(target = "active", constant = "true")
     @Mapping(target = "created", expression = "java(dateTimeUtil.now())")
     @Mapping(target = "updated", expression = "java(dateTimeUtil.now())")
     @Mapping(target = "landmarks", source = "landmarks")
-    public abstract ProfileEntity to(ProfileRegistrationRequestDto registrationRequestDto, String landmarks);
+    @Mapping(target = "photos", ignore = true)
+    public abstract ProfileEntity to(ProfileRegistrationRequestDto request, String landmarks);
 
     public abstract ProfileDto from(ProfileEntity profileEntity);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "photos", ignore = true)
+    @Mapping(target = "landmarks", ignore = true)
+    @Mapping(target = "created", ignore = true)
+    @Mapping(target = "active", ignore = true)
     @Mapping(target = "updated", expression = "java(dateTimeUtil.now())")
     public abstract void update(
             @MappingTarget

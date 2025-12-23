@@ -3,6 +3,8 @@ package ru.maxb.soulmate.profile.model;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -30,7 +32,8 @@ public class OutboxEntity {
     @Column(name = "aggregateid")
     private String aggregateId;
 
-    private String type;
+    @Enumerated(EnumType.STRING)
+    private OutboxType type;
 
     @JdbcTypeCode(SqlTypes.JSON)
     private JsonNode payload;

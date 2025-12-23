@@ -37,8 +37,18 @@ public class ProfileRepositoryTest extends AbstractPostgresqlTest {
     private DateTimeUtil dateTimeUtil;
 
     @BeforeEach
+    @SneakyThrows
     public void init() {
         profileRepository.deleteAll();
+
+        objectStorageService.listObjects()
+                .forEach(v -> {
+                    try {
+                        objectStorageService.deleteFile(v);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
     }
 
     @Test
@@ -48,20 +58,7 @@ public class ProfileRepositoryTest extends AbstractPostgresqlTest {
         MultipartFile multipartFileFromResource = createMultipartFileFromResource();
         objectStorageService.saveObject(photoId + ".jpg", multipartFileFromResource);
 
-        ProfileEntity profileEntity = new ProfileEntity();
-        profileEntity.setEmail("email");
-        profileEntity.setPhoneNumber("+8223232323");
-        profileEntity.setAgeMin(18);
-        profileEntity.setAgeMax(20);
-        profileEntity.setRadius(10);
-        profileEntity.setBirthDate(LocalDate.of(1990, 11, 14));
-        profileEntity.setInterestedIn(Gender.FEMALE);
-        profileEntity.setFirstName("firstName");
-        profileEntity.setLastName("lastName");
-        profileEntity.setActive(true);
-        profileEntity.setCreated(dateTimeUtil.now());
-        profileEntity.setUpdated(dateTimeUtil.now());
-        profileEntity.setPhotos(List.of(photoId));
+        ProfileEntity profileEntity = getProfileEntity(photoId);
         profileRepository.save(profileEntity);
 
         Optional<ProfileEntity> byId = profileRepository.findById(profileEntity.getId());
@@ -85,6 +82,26 @@ public class ProfileRepositoryTest extends AbstractPostgresqlTest {
     }
 
 
+    private ProfileEntity getProfileEntity(String photoId) {
+        ProfileEntity profileEntity = new ProfileEntity();
+        profileEntity.setPrincipalId(UUID.randomUUID());
+        profileEntity.setEmail("email");
+        profileEntity.setPhoneNumber("+8223232323");
+        profileEntity.setAgeMin(18);
+        profileEntity.setAgeMax(20);
+        profileEntity.setRadius(10);
+        profileEntity.setBirthDate(LocalDate.of(1990, 11, 14));
+        profileEntity.setInterestedIn(Gender.FEMALE);
+        profileEntity.setGender(Gender.MALE);
+        profileEntity.setFirstName("firstName");
+        profileEntity.setLastName("lastName");
+        profileEntity.setActive(true);
+        profileEntity.setCreated(dateTimeUtil.now());
+        profileEntity.setUpdated(dateTimeUtil.now());
+        profileEntity.setPhotos(List.of(photoId));
+        profileEntity.setLandmarks("");
+        return profileEntity;
+    }
 
     public MultipartFile createMultipartFileFromResource() throws IOException {
         return new MockMultipartFile(

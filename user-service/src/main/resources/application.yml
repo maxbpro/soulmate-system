@@ -4,19 +4,21 @@ server:
 spring:
   application:
     name: user-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${RESOURCE_SERVER_ISSUER_URI:http://localhost:8080/realms/customer}
+          jwk-set-uri: ${RESOURCE_SERVER_JWK_SET_URI:http://localhost:8080/realms/customer/protocol/openid-connect/certs}
   datasource:
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/profile_db
-    username: customer
-    password: password
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
   liquibase:
     enabled: true
     change-log: db/changelog/master.xml
     default-schema: profile
     liquibase-schema: public
-  elasticsearch:
-    uris: ${ELASTICSEARCH_URIS:http://localhost:9200}
-    username: elastic
-    password: password
   jpa:
     hibernate:
       ddl-auto: validate
@@ -43,7 +45,6 @@ spring:
     bootstrap-servers: ${KAFKA:http://localhost:9092}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-#      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
     consumer:
       group-id: landmark-group
@@ -90,15 +91,19 @@ face:
   key: ${FACE_API_KEY:test}
   secret: ${FACE_API_SECRET:secret}
 
-otel:
-  exporter:
-    otlp:
-      endpoint: http://alloy.monitoring.svc.cluster.local:4318
-      protocol: http/protobuf
-  logs:
-    exporter: none
-  metrics:
-    exporter: none
+landmarks:
+  name: landmarks
+  url: ${LANDMARK_API_URL:http://localhost:}
 
+#otel:
+#  exporter:
+#    otlp:
+#      endpoint: http://alloy.monitoring.svc.cluster.local:4318
+#      protocol: http/protobuf
+#  logs:
+#    exporter: none
+#  metrics:
+#    exporter: none
+#
 
 

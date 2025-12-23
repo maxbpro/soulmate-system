@@ -28,6 +28,7 @@ import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.lifecycle.Startables;
 import ru.maxb.soulmate.profile.model.Gender;
 import ru.maxb.soulmate.profile.model.OutboxEntity;
+import ru.maxb.soulmate.profile.model.OutboxType;
 import ru.maxb.soulmate.profile.model.ProfileEntity;
 import ru.maxb.soulmate.profile.repository.OutboxRepository;
 import ru.maxb.soulmate.profile.repository.ProfileRepository;
@@ -160,7 +161,7 @@ public class DebeziumTest {
         OutboxEntity outboxEntity = new OutboxEntity();
         outboxEntity.setAggregateType(ProfileEntity.class.getSimpleName());
         outboxEntity.setAggregateId(profileEntity.getId().toString());
-        outboxEntity.setType("Profile created");
+        outboxEntity.setType(OutboxType.PROFILE_CREATED);
         outboxEntity.setPayload(new ObjectMapper().readTree(" \"{\"postCode\": \"E4 8ST, \"city\":\"London}\""));
 
         try (KafkaConsumer<String, String> consumer = getConsumer(kafka)) {

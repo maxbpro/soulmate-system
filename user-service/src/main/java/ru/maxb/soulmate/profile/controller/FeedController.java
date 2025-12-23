@@ -4,14 +4,19 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.RestController;
+import ru.maxb.soulmate.profile.exception.ProfileException;
 import ru.maxb.soulmate.profile.service.FeedService;
 import ru.maxb.soulmate.user.api.FeedApi;
 import ru.maxb.soulmate.user.dto.ProfileDto;
 
-import java.math.BigDecimal;
-import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -21,27 +26,23 @@ public class FeedController implements FeedApi {
     private final FeedService feedService;
 
     @Override
-    public ResponseEntity<List<ProfileDto>> getFeed(@NotNull @Valid BigDecimal lat,
-                                                    @NotNull @Valid BigDecimal lng) {
-
-
-        UUID profileId = null;
-
-        return ResponseEntity.ok(feedService.getProfiles());
+    public ResponseEntity<List<ProfileDto>> getFeed(@NotNull @Valid Double lat,
+                                                    @NotNull @Valid Double lng) {
+        UUID profileId = getSub();
+        return ResponseEntity.ok(feedService.getProfiles(profileId, lat, lng));
     }
 
-//    private void getSecurity(){
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        if (authentication != null && authentication.getPrincipal() instanceof Jwt) {
-//            Jwt jwt = (Jwt) authentication.getPrincipal();
-//            String preferredUsername = jwt.getClaimAsString("preferred_username");
-//            String firstName = jwt.getClaimAsString("given_name"); // or "firstName" depending on Keycloak mapping
-//            String lastName = jwt.getClaimAsString("family_name"); // or "lastName" depending on Keycloak mapping
-//
-//            return "Preferred Username: " + preferredUsername +
-//                    ", First Name: " + firstName +
-//                    ", Last Name: " + lastName;
-//        }
-//        return "JWT token not found or user not authenticated.";
-//    }
+    private UUID getSub() {
+        return Optional.ofNullable(SecurityContextHolder.getContext())
+                .map(SecurityContext::getAuthentication)
+                .filter(Authentication::isAuthenticated)
+                .filter(authentication -> authentication instanceof JwtAuthenticationToken)
+                .map(authentication -> (JwtAuthenticationToken) authentication)
+                .map(JwtAuthenticationToken::getToken)
+                .map(Jwt::getClaims)
+                .filter(v -> v.containsKey("sub"))
+                .map(v -> (String) v.get("sub"))
+                .map(UUID::fromString)
+                .orElseThrow(() -> new ProfileException("Not authenticated"));
+    }
 }
