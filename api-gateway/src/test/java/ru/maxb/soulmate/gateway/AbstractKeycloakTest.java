@@ -30,7 +30,6 @@ import static ru.maxb.soulmate.gateway.containers.WireMockTestContainer.wireMock
                 AppTestConfig.class,
                 GatewayApiTestService.class,
                 KeycloakApiTestService.class
-                //TestSupportConfig.class
         })
 
 public class AbstractKeycloakTest {

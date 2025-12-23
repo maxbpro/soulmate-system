@@ -2,25 +2,28 @@ package ru.maxb.soulmate.gateway.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverter;
+import org.springframework.security.web.server.SecurityWebFilterChain;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Configuration
-@EnableWebSecurity
+@EnableWebFluxSecurity
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(AbstractHttpConfigurer::disable)
-                .oauth2ResourceServer(oauth2ResourceServer ->
-                        oauth2ResourceServer.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                )
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/actuator/health",
+    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
+        return http
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .authorizeExchange(exchangeSpec -> exchangeSpec
+                        .pathMatchers(
+                                "/actuator/health",
                                 "/actuator/prometheus",
                                 "/actuator/info",
                                 "/v3/api-docs/**",
@@ -29,19 +32,29 @@ public class SecurityConfig {
                                 "/v1/auth/registration",
                                 "/v1/auth/login",
                                 "/v1/auth/refresh-token"
-                        ).permitAll() // Permit access to public paths
-                        .requestMatchers("/v1/auth/me").hasAuthority("ROLE_individual.user")
-                        .anyRequest().authenticated() // All other requests require authentication
-                );
+                        ).permitAll()
 
-        return http.build();
+                        .pathMatchers(
+                                "/v1/auth/me",
+                                "/api/v1/matches",
+                                "/api/v1/swipes",
+                                "/v1/profiles/feed"
+                        ).hasAuthority("ROLE_soulmateapp.user")
+                        .anyExchange().authenticated()
+                )
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(keycloakAuthenticationConverter())))
+                .build();
     }
 
-    @Bean
-    public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
-        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(new KeycloakJwtAuthenticationConverter());
-        return jwtAuthenticationConverter;
+    private Converter<Jwt, ? extends Mono<? extends AbstractAuthenticationToken>> keycloakAuthenticationConverter() {
+        ReactiveJwtAuthenticationConverter converter = new ReactiveJwtAuthenticationConverter();
+        converter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter());
+        return converter;
+    }
+
+    private Converter<Jwt, Flux<GrantedAuthority>> jwtGrantedAuthoritiesConverter() {
+        return new KeycloakJwtAuthenticationConverter();
     }
 }
 

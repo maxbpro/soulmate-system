@@ -8,13 +8,25 @@ spring:
           wiretap: true
         httpclient:
           wiretap: true
-#        webflux:
-#          routes:
-#            - id: profile-by-id-test
-#              uri: http://localhost:8082
-#              predicates:
-#                - Path=/api/users/v1/test
-#                - Method=GET
+        webflux:
+          routes:
+            - id: profiles-feed
+              uri: http://user-service:8082
+              predicates:
+                - Path=/v1/profiles/feed
+                - Method=GET
+
+            - id: swipe
+              uri: http://swipe-service:8083
+              predicates:
+                - Path=/api/v1/swipes
+                - Method=GET,POST
+
+            - id: match
+              uri: http://swipe-service:8083
+              predicates:
+                - Path=/api/v1/matches
+                - Method=GET
 
   servlet:
     multipart:
@@ -30,7 +42,7 @@ spring:
             provider: keycloak
             client-id: ${application.keycloak.clientId}
             client-secret: ${application.keycloak.clientSecret}
-            client-name: individual
+            client-name: ${application.keycloak.clientId}
             authorization-grant-type: authorization_code
             scope: openid, profile, email
       resourceserver:
@@ -49,10 +61,10 @@ logging:
 
 application:
   keycloak:
-    realm: customer
-    clientId: soulmateApp
-    clientSecret: 39fHHVt6VKseUclnOxgADA1NNaeBd8uB
-    serverUrl: http://kc-service.default.svc.cluster.local:8080
+    realm: ${KEYCLOAK_REALM:customer}
+    clientId: ${KEYCLOAK_CLIENT_ID:customer}
+    clientSecret: ${KEYCLOAK_CLIENT_SECRET:s58oVwOCNpThoThUXKWtE8flEW4Aq368}
+    serverUrl: ${KEYCLOAK_SERVER_URL:http://kc-service.default.svc.cluster.local:8080}
     realmUrl: ${application.keycloak.serverUrl}/realms/${application.keycloak.realm}
     tokenUrl: ${application.keycloak.realmUrl}/protocol/openid-connect/token
     adminUsername: admin
@@ -74,7 +86,7 @@ keycloakAuth:
 
 users:
   name: ${USERS_API_NAME:kcUsers}
-  url: ${USERS_API_NAME:http://localhost:8080}
+  url: ${USERS_API_NAME:http://localhost:8082}
 
 #end keycloak
 
@@ -85,6 +97,10 @@ profile:
 swipe:
   name: ${SWIPE_API_NAME:swipe}
   url: ${SWIPE_API_URL:http://localhost:8083}
+
+feed:
+  name: ${FEED_API_NAME:feed}
+  url: ${FEED_API_URL:http://localhost:8083}
 
 management:
   server:

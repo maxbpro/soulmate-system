@@ -21,6 +21,8 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.util.UUID;
+
 
 @Slf4j
 @Component
@@ -34,17 +36,19 @@ public class KeycloakClient {
 
     private String userRegistrationUrl;
     private String userPasswordResetUrl;
+    private String userDeleteUrl;
     private String userByIdUrl;
 
     @PostConstruct
     public void init() {
         this.userRegistrationUrl = props.serverUrl() + "/admin/realms/" + props.realm() + "/users";
+        this.userDeleteUrl = props.serverUrl() + "/admin/realms/" + props.realm() + "/users/{id}";
         this.userByIdUrl = userRegistrationUrl + "/{id}";
         this.userPasswordResetUrl = userByIdUrl + "/reset-password";
     }
 
     //    @WithSpan("keycloakClient.login")
-    public TokenResponse login(UserLoginRequest req) {
+    public Mono<TokenResponse> login(UserLoginRequest req) {
         var form = new LinkedMultiValueMap<String, String>();
         form.add("grant_type", "password");
         form.add("username", req.getEmail());
@@ -58,12 +62,11 @@ public class KeycloakClient {
                 .bodyValue(form)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, this::toApiException)
-                .bodyToMono(TokenResponse.class)
-                .block();
+                .bodyToMono(TokenResponse.class);
     }
 
     //    @WithSpan("keycloakClient.adminLogin")
-    public TokenResponse adminLogin() {
+    public Mono<TokenResponse> adminLogin() {
         var form = new LinkedMultiValueMap<String, String>();
         form.add("grant_type", "password");
         form.add("client_id", props.adminClientId());
@@ -76,12 +79,11 @@ public class KeycloakClient {
                 .bodyValue(form)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, this::toApiException)
-                .bodyToMono(TokenResponse.class)
-                .block();
+                .bodyToMono(TokenResponse.class);
     }
 
     //    @WithSpan("keycloakClient.refreshToken")
-    public TokenResponse refreshToken(TokenRefreshRequest req) {
+    public Mono<TokenResponse> refreshToken(TokenRefreshRequest req) {
         var form = new LinkedMultiValueMap<String, String>();
         form.add("grant_type", "refresh_token");
         form.add("refresh_token", req.getRefreshToken());
@@ -94,19 +96,33 @@ public class KeycloakClient {
                 .bodyValue(form)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, this::toApiException)
-                .bodyToMono(TokenResponse.class)
-                .block();
+                .bodyToMono(TokenResponse.class);
     }
 
     //    @WithSpan("keycloakClient.registerUser")
-    public String registerUser(TokenResponse adminToken, KeycloakUserRepresentation user) {
+    public Mono<String> registerUser(TokenResponse adminToken, KeycloakUserRepresentation user) {
         return webClient.post()
                 .uri(userRegistrationUrl)
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + adminToken.getAccessToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(user)
-                .exchangeToMono((ClientResponse response) -> extractIdFromPath(response))
-                .block();
+                .exchangeToMono((ClientResponse response) -> extractIdFromPath(response));
+    }
+
+    //@WithSpan("keycloakClient.deleteUser")
+    public Mono<Void> deleteUser(TokenResponse adminToken, String userId) {
+        return webClient.delete()
+                .uri(userDeleteUrl, userId)
+                .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + adminToken.getAccessToken())
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, resp ->
+                        resp.bodyToMono(String.class)
+                                .defaultIfEmpty("")
+                                .flatMap(body -> Mono.error(new ApiException(
+                                        "KC user deleting failed " + resp.statusCode())))
+                )
+                .toBodilessEntity()
+                .then();
     }
 
     private Mono<String> extractIdFromPath(ClientResponse response) {
@@ -121,8 +137,8 @@ public class KeycloakClient {
     }
 
     //    @WithSpan("keycloakClient.resetUserPassword")
-    public void resetUserPassword(String userId, KeycloakCredentialsRepresentation dto, String adminAccessToken) {
-        webClient.put()
+    public Mono<Void> resetUserPassword(String userId, KeycloakCredentialsRepresentation dto, String adminAccessToken) {
+        return webClient.put()
                 .uri(userPasswordResetUrl, userId)
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + adminAccessToken)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -135,19 +151,18 @@ public class KeycloakClient {
                                         "KC reset-password failed " + resp.statusCode() + ": " + body)))
                 )
                 .toBodilessEntity()
-                .block();
+                .then();
     }
 
 
     //    @WithSpan("keycloakClient.resetUserPassword.executeOnError")
-    public void executeOnError(String userId, String adminAccessToken, Throwable e) {
-        webClient.delete()
+    public Mono<Void> executeOnError(String userId, String adminAccessToken, Throwable e) {
+        return webClient.delete()
                 .uri(userByIdUrl, userId)
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + adminAccessToken)
                 .retrieve()
                 .toBodilessEntity()
-                .then(Mono.error(e))
-                .block();
+                .then();
     }
 
     private static void addIfNotBlank(LinkedMultiValueMap<String, String> form, String key, String value) {

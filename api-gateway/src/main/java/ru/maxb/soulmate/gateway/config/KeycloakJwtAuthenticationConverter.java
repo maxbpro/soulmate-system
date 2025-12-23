@@ -5,21 +5,18 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.util.CollectionUtils;
+import reactor.core.publisher.Flux;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.stream.Collectors;
 
-public class KeycloakJwtAuthenticationConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
-
+public class KeycloakJwtAuthenticationConverter implements Converter<Jwt, Flux<GrantedAuthority>> {
     @Override
-    public Collection<GrantedAuthority> convert(Jwt source) {
+    public Flux<GrantedAuthority> convert(Jwt source) {
         var roles = source.getClaimAsStringList("roles");
         if (CollectionUtils.isEmpty(roles)) {
-            return Collections.emptyList();
+            return Flux.empty();
         }
-        return roles.stream()
+        return Flux.fromIterable(roles.stream()
                 .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+                .toList());
     }
 }
