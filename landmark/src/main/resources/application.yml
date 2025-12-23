@@ -4,10 +4,16 @@ server:
 spring:
   application:
     name: landmark-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${RESOURCE_SERVER_ISSUER_URI:http://localhost:8080/realms/customer}
+          jwk-set-uri: ${RESOURCE_SERVER_JWK_SET_URI:http://localhost:8080/realms/customer/protocol/openid-connect/certs}
   elasticsearch:
     uris: ${ELASTICSEARCH_URIS:http://localhost:9200}
-    username: elastic
-    password: password
+    username: ${ELASTICSEARCH_USERNAME:elastic}
+    password: ${ELASTICSEARCH_PASSWORD:password}
   kafka:
     bootstrap-servers: ${KAFKA:http://localhost:9092}
     producer:
@@ -24,8 +30,8 @@ spring:
 
 
 profile:
-  topic: "profile"
   outbox: "dbserver.profile.outbox"
+  #  topic: "profile"
 
 
 management:
@@ -47,15 +53,15 @@ management:
       export:
         enabled: true
 
-otel:
-  exporter:
-    otlp:
-      endpoint: http://alloy.monitoring.svc.cluster.local:4318
-      protocol: http/protobuf
-  logs:
-    exporter: none
-  metrics:
-    exporter: none
+#otel:
+#  exporter:
+#    otlp:
+#      endpoint: http://alloy.monitoring.svc.cluster.local:4318
+#      protocol: http/protobuf
+#  logs:
+#    exporter: none
+#  metrics:
+#    exporter: none
 
 
 

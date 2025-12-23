@@ -1,6 +1,7 @@
 package ru.maxb.soulmate.landmark.consumer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,8 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 import ru.maxb.soulmate.common.event.ProfileCreatedDto;
 import ru.maxb.soulmate.landmark.service.MatchService;
+
+import java.util.Optional;
 
 
 @Slf4j
@@ -27,7 +30,20 @@ public class ProfileCreatedConsumer implements ConsumerSeekAware {
                                    @Header(KafkaHeaders.OFFSET) Long offset) {
         try {
             String debeziumEventJson = debeziumEventRecord.value();
-            String payload = objectMapper.readTree(debeziumEventJson).get("after").get("payload").asText();
+
+            String payload = Optional.ofNullable(debeziumEventJson)
+                    .map(v -> {
+                        try {
+                            return objectMapper.readTree(v);
+                        } catch (JsonProcessingException e) {
+                            throw new RuntimeException(e);
+                        }
+                    })
+                    .map(v -> v.get("payload"))
+                    .map(v -> v.get("after"))
+                    .map(v -> v.get("payload"))
+                    .map(JsonNode::asText)
+                    .orElseThrow(() -> new IllegalArgumentException("Debezium format issue"));
 
             ProfileCreatedDto profileCreatedDto = objectMapper.readValue(payload, ProfileCreatedDto.class);
             log.info("received profileId='{}'", profileCreatedDto.id() + ", offset: " + offset);

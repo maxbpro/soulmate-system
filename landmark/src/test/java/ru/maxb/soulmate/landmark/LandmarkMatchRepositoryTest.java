@@ -16,8 +16,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @Testcontainers
@@ -77,7 +75,7 @@ public class LandmarkMatchRepositoryTest extends AbstractElasticSearchTest {
 
 
         List<LandmarkMatch> byParams = landmarkReadService.findByParams(12, 10, 1000,
-                18, 35, Gender.FEMALE, profileId.toString());
+                18, 35, Gender.FEMALE, profileId);
 
         assertFalse(byParams.contains(profile));
         assertFalse(byParams.contains(soulmateNotMatched));

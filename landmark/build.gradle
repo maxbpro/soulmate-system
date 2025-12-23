@@ -6,7 +6,7 @@ plugins {
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(22)
+		languageVersion = JavaLanguageVersion.of(24)
 	}
 }
 
@@ -44,10 +44,11 @@ repositories {
 }
 
 dependencies {
-	implementation 'ru.maxb.soulmate.common:common:1.0.27'
+	implementation 'ru.maxb.soulmate.common:common:1.0.32'
 
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.data:spring-data-elasticsearch'
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation("org.springframework.boot:spring-boot-starter-validation")

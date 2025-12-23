@@ -14,6 +14,7 @@ import ru.maxb.soulmate.landmark.model.LandmarkMatch;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 
@@ -23,9 +24,9 @@ public class LandmarkReadService {
 
     private final ElasticsearchOperations elasticsearchOperations;
 
-    public List<LandmarkMatch> findByParams( double lat, double lon, int distance,
+    public List<LandmarkMatch> findByParams(double lat, double lon, int distance,
                                             int ageMin, int ageMax, Gender interestedIn,
-                                             String excludeProfileId) {
+                                            UUID excludeProfileId) {
         IndexCoordinates index = IndexCoordinates.of("landmark_match");
 
         LocalDate upperDate = LocalDate.now().minusYears(ageMin);
