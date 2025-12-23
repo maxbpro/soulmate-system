@@ -40,7 +40,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MatchDto'
+                type: array
+                items: { $ref: '#/components/schemas/MatchDto' }
+
 components:
   schemas:
     SwipeRequestDto:
