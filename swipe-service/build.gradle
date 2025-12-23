@@ -2,12 +2,11 @@ plugins {
 	id 'java-library'
 	id 'org.springframework.boot' version '3.5.0'
 	id 'io.spring.dependency-management' version '1.1.4'
-	id "com.github.davidmc24.gradle.plugin.avro" version "1.9.1"
 }
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(22)
+		languageVersion = JavaLanguageVersion.of(24)
 	}
 }
 
@@ -44,16 +43,12 @@ repositories {
 	}
 }
 
-avro {
-	createSetters = true
-	fieldVisibility = 'PRIVATE'
-}
-
 dependencies {
-	implementation 'ru.maxb.soulmate.common:common:1.0.29'
+	implementation 'ru.maxb.soulmate.common:common:1.0.35'
 
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.data:spring-data-cassandra:4.5.4'
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation("org.springframework.boot:spring-boot-starter-validation")
@@ -61,7 +56,6 @@ dependencies {
 	implementation "io.github.resilience4j:resilience4j-spring-boot3:${resilience4jSpringBoot3Version}"
 
 	implementation 'org.springframework.kafka:spring-kafka:3.3.10'
-	implementation 'io.confluent:kafka-avro-serializer:7.9.2'
 
 	compileOnly("org.projectlombok:lombok")
 	compileOnly("org.mapstruct:mapstruct:${mapstructVersion}")

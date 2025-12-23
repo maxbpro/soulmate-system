@@ -12,6 +12,7 @@ import ru.maxb.soulmate.swipe.model.SwipeEntity;
 import ru.maxb.soulmate.swipe.repository.MatchRepository;
 import ru.maxb.soulmate.swipe.repository.SwipeRepository;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -40,6 +41,12 @@ public class SwipeService {
         }
 
         return swipeMapper.from(swipeEntity);
+    }
+
+    public List<SwipeDto> getSwipes(UUID profileId) {
+        return swipeRepository.findByUserId(profileId).stream()
+                .map(swipeMapper::from)
+                .toList();
     }
 
     private void createMatch(SwipeEntity swipeEntity) {

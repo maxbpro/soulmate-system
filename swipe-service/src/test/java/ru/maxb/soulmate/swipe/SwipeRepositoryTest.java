@@ -11,6 +11,7 @@ import ru.maxb.soulmate.swipe.model.SwipeEntity;
 import ru.maxb.soulmate.swipe.repository.SwipeRepository;
 import ru.maxb.soulmate.swipe.util.DateTimeUtil;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -53,7 +54,13 @@ public class SwipeRepositoryTest extends AbstractCassandraTest {
 
         assertEquals(byId.get().getUserPair(), userPair);
         assertEquals(byId.get().getUserId(), userId);
+
+        List<SwipeEntity> byUserId = swipeRepository.findByUserId(userId);
+
+        assertEquals(byUserId.size(), 1);
+        assertEquals(byUserId.get(0).getUserId(), userId);
     }
+
 
 //    @Test
 //    public void shouldFindProfile() {

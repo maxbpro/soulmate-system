@@ -4,8 +4,14 @@ server:
 spring:
   application:
     name: swipe-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${RESOURCE_SERVER_ISSUER_URI:http://localhost:8080/realms/customer}
+          jwk-set-uri: ${RESOURCE_SERVER_JWK_SET_URI:http://localhost:8080/realms/customer/protocol/openid-connect/certs}
   cassandra:
-    keyspaceName: swipe
+    keyspaceName: ${CASSANDRA_KEYSPACE:swipe}
     port: ${CASSANDRA_PORT:9042}
     contactPoints: ${CASSANDRA_HOST:http://cassandra.default.svc.cluster.local}
     localDatacenter: ${CASSANDRA_DATACENTER:datacenter1}
@@ -13,19 +19,14 @@ spring:
     bootstrap-servers: ${KAFKA:http://localhost:9092}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
     consumer:
       group-id: my-group-id
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       enable-auto-commit: true
       auto-commit-interval: 1000
-    properties:
-      schema.registry.url: http://schema-registry:8091
-      auto.register.schemas: true
-      specific.avro.reader: true
-      value.subject.name.strategy: io.confluent.kafka.serializers.subject.RecordNameStrategy
 
 test:
   topic: "event"
@@ -49,15 +50,15 @@ management:
       export:
         enabled: true
 
-otel:
-  exporter:
-    otlp:
-      endpoint: http://alloy.monitoring.svc.cluster.local:4318
-      protocol: http/protobuf
-  logs:
-    exporter: none
-  metrics:
-    exporter: none
+#otel:
+#  exporter:
+#    otlp:
+#      endpoint: http://alloy.monitoring.svc.cluster.local:4318
+#      protocol: http/protobuf
+#  logs:
+#    exporter: none
+#  metrics:
+#    exporter: none
 
 
 

@@ -4,9 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.maxb.soulmate.swipe.common.AbstractCassandraTest;
-import ru.maxb.soulmate.swipe.dto.MatchDto;
 import ru.maxb.soulmate.swipe.dto.SwipeDto;
 import ru.maxb.soulmate.swipe.dto.SwipeRequestDto;
+import ru.maxb.soulmate.swipe.model.MatchEntity;
 import ru.maxb.soulmate.swipe.service.MatchService;
 import ru.maxb.soulmate.swipe.service.SwipeService;
 
@@ -35,7 +35,7 @@ public class SwipeIntegrationTest extends AbstractCassandraTest {
         assertEquals(swipedUserId, swipeDto.getSwipedUserId());
         assertEquals(profileId, swipeDto.getUserId());
 
-        List<MatchDto> matches = matchService.getMatches(profileId);
+        List<MatchEntity> matches = matchService.getMatches(profileId);
         assertEquals(0, matches.size());
 
         SwipeRequestDto swipeRequest2 = getSwipeRequestDto(profileId);
