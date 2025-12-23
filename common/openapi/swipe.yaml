@@ -28,7 +28,7 @@ paths:
                 $ref: '#/components/schemas/SwipeDto'
 
     get:
-      summary: Список свайпов пользователя
+      summary: Список свайпов пользователя (для отладки)
       operationId: "getSwipes"
       tags:
         - Swipe

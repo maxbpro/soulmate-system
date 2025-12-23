@@ -1,0 +1,448 @@
+services:
+
+  api-gateway:
+    image: 'api-gateway'
+    build:
+      context:  ../../api-gateway
+      args:
+        GITHUB_ACTOR: "maxbpro"
+        PERSONAL_ACCESS_TOKEN: ${PERSONAL_ACCESS_TOKEN}
+    environment:
+      JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8091"
+      KEYCLOAK_SERVER_URL: http://keycloak:8080
+      KEYCLOAK_REALM: customer
+      KEYCLOAK_CLIENT_ID: soulmate
+      KEYCLOAK_CLIENT_SECRET: s58oVwOCNpThoThUXKWtE8flEW4Aq368
+      KEYCLOAK_AUTH_API_URL: http://keycloak:8080
+      AUTH_API_URL: http://keycloak:8080
+      USERS_API_NAME: http://keycloak:8080
+      PROFILE_API_URL: http://user-service:8082
+      SWIPE_API_URL: http://swipe-service:8083
+      FEED_API_URL: http://landmark-service:8084
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8081/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    ports:
+      - '8081:8081'
+      - '8091:8091'
+    mem_limit: 256M # Hard limit of 512MB
+    mem_reservation: 128M # Soft limit of 256MB
+    networks:
+      - soulmate-network
+
+  user-service:
+    image: 'user-service'
+    container_name: 'user-service'
+    build:
+      context: ../../user-service
+      args:
+        GITHUB_ACTOR: "maxbpro"
+        PERSONAL_ACCESS_TOKEN: ${PERSONAL_ACCESS_TOKEN}
+    environment:
+      JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8092"
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      KAFKA: http://kafka:9091
+      MINIO_ENDPOINT: http://minio:9999
+      FACE_API_URL: http://faceplusplus-api:8080
+      FACE_API_KEY: test
+      FACE_API_SECRET: secret
+      LANDMARK_API_URL: http://landmark-service:8084
+      RESOURCE_SERVER_ISSUER_URI: http://keycloak:8080/realms/customer
+      RESOURCE_SERVER_JWK_SET_URI: http://keycloak:8080/realms/customer/protocol/openid-connect/certs
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    ports:
+      - '8082:8082'
+      - '8092:8092'
+    mem_limit: 256M # Hard limit of 512MB
+    mem_reservation: 128M # Soft limit of 256MB
+    networks:
+      - soulmate-network
+
+  landmark-service:
+    image: 'landmark-service'
+    build:
+      context: ../../landmark
+      args:
+        GITHUB_ACTOR: "maxbpro"
+        PERSONAL_ACCESS_TOKEN: ${PERSONAL_ACCESS_TOKEN}
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    environment:
+      JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8094"
+      RESOURCE_SERVER_ISSUER_URI: http://keycloak:8080/realms/customer
+      RESOURCE_SERVER_JWK_SET_URI: http://keycloak:8080/realms/customer/protocol/openid-connect/certs
+      ELASTICSEARCH_URIS: http://elasticsearch:9200
+      ELASTICSEARCH_USERNAME: elastic
+      ELASTICSEARCH_PASSWORD: password
+      KAFKA: http://kafka:9091
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:8084/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    ports:
+      - '8084:8084'
+      - '8094:8094'
+    mem_limit: 256M # Hard limit of 512MB
+    mem_reservation: 128M # Soft limit of 256MB
+    networks:
+      - soulmate-network
+
+  swipe-service:
+    image: 'swipe-service'
+    build:
+      context: ../../swipe-service
+      args:
+        GITHUB_ACTOR: "maxbpro"
+        PERSONAL_ACCESS_TOKEN: ${PERSONAL_ACCESS_TOKEN}
+    depends_on:
+      cassandra:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    environment:
+      JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8093"
+      RESOURCE_SERVER_ISSUER_URI: http://keycloak:8080/realms/customer
+      RESOURCE_SERVER_JWK_SET_URI: http://keycloak:8080/realms/customer/protocol/openid-connect/certs
+      CASSANDRA_PORT: 9042
+      CASSANDRA_HOST: cassandra
+      CASSANDRA_DATACENTER: datacenter1
+      CASSANDRA_KEYSPACE: swipe
+      KAFKA: http://kafka:9091
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:8083/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    ports:
+      - '8083:8083'
+      - '8093:8093'
+    mem_limit: 256M
+    mem_reservation: 128M
+    networks:
+      - soulmate-network
+
+
+  keycloak:
+    container_name: soulmate-keycloak
+    image: quay.io/keycloak/keycloak:26.2
+    command:
+      - start-dev
+      - --import-realm
+    volumes:
+      - ./keycloak/:/opt/keycloak/data/import/
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTP_PORT: 8080
+      KC_HOSTNAME_URL: http://localhost:8080
+      KC_HOSTNAME_ADMIN_URL: http://localhost:8080
+      KC_HOSTNAME_STRICT_BACKCHANNEL: true
+      KC_HTTP_RELATIVE_PATH: /
+      KC_HTTP_ENABLED: true
+      KC_HEALTH_ENABLED: true
+      KC_METRICS_ENABLED: true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: [
+        "CMD-SHELL",
+        "exec 3<>/dev/tcp/127.0.0.1/9000; echo -e 'GET /health/ready HTTP/1.1\\r\\nhost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3; grep 'HTTP/1.1 200 OK' <&3"
+      ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    ports:
+      - 8080:8080
+      - 9000:9000
+    mem_limit: 512M # Hard limit of 512MB
+    mem_reservation: 256M # Soft limit of 256MB
+    networks:
+      - soulmate-network
+
+  faceplusplus-api:
+    image: "wiremock/wiremock:3.13.0"
+    container_name: faceplusplus-api
+    ports:
+      - "8099:8080"
+    volumes:
+      # Mount local 'mappings' directory to the container's '/home/wiremock/mappings'
+      - ../../user-service/src/test/resources/mappings:/home/wiremock/mappings
+    mem_limit: 128M # Hard limit of 512MB
+    mem_reservation: 64M # Soft limit of 256MB
+    networks:
+      - soulmate-network
+
+  cassandra:
+    container_name: cassandra
+    image: cassandra:latest
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+    environment:
+      CASSANDRA_LISTEN_ADDRESS: cassandra
+      CASSANDRA_AUTHENTICATOR: org.apache.cassandra.auth.PasswordAuthenticator
+      CASSANDRA_USER: cassandra_user
+      CASSANDRA_PASSWORD: cassandra_password
+      # Set Cassandra's JVM heap size to match your reservation for better control
+      CASSANDRA_HEAP_SIZE: 1G
+      JVM_OPTS: -Xms1G -Xmx2G
+    restart: unless-stopped
+    ports:
+      - "9042:9042"
+    healthcheck:
+      test: [ "CMD", "cqlsh", "-e", "describe keyspaces" ]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    mem_limit: 2G
+    mem_reservation: 1G
+    networks:
+      - soulmate-network
+  init-cassandra:
+    image: cassandra:latest
+    depends_on:
+      - cassandra
+    restart: "no"
+    entrypoint: [ "/init.sh" ]
+    volumes:
+      - ./cassandra/cassandra-init-data.sh:/init.sh
+      - ./cassandra/init.cql:/init.cql
+    networks:
+      - soulmate-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.8.0
+    hostname: kafka
+    container_name: kafka
+    ports:
+#      - "9092:9092"
+#      - "9093:9093"
+      - "29092:29092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_BROKER_ID: 1
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      # "Слушатели" используются для указания способа подключения к Kafka ноде,
+      # То есть Kafka откроет порты и будет слушать на них подключения
+      # В нашем случае первое слово - Alias, ://: - на всех сетевых интерфейсах,
+      # Ну и в конце, очевидно, порт
+      KAFKA_LISTENERS: 'INTERNAL://:9091,EXTERNAL://:29092,CONTROLLER://:9093'
+      # Здесь мы указываем, куда Kafka будет "перенаправлять" клиента после того,
+      # Как тот подключится к ней. Контроллер не указываем, так как это нужно
+      # Только для внутренней работы Kafka
+      KAFKA_ADVERTISED_LISTENERS: 'INTERNAL://kafka:9091,EXTERNAL://localhost:29092'
+      # Настраиваем шифрование
+      # В нашем случае PLAINTEXT означает его отсутствие
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'INTERNAL'
+      CLUSTER_ID: 'EmptNWtoR4GGWx-BH6nGLQ'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+#      KAFKA_MIN_INSYNC_REPLICAS: 2
+    volumes:
+      - ./kafka1/data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD", "sh", "-c", "nc -z kafka 9091  || exit 1"]
+      start_period: 15s # Gives the container time to bootstrap
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    mem_limit: 256M # Hard limit of 512MB
+    mem_reservation: 128M # Soft limit of 256MB
+    networks:
+      - soulmate-network
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:v0.7.2
+    container_name: kafka-ui
+    hostname: kafka-ui
+    depends_on:
+      - kafka
+    ports:
+      - "8086:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      # Указыв��ем адреса наших брокеров в кластере
+      # так как Kafka-UI и брокеры в одной Docker-сети, то используем порты 9091
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9091
+      DYNAMIC_CONFIG_ENABLED: true
+    networks:
+      - soulmate-network
+
+  postgres:
+    image: postgres:18-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: profile_db
+    command:
+      - "postgres"
+      - "-c"
+      - "wal_level=logical"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    ports:
+      - "5432:5432"
+    mem_limit: 256M # Hard limit of 512MB
+    mem_reservation: 128M # Soft limit of 256MB
+    networks:
+      - soulmate-network
+
+  minio:
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
+    container_name: minio
+    environment:
+      MINIO_ROOT_USER: user
+      MINIO_ROOT_PASSWORD: password
+    volumes:
+      - minio_data:/data
+    command: server --console-address ":9001" /data
+    ports:
+      - "9999:9000"
+      - "9998:9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+      start_period: 5s
+    mem_limit: 256M # Hard limit of 512MB
+    mem_reservation: 128M # Soft limit of 256MB
+    networks:
+      - soulmate-network
+
+  debezium-connect:
+    image: quay.io/debezium/connect:3.3.1.Final
+    restart: always
+    container_name: debezium
+    hostname: debezium
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    ports:
+      - '9099:8083'
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9091
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: connect_configs
+      STATUS_STORAGE_TOPIC: connect_statuses
+      OFFSET_STORAGE_TOPIC: connect_offsets
+      KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      ENABLE_DEBEZIUM_SCRIPTING: 'true'
+    volumes:
+      - ./debezium/connector-config.json:/etc/debezium/connector-config.json
+      - ./debezium/register-connector.sh:/usr/local/bin/register-connector.sh
+#    command: ["sh", "-c", "export | grep BOOTSTRAP_SERVERS; chmod +x /usr/local/bin/register-connector.sh; /usr/local/bin/register-connector.sh"]
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'curl',
+          '--silent',
+          '--fail',
+          '-X',
+          'GET',
+          'http://localhost:8083/connectors',
+        ]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+#    mem_limit: 512M # Hard limit of 512MB
+#    mem_reservation: 256M # Soft limit of 256MB
+    networks:
+      - soulmate-network
+
+  debezium-ui:
+    image: debezium/debezium-ui:1.9
+    platform: linux/amd64
+    restart: always
+    container_name: debezium-ui
+    hostname: debezium-ui
+    depends_on:
+      debezium-connect:
+        condition: service_healthy
+    environment:
+      KAFKA_CONNECT_URIS: http://debezium:8083
+    ports:
+      - '9090:8080'
+    mem_limit: 256M # Hard limit of 512MB
+    mem_reservation: 128M # Soft limit of 256MB
+    networks:
+      - soulmate-network
+
+  elasticsearch:
+    image: elasticsearch:8.19.5
+#    image: elasticsearch:7.17.10
+    container_name: elasticsearch
+    environment:
+      # Set discovery type to single-node for development
+      - discovery.type=single-node
+      # Disable security for easier local testing (no SSL/login required)
+      - xpack.security.enabled=false
+      # Optional: Set the initial 'elastic' user password (for development only)
+      - ELASTIC_PASSWORD=password
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -s http://localhost:9200/_cat/health >/dev/null || exit 1" ]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    mem_limit: 512M # Hard limit of 512MB
+    mem_reservation: 256M # Soft limit of 256MB
+    networks:
+      - soulmate-network
+
+volumes:
+  cassandra_data:
+  pgdata:
+    driver: local
+  minio_data:
+    driver: local
+  esdata:
+    driver: local
+
+networks:
+  soulmate-network:
+    driver: bridge

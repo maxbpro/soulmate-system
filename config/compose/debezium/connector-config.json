@@ -1,0 +1,16 @@
+{
+  "name": "soulmate-user-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "plugin.name": "pgoutput",
+    "topic.prefix": "dbserver",
+    "tasks.max": "1",
+    "database.hostname": "postgres",
+    "database.port": "5432",
+    "database.user": "postgres",
+    "database.password": "postgres",
+    "database.dbname": "profile_db",
+    "database.server.name": "dbserver1",
+    "database.history.kafka.bootstrap.servers": "kafka:9091"
+  }
+}
