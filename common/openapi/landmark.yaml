@@ -7,7 +7,30 @@ servers:
   - url: http://localhost:8084
 
 paths:
-  /v1/landmarks/mathes:
+  /api/v1/profiles/location:
+    patch:
+      summary: Обновление координат пользователя
+      operationId: "updateProfileLocation"
+      tags:
+        - Profile
+      parameters:
+        - in: query
+          name: lat
+          required: true
+          schema:
+            type: number
+            format: double
+        - in: query
+          name: lng
+          required: true
+          schema:
+            type: number
+            format: double
+      responses:
+        '200':
+          description: Обновлено
+
+  /api/v1/landmarks/mathes:
     get:
       summary: запрос LandmarkMatch для построения списка рекомендаций
       operationId: "getLandmarkMatches"
