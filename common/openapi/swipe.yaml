@@ -10,7 +10,7 @@ paths:
   /api/v1/swipes:
     post:
       summary: Создание записи о swipe
-      operationId: "swipe"
+      operationId: "createSwipe"
       tags:
         - Swipe
       requestBody:
@@ -19,14 +19,27 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/SwipeRequestDto'
-
       responses:
         '201':
-          description: Успешная создание
+          description: Успешная создание свайпа
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SwipeDto'
+
+    get:
+      summary: Список свайпов пользователя
+      operationId: "getSwipes"
+      tags:
+        - Swipe
+      responses:
+        '200':
+          description: список свайпов
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/SwipeDto' }
 
   /api/v1/matches:
     get:
