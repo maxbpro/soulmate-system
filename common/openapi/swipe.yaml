@@ -45,6 +45,7 @@ components:
   schemas:
     SwipeRequestDto:
       type: object
+      required: [ swipedUserId, liked ]
       properties:
         swipedUserId:
           type: string
