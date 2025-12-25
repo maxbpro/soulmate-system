@@ -402,7 +402,7 @@ services:
     environment:
       KAFKA_CONNECT_URIS: http://debezium:8083
     ports:
-      - '9090:8080'
+      - '9191:8080'
     mem_limit: 256M # Hard limit of 512MB
     mem_reservation: 128M # Soft limit of 256MB
     networks:
@@ -431,6 +431,81 @@ services:
       - "9300:9300"
     mem_limit: 512M # Hard limit of 512MB
     mem_reservation: 256M # Soft limit of 256MB
+    networks:
+      - soulmate-network
+
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./loki/loki-config.yaml:/etc/loki/local-config.yaml
+    networks:
+      - soulmate-network
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      # Automatically configure Loki as the default data source
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_BASIC_ENABLED=false
+    ports:
+      - 3000:3000/tcp
+    entrypoint:
+      - sh
+      - -euc
+      - |
+        mkdir -p /etc/grafana/provisioning/datasources
+        cat <<EOF > /etc/grafana/provisioning/datasources/ds.yaml
+        apiVersion: 1
+        datasources:
+          - name: Loki
+            type: loki
+            access: proxy
+            orgId: 1
+            url: 'http://loki:3100'
+            basicAuth: false
+            isDefault: false
+            version: 1
+            editable: true
+          - name: Prometheus
+            type: prometheus
+            orgId: 1
+            url: http://prometheus:9090
+            basicAuth: false
+            isDefault: true
+            version: 1
+            editable: false
+        EOF
+        /run.sh
+    networks:
+      - soulmate-network
+
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    command:
+      - --web.enable-remote-write-receiver
+      - --config.file=/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - soulmate-network
+
+  alloy:
+    image: grafana/alloy:latest
+    volumes:
+      # Mount the Alloy config file
+      - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
+      # Mount the Docker socket to allow Alloy to discover and read container logs
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data /etc/alloy/config.alloy
+    ports:
+      - 12345:12345
+    depends_on:
+      - loki
     networks:
       - soulmate-network
 
