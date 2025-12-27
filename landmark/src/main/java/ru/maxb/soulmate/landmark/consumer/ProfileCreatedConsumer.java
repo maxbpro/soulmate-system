@@ -26,33 +26,33 @@ public class ProfileCreatedConsumer implements ConsumerSeekAware {
     private final ObjectMapper objectMapper;
 
     @KafkaListener(topics = "${profile.outbox}", groupId = "landmark-group")
-    public void newProfileCreated3(ConsumerRecord<String, String> debeziumEventRecord,
-                                   @Header(KafkaHeaders.OFFSET) Long offset) {
+    public void profileCreated(ConsumerRecord<String, String> debeziumEventRecord,
+                               @Header(KafkaHeaders.OFFSET) Long offset) {
         try {
-            String debeziumEventJson = debeziumEventRecord.value();
-
-            String payload = Optional.ofNullable(debeziumEventJson)
-                    .map(v -> {
-                        try {
-                            return objectMapper.readTree(v);
-                        } catch (JsonProcessingException e) {
-                            throw new RuntimeException(e);
-                        }
-                    })
-                    .map(v -> v.get("payload"))
-                    .map(v -> v.get("after"))
-                    .map(v -> v.get("payload"))
-                    .map(JsonNode::asText)
-                    .orElseThrow(() -> new IllegalArgumentException("Debezium format issue"));
-
+            String payload = getPayload(debeziumEventRecord);
             ProfileCreatedDto profileCreatedDto = objectMapper.readValue(payload, ProfileCreatedDto.class);
             log.info("received profileId='{}'", profileCreatedDto.id() + ", offset: " + offset);
-
-            matchService.startMatchingProcess(profileCreatedDto);
+            matchService.updateProfileRecord(profileCreatedDto);
 
         } catch (JsonProcessingException e) {
             log.error("error parsing json", e);
         }
     }
 
+    private String getPayload(ConsumerRecord<String, String> debeziumEventRecord) {
+        return Optional.ofNullable(debeziumEventRecord)
+                .map(ConsumerRecord::value)
+                .map(v -> {
+                    try {
+                        return objectMapper.readTree(v);
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .map(v -> v.get("payload"))
+                .map(v -> v.get("after"))
+                .map(v -> v.get("payload"))
+                .map(JsonNode::asText)
+                .orElseThrow(() -> new IllegalArgumentException("Debezium format issue"));
+    }
 }

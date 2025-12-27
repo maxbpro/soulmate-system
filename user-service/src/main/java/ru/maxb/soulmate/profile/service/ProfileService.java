@@ -3,10 +3,10 @@ package ru.maxb.soulmate.profile.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.maxb.soulmate.profile.exception.ProfileException;
 import ru.maxb.soulmate.profile.mapper.ProfileMapper;
@@ -39,18 +39,28 @@ public class ProfileService {
         profileRepository.save(profileEntity);
         log.info("IN - register: profile: [{}] successfully registered", profileEntity.getEmail());
 
-        saveToOutbox(profileEntity);
+        saveToOutbox(profileEntity, OutboxType.PROFILE_CREATED);
         return profileMapper.from(profileEntity);
     }
 
-    private void saveToOutbox(ProfileEntity profileEntity) {
+    @Transactional
+    public ProfileDto update(UUID id, ProfileRegistrationRequestDto requestDto) {
+        var profileEntity = profileRepository.findById(id)
+                .orElseThrow(() -> new ProfileException("Profile not found by id=[%s]", id));
+        profileMapper.update(profileEntity, requestDto);
+        profileRepository.save(profileEntity);
+
+        saveToOutbox(profileEntity, OutboxType.PROFILE_UPDATED);
+        return profileMapper.from(profileEntity);
+    }
+
+    private void saveToOutbox(ProfileEntity profileEntity, OutboxType outboxType) {
         String aggregationId = profileEntity.getId().toString();
         String aggregateType = ProfileEntity.class.getSimpleName();
         JsonNode payload = objectMapper.valueToTree(profileEntity);
-        OutboxType outboxType = OutboxType.PROFILE_CREATED;
 
         outboxService.save(aggregationId, aggregateType, payload, outboxType);
-        log.info("IN - register: profile saved in outbox: [{}]", profileEntity.getEmail());
+        log.info("IN - register: profile saved/updated in outbox: [{}]", profileEntity.getEmail());
     }
 
     private String getLandmarksJson(String photo) {
@@ -65,6 +75,7 @@ public class ProfileService {
         throw new ProfileException("Face API response has issues");
     }
 
+    @Transactional(readOnly = true)
     public ProfileDto findById(UUID id) {
         var individual = profileRepository.findById(id)
                 .orElseThrow(() -> new ProfileException("Profile not found by id=[%s]", id));
@@ -84,15 +95,6 @@ public class ProfileService {
                 .orElseThrow(() -> new ProfileException("Profile not found by id=[%s]", id));
         log.info("IN - hardDelete: profile with id = [{}] successfully deleted", id);
         profileRepository.delete(individual);
-    }
-
-    @Transactional
-    public ProfileDto update(UUID id, ProfileRegistrationRequestDto requestDto) {
-        var profileEntity = profileRepository.findById(id)
-                .orElseThrow(() -> new ProfileException("Profile not found by id=[%s]", id));
-        profileMapper.update(profileEntity, requestDto);
-        profileRepository.save(profileEntity);
-        return profileMapper.from(profileEntity);
     }
 
     @Transactional

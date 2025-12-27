@@ -1,5 +1,6 @@
 package ru.maxb.soulmate.gateway.service;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -29,6 +30,7 @@ public class UserService {
     private final KeycloakClient keycloakClient;
     private final TokenResponseMapper tokenResponseMapper;
 
+    @WithSpan("userService.getUserInfo")
     public Mono<UserInfoResponse> getUserInfo() {
         return ReactiveSecurityContextHolder.getContext()
                 .map(SecurityContext::getAuthentication)
@@ -73,6 +75,7 @@ public class UserService {
         );
     }
 
+    @WithSpan("userService.register")
     public Mono<TokenResponse> register(GatewayRegistrationRequestDto request) {
         return keycloakClient.adminLogin()
                 .flatMap(adminToken ->

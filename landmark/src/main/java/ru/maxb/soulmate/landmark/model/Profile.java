@@ -9,7 +9,9 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -30,4 +32,9 @@ public class Profile {
     @Field(type = FieldType.Date, format = DateFormat.date)
     private LocalDate dateOfBirth;
 
+    @Field(type = FieldType.Date, format = DateFormat.date_time)
+    private Instant created;
+
+    @Field(type = FieldType.Date, format = DateFormat.date_time)
+    private Instant updated;
 }

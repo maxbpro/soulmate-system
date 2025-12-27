@@ -1,5 +1,6 @@
 package ru.maxb.soulmate.gateway.client;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +48,7 @@ public class KeycloakClient {
         this.userPasswordResetUrl = userByIdUrl + "/reset-password";
     }
 
-    //    @WithSpan("keycloakClient.login")
+    @WithSpan("keycloakClient.login")
     public Mono<TokenResponse> login(UserLoginRequest req) {
         var form = new LinkedMultiValueMap<String, String>();
         form.add("grant_type", "password");
@@ -65,7 +66,7 @@ public class KeycloakClient {
                 .bodyToMono(TokenResponse.class);
     }
 
-    //    @WithSpan("keycloakClient.adminLogin")
+    @WithSpan("keycloakClient.adminLogin")
     public Mono<TokenResponse> adminLogin() {
         var form = new LinkedMultiValueMap<String, String>();
         form.add("grant_type", "password");
@@ -82,7 +83,7 @@ public class KeycloakClient {
                 .bodyToMono(TokenResponse.class);
     }
 
-    //    @WithSpan("keycloakClient.refreshToken")
+    @WithSpan("keycloakClient.refreshToken")
     public Mono<TokenResponse> refreshToken(TokenRefreshRequest req) {
         var form = new LinkedMultiValueMap<String, String>();
         form.add("grant_type", "refresh_token");
@@ -99,7 +100,7 @@ public class KeycloakClient {
                 .bodyToMono(TokenResponse.class);
     }
 
-    //    @WithSpan("keycloakClient.registerUser")
+    @WithSpan("keycloakClient.registerUser")
     public Mono<String> registerUser(TokenResponse adminToken, KeycloakUserRepresentation user) {
         return webClient.post()
                 .uri(userRegistrationUrl)
@@ -109,7 +110,7 @@ public class KeycloakClient {
                 .exchangeToMono((ClientResponse response) -> extractIdFromPath(response));
     }
 
-    //@WithSpan("keycloakClient.deleteUser")
+    @WithSpan("keycloakClient.deleteUser")
     public Mono<Void> deleteUser(TokenResponse adminToken, String userId) {
         return webClient.delete()
                 .uri(userDeleteUrl, userId)
@@ -125,18 +126,7 @@ public class KeycloakClient {
                 .then();
     }
 
-    private Mono<String> extractIdFromPath(ClientResponse response) {
-        if (response.statusCode().equals(HttpStatus.CREATED)) {
-            var location = response.headers().asHttpHeaders().getLocation();
-            if (location == null)
-                throw new ApiException("Location header missing");
-            return Mono.just(UserIdExtractor.extractIdFromPath(location.getPath()));
-        }
-        return response.bodyToMono(String.class)
-                .flatMap(body -> Mono.error(new ApiException("User creation failed: " + body)));
-    }
-
-    //    @WithSpan("keycloakClient.resetUserPassword")
+    @WithSpan("keycloakClient.resetUserPassword")
     public Mono<Void> resetUserPassword(String userId, KeycloakCredentialsRepresentation dto, String adminAccessToken) {
         return webClient.put()
                 .uri(userPasswordResetUrl, userId)
@@ -155,7 +145,7 @@ public class KeycloakClient {
     }
 
 
-    //    @WithSpan("keycloakClient.resetUserPassword.executeOnError")
+    @WithSpan("keycloakClient.resetUserPassword.executeOnError")
     public Mono<Void> executeOnError(String userId, String adminAccessToken, Throwable e) {
         return webClient.delete()
                 .uri(userByIdUrl, userId)
@@ -173,5 +163,16 @@ public class KeycloakClient {
         return resp.bodyToMono(String.class)
                 .defaultIfEmpty(resp.statusCode().toString())
                 .map(body -> new ApiException("Keycloak error " + resp.statusCode() + ": " + body));
+    }
+
+    private Mono<String> extractIdFromPath(ClientResponse response) {
+        if (response.statusCode().equals(HttpStatus.CREATED)) {
+            var location = response.headers().asHttpHeaders().getLocation();
+            if (location == null)
+                throw new ApiException("Location header missing");
+            return Mono.just(UserIdExtractor.extractIdFromPath(location.getPath()));
+        }
+        return response.bodyToMono(String.class)
+                .flatMap(body -> Mono.error(new ApiException("User creation failed: " + body)));
     }
 }

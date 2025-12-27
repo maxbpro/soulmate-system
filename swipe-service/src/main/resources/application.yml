@@ -49,16 +49,19 @@ management:
     metrics:
       export:
         enabled: true
+  otlp:
+    tracing:
+      endpoint: ${ALLOY_OTLP_TRACING_ENDPOINT:http://alloy:4318/v1/traces}
 
-#otel:
-#  exporter:
-#    otlp:
-#      endpoint: http://alloy.monitoring.svc.cluster.local:4318
-#      protocol: http/protobuf
-#  logs:
-#    exporter: none
-#  metrics:
-#    exporter: none
+otel:
+  exporter:
+    otlp:
+      endpoint: ${ALLOY_OTLP_ENDPOINT:http://alloy:4318}
+      protocol: http/protobuf
+  logs:
+    exporter: none
+  metrics:
+    exporter: none
 
 
 

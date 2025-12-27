@@ -4,13 +4,11 @@ import feign.RequestInterceptor;
 import jakarta.servlet.http.HttpServletRequest;
 import org.openapitools.configuration.ClientConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.Objects;
 
-//@Configuration
 public class LandmarksClientConfiguration extends ClientConfiguration {
 
     private static final String AUTHORIZATION_HEADER = "Authorization";

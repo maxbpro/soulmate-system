@@ -30,10 +30,24 @@ public class MatchService {
     private final EuclideanDistanceService euclideanDistanceService;
     private final ObjectMapper objectMapper;
     private final ProfileReadService profileReadService;
+    private final ProfileService profileService;
 
     private final double THRESHOLD = 0.25;
 
-    public void startMatchingProcess(ProfileCreatedDto profile) throws JsonProcessingException {
+    public void updateProfileRecord(ProfileCreatedDto profileCreatedDto) throws JsonProcessingException {
+        Profile profile = profileReadService.findById(profileCreatedDto.id());
+
+        if (profile == null) {
+            log.info("Starting matching process for {}", profileCreatedDto.id());
+            startMatchingProcess(profileCreatedDto);
+        } else {
+            log.info("Updating profile {}", profileCreatedDto.id());
+            profileService.update(profile, profileCreatedDto);
+        }
+    }
+
+
+    private void startMatchingProcess(ProfileCreatedDto profile) throws JsonProcessingException {
         var profileEntity = profileMapper.toProfile(profile);
         profileRepository.save(profileEntity);
         log.info("New profile {} saved", profileEntity.getProfileId());

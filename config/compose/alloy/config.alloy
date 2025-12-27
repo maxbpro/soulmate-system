@@ -1,29 +1,43 @@
 // Discover all Docker containers running on the host
 discovery.docker "containers" {
   host = "unix:///var/run/docker.sock"
+  refresh_interval = "5s"
 }
 
-local.file_match "local_files" {
-  path_targets = [{"__path__" = "/var/log/*.log"}]
-  sync_period = "5s"
-}
-
-loki.source.file "log_scrape" {
-  targets    = local.file_match.local_files.targets
-  forward_to = [loki.process.filter_logs.receiver]
-  tail_from_end = true
-}
-
-loki.process "filter_logs" {
-  stage.drop {
-    source = ""
-    expression  = ".*Connection closed by authenticating user root"
-    drop_counter_reason = "noisy"
+discovery.relabel "containers" {
+  targets = discovery.docker.containers.targets
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex = "/(.*)"
+    target_label = "container"
   }
-  forward_to = [loki.write.grafana_loki.receiver]
+  rule {
+    target_label = "job"
+    replacement = "docker"
+  }
+  rule {
+    target_label = "host"
+    replacement = constants.hostname
+  }
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex = "/(.*)"
+    target_label = "service"
+  }
+  rule {
+    source_labels = ["__meta_docker_container_log_stream"]
+    target_label = "stream"
+  }
 }
 
-loki.write "grafana_loki" {
+loki.source.docker "containers" {
+  host = "unix:///var/run/docker.sock"
+  targets = discovery.docker.containers.targets
+  relabel_rules = discovery.relabel.containers.rules
+  forward_to = [loki.write.local.receiver]
+}
+
+loki.write "local" {
   endpoint {
     url = "http://loki:3100/loki/api/v1/push"
   }
@@ -38,27 +52,10 @@ otelcol.receiver.otlp "default" {
     endpoint = "0.0.0.0:4318"
   }
   output {
-    logs  = [otelcol.processor.batch.default.input]
     traces = [otelcol.exporter.otlp.tempo.input]
     metrics = [otelcol.exporter.prometheus.default.input]
   }
 }
-
-otelcol.processor.batch "default" {
-    output {
-        logs = [
-          otelcol.exporter.otlphttp.loki.input,
-        ]
-    }
-}
-
-otelcol.exporter.otlphttp "loki" {
-  client {
-    endpoint = "http://loki:3100/otlp"
-  }
-}
-
-
 
 otelcol.exporter.otlp "tempo" {
   client {

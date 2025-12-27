@@ -7,7 +7,7 @@ plugins {
 dependencyManagement {
     imports {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:2025.0.0"
-        mavenBom("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:2.20.1")
+        mavenBom("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:2.23.0")
     }
 }
 
@@ -49,8 +49,7 @@ dependencies {
 
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-validation")
-
-    implementation("io.micrometer:micrometer-registry-prometheus")
+    implementation("org.springframework.boot:spring-boot-starter-aop")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 
@@ -61,9 +60,6 @@ dependencies {
     implementation "org.springframework.cloud:spring-cloud-starter-openfeign:${springCloudStarterOpenFeignVersion}"
     implementation "io.github.resilience4j:resilience4j-spring-boot3:${resilience4jSpringBoot3Version}"
 
-//    implementation("io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter")
-//    implementation("io.opentelemetry:opentelemetry-exporter-otlp")
-
     implementation "io.github.openfeign:feign-okhttp:${feignOkhttpVersion}"
     implementation "io.github.openfeign:feign-jackson:${feignJacksonVersion}"
     implementation "org.openapitools:jackson-databind-nullable:${jacksonDatabindNullableVersion}"
@@ -73,6 +69,12 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
     annotationProcessor("org.mapstruct:mapstruct-processor:${mapstructVersion}")
 
+    implementation("io.opentelemetry:opentelemetry-exporter-otlp")
+    implementation("io.micrometer:micrometer-observation")
+    implementation("io.micrometer:micrometer-tracing")
+    implementation("io.micrometer:micrometer-tracing-bridge-otel")
+    runtimeOnly("io.micrometer:micrometer-registry-prometheus")
+    implementation("io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
