@@ -436,6 +436,7 @@ services:
 
   loki:
     image: grafana/loki:latest
+    container_name: "loki"
     ports:
       - "3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
@@ -452,49 +453,50 @@ services:
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_BASIC_ENABLED=false
+    volumes:
+      - ./grafana/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
     ports:
       - 3000:3000/tcp
-    entrypoint:
-      - sh
-      - -euc
-      - |
-        mkdir -p /etc/grafana/provisioning/datasources
-        cat <<EOF > /etc/grafana/provisioning/datasources/ds.yaml
-        apiVersion: 1
-        datasources:
-          - name: Loki
-            type: loki
-            access: proxy
-            orgId: 1
-            url: 'http://loki:3100'
-            basicAuth: false
-            isDefault: false
-            version: 1
-            editable: true
-          - name: Prometheus
-            type: prometheus
-            orgId: 1
-            url: http://prometheus:9090
-            basicAuth: false
-            isDefault: true
-            version: 1
-            editable: false
-        EOF
-        /run.sh
+    depends_on:
+      - prometheus
     networks:
       - soulmate-network
 
   prometheus:
     image: prom/prometheus:v2.47.0
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
     command:
-      - --web.enable-remote-write-receiver
-      - --config.file=/etc/prometheus/prometheus.yml
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
     ports:
       - "9090:9090"
+    restart: unless-stopped
+    networks:
+      - soulmate-network
+
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: "node-exporter"
+    # Use 'host' network mode to monitor the host's network interfaces directly
+#    network_mode: host
+    # Use 'host' PID mode to access host process information
+    pid: host
+    restart: unless-stopped
+    command:
+      # Tell node-exporter where the host's root filesystem is mounted within the container
+      - '--path.rootfs=/host'
+#    volumes:
+      # Mount the host's root filesystem into the container at /host in read-only mode
+#      - '/:/host:ro,rslave'
+    ports:
+      - "9100:9100"
     networks:
       - soulmate-network
 
   alloy:
+    container_name: "alloy"
     image: grafana/alloy:latest
     volumes:
       # Mount the Alloy config file
@@ -503,9 +505,25 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data /etc/alloy/config.alloy
     ports:
-      - 12345:12345
+      - "12345:12345" # Expose the Alloy HTTP server
+      - "4317:4317" # Expose the OTLP gRPC port for traces
+      - "4318:4318" # Expose the OTLP HTTP port for traces
     depends_on:
       - loki
+    networks:
+      - soulmate-network
+
+  tempo:
+    image: grafana/tempo:latest
+    container_name: "tempo"
+    volumes:
+      - ./tempo/tempo.yaml:/etc/tempo.yaml
+      - tempo-data:/var/tempo
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    ports:
+      - "3200" # tempo
+      - "4317" # otlp grpc
+#      - "4318" # otlp HTTP
     networks:
       - soulmate-network
 
@@ -516,6 +534,10 @@ volumes:
   minio_data:
     driver: local
   esdata:
+    driver: local
+  tempo-data:
+    driver: local
+  prometheus_data:
     driver: local
 
 networks:
