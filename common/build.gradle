@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'ru.maxb.soulmate.common'
-version '1.0.36'
+version '1.0.37'
 
 apply(from: 'openapi.gradle')
 

@@ -30,7 +30,7 @@ paths:
         '200':
           description: Обновлено
 
-  /api/v1/landmarks/mathes:
+  /api/v1/landmarks/matches:
     get:
       summary: запрос LandmarkMatch для построения списка рекомендаций
       operationId: "getLandmarkMatches"
