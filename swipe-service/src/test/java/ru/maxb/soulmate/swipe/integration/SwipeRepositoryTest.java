@@ -1,4 +1,4 @@
-package ru.maxb.soulmate.swipe;
+package ru.maxb.soulmate.swipe.integration;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,13 +61,4 @@ public class SwipeRepositoryTest extends AbstractCassandraTest {
         assertEquals(byUserId.get(0).getUserId(), userId);
     }
 
-
-//    @Test
-//    public void shouldFindProfile() {
-//        Iterable<ProfileEntity> profiles = profileRepository.findAll();
-//
-//        if (profiles.iterator().hasNext()) {
-//
-//        }
-//    }
 }

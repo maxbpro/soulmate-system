@@ -1,5 +1,6 @@
 package ru.maxb.soulmate.swipe.mapper;
 
+import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,11 +13,15 @@ import java.util.UUID;
 
 import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
 
-@Mapper(componentModel = SPRING)
+@Mapper(componentModel = SPRING, injectionStrategy = InjectionStrategy.SETTER)
 public abstract class MatchMapper {
 
-    @Autowired
     public DateTimeUtil dateTimeUtil;
+
+    @Autowired
+    public void setDateTimeUtil(DateTimeUtil dateTimeUtil) {
+        this.dateTimeUtil = dateTimeUtil;
+    }
 
     public abstract MatchDto toDto(MatchEntity match);
 

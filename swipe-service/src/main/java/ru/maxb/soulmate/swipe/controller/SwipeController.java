@@ -2,6 +2,7 @@ package ru.maxb.soulmate.swipe.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -27,7 +28,9 @@ public class SwipeController implements SwipeApi {
 
     @Override
     public ResponseEntity<SwipeDto> createSwipe(@Valid SwipeRequestDto swipeRequestDto) {
-        return ResponseEntity.ok(swipeService.createSwipe(getSub(), swipeRequestDto));
+        return ResponseEntity.status(201)
+                .body(swipeService.createSwipe(getSub(), swipeRequestDto));
+
     }
 
     @Override
