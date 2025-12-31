@@ -9,6 +9,7 @@ import ru.maxb.soulmate.swipe.dto.SwipeDto;
 import ru.maxb.soulmate.swipe.dto.SwipeRequestDto;
 import ru.maxb.soulmate.swipe.mapper.MatchMapperImpl;
 import ru.maxb.soulmate.swipe.mapper.SwipeMapperImpl;
+import ru.maxb.soulmate.swipe.model.MatchEntity;
 import ru.maxb.soulmate.swipe.model.SwipeEntity;
 import ru.maxb.soulmate.swipe.repository.MatchRepository;
 import ru.maxb.soulmate.swipe.repository.SwipeRepository;
@@ -17,11 +18,13 @@ import ru.maxb.soulmate.swipe.util.DateTimeUtil;
 import java.time.Clock;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class SwipeServiceTest {
@@ -35,6 +38,7 @@ class SwipeServiceTest {
     private MatchRepository matchRepository;
 
     private final UUID profileId = UUID.randomUUID();
+    private final UUID swipedUserId = UUID.randomUUID();
 
     @BeforeEach
     void setUp() {
@@ -54,11 +58,18 @@ class SwipeServiceTest {
 
     @Test
     void createSwipe() {
-        UUID swipedUserId = UUID.randomUUID();
+        when(swipeRepository.hasMatch(eq(swipedUserId+":" + profileId),
+                eq(swipedUserId),
+                eq(profileId))).thenReturn(Optional.of(true));
+
+        when(matchRepository.save(any())).thenReturn(new MatchEntity());
+
         SwipeDto swipe = swipeService.createSwipe(profileId, getSwipeRequestDto(swipedUserId));
         assertThat(swipe.getSwipedUserId()).isEqualTo(swipedUserId);
         assertThat(swipe.getUserId()).isEqualTo(profileId);
         assertThat(swipe.getLiked()).isEqualTo(true);
+
+        verify(matchRepository, times(1)).save(any());
     }
 
     @Test
