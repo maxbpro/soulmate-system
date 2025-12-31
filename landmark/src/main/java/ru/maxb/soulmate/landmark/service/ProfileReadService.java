@@ -9,7 +9,6 @@ import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.stereotype.Service;
-import ru.maxb.soulmate.landmark.exception.LandmarkException;
 import ru.maxb.soulmate.landmark.model.Profile;
 
 import java.util.List;
@@ -43,14 +42,13 @@ public class ProfileReadService {
                 .collect(Collectors.toList());
     }
 
-    public Profile findById(UUID profileId) {
+    public Optional<Profile> findById(UUID profileId) {
         IndexCoordinates index = IndexCoordinates.of("profile");
         CriteriaQuery criteriaQuery = new CriteriaQuery(Criteria
                 .where("profileId").is(profileId));
 
         SearchHit<Profile> profileSearchHit = elasticsearchOperations.searchOne(criteriaQuery, Profile.class, index);
         return Optional.ofNullable(profileSearchHit)
-                .map(SearchHit::getContent)
-                .orElseThrow(() -> new LandmarkException("Profile not found by id: " + profileId));
+                .map(SearchHit::getContent);
     }
 }

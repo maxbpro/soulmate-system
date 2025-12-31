@@ -15,6 +15,7 @@ import ru.maxb.soulmate.landmark.repository.LandmarkMatchRepository;
 import ru.maxb.soulmate.landmark.repository.ProfileRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -35,14 +36,14 @@ public class MatchService {
     private final double THRESHOLD = 0.25;
 
     public void updateProfileRecord(ProfileCreatedDto profileCreatedDto) throws JsonProcessingException {
-        Profile profile = profileReadService.findById(profileCreatedDto.id());
+        Optional<Profile> profileOptional = profileReadService.findById(profileCreatedDto.id());
 
-        if (profile == null) {
+        if (profileOptional.isEmpty()) {
             log.info("Starting matching process for {}", profileCreatedDto.id());
             startMatchingProcess(profileCreatedDto);
         } else {
             log.info("Updating profile {}", profileCreatedDto.id());
-            profileService.update(profile, profileCreatedDto);
+            profileService.update(profileOptional.get(), profileCreatedDto);
         }
     }
 

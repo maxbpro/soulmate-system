@@ -1,4 +1,4 @@
-package ru.maxb.soulmate.landmark;
+package ru.maxb.soulmate.landmark.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
@@ -24,13 +23,15 @@ import ru.maxb.soulmate.landmark.consumer.ProfileCreatedConsumer;
 import ru.maxb.soulmate.landmark.model.LandmarkMatch;
 import ru.maxb.soulmate.landmark.repository.LandmarkMatchRepository;
 import ru.maxb.soulmate.landmark.repository.ProfileRepository;
-import ru.maxb.soulmate.landmark.service.LandmarkReadService;
+import ru.maxb.soulmate.landmark.util.DateTimeUtil;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Spliterators;
+import java.util.stream.StreamSupport;
 
 import static org.awaitility.Awaitility.await;
 
@@ -70,6 +71,9 @@ public class LandmarkIntegrationTest extends AbstractKafkaTest {
     @Autowired
     private ProfileRepository profileRepository;
 
+    @Autowired
+    private DateTimeUtil dateTimeUtil;
+
     @BeforeAll
     public static void setUp() {
         elasticsearchContainer.start();
@@ -105,11 +109,21 @@ public class LandmarkIntegrationTest extends AbstractKafkaTest {
         await().atMost(Duration.ofSeconds(5))
                 .until(() -> {
 
-                    LandmarkMatch landmarkMatch = landmarkMatchRepository.findAll().iterator().next();
+                    Iterator<LandmarkMatch> iterator = landmarkMatchRepository.findAll().iterator();
+
+                    List<LandmarkMatch> matches = StreamSupport.stream(
+                            Spliterators.spliteratorUnknownSize(iterator, 0),
+                            false
+                    ).toList();
+
+                    if (matches.isEmpty()) {
+                        return false;
+                    }
+                    LandmarkMatch landmarkMatch  = matches.get(0);
 
                     return landmarkMatchRepository.count() == 1
-                            && landmarkMatch.getSoulmateId().equals("58d5b6ca-b775-4175-8f63-db54d2817c53")
-                            && landmarkMatch.getProfileId().equals("c8e046aa-9d0a-4c3c-9208-57b41fd8b417");
+                            && landmarkMatch.getSoulmateId().equals("28ec38fc-f267-4ec5-a74a-4f41c396fe22")
+                            && landmarkMatch.getProfileId().equals("58d5b6ca-b775-4175-8f63-db54d2817c53");
                 });
     }
 
@@ -117,7 +131,11 @@ public class LandmarkIntegrationTest extends AbstractKafkaTest {
     @SneakyThrows
     void parseDebeziumJson() {
         String json = readTestResourceAsString("debezium/profile_created.json");
-        String payload = objectMapper.readTree(json).get("after").get("payload").asText();
+        String payload = objectMapper.readTree(json)
+                .get("payload")
+                .get("after")
+                .get("payload")
+                .asText();
 
         ProfileCreatedDto profileCreatedDto = objectMapper.readValue(payload, ProfileCreatedDto.class);
 

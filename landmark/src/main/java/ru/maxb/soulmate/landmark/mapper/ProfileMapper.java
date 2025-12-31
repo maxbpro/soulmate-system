@@ -4,22 +4,26 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 import ru.maxb.soulmate.common.event.ProfileCreatedDto;
 import ru.maxb.soulmate.landmark.model.Profile;
 import ru.maxb.soulmate.landmark.util.DateTimeUtil;
 
-import java.time.LocalDate;
-
-import static org.mapstruct.InjectionStrategy.CONSTRUCTOR;
+import static org.mapstruct.InjectionStrategy.SETTER;
 import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
 
 @Mapper(componentModel = SPRING,
-        injectionStrategy = CONSTRUCTOR,
+        injectionStrategy = SETTER,
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public abstract class ProfileMapper {
 
     protected DateTimeUtil dateTimeUtil;
+
+    @Autowired
+    public void setDateTimeUtil(DateTimeUtil dateTimeUtil) {
+        this.dateTimeUtil = dateTimeUtil;
+    }
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "profileId", source = "profileEvent.id")

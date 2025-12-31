@@ -51,7 +51,7 @@ repositories {
 }
 
 dependencies {
-	implementation 'ru.maxb.soulmate.common:common:1.0.36'
+	implementation 'ru.maxb.soulmate.common:common:1.0.37'
 
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.data:spring-data-elasticsearch'
@@ -86,7 +86,6 @@ dependencies {
 
 	testImplementation 'org.testcontainers:elasticsearch:1.21.3'
 	testImplementation 'org.testcontainers:kafka:1.21.3'
-	testImplementation 'org.testcontainers:postgresql:1.21.3'
 	testImplementation("org.testcontainers:junit-jupiter:1.21.3")
 
 	testCompileOnly 'org.projectlombok:lombok'
