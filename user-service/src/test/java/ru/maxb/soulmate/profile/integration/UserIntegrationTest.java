@@ -3,7 +3,6 @@ package ru.maxb.soulmate.profile.integration;
 import com.jayway.jsonpath.JsonPath;
 import io.debezium.testing.testcontainers.ConnectorConfiguration;
 import io.debezium.testing.testcontainers.DebeziumContainer;
-import io.minio.errors.MinioException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -26,20 +25,20 @@ import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.utility.DockerImageName;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 import ru.maxb.soulmate.profile.common.AbstractPostgresqlTest;
+import ru.maxb.soulmate.profile.model.OutboxType;
 import ru.maxb.soulmate.profile.service.FaceLandmarkService;
 import ru.maxb.soulmate.profile.service.ObjectStorageService;
 import ru.maxb.soulmate.profile.service.ProfileService;
 import ru.maxb.soulmate.user.dto.ProfileDto;
 import ru.maxb.soulmate.user.dto.ProfileRegistrationRequestDto;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -158,7 +157,7 @@ public class UserIntegrationTest extends AbstractPostgresqlTest {
 
             String value = changeEvents.get(0).value();
             assertThat(JsonPath.<String>read(value, "$.after.aggregatetype")).isEqualTo("ProfileEntity");
-            assertThat(JsonPath.<String>read(value, "$.after.type")).isEqualTo("Profile created");
+            assertThat(JsonPath.<String>read(value, "$.after.type")).isEqualTo(OutboxType.PROFILE_CREATED.toString());
 
             consumer.unsubscribe();
         }
@@ -167,7 +166,7 @@ public class UserIntegrationTest extends AbstractPostgresqlTest {
     private ConnectorConfiguration getTestConnectorConfiguration() {
         return ConnectorConfiguration
                 .forJdbcContainer(postgresqlContainer)
-                .with("plugin.name", "pgoutput") //todo
+                .with("plugin.name", "pgoutput")
                 .with("topic.prefix", "dbserver");
     }
 
@@ -201,40 +200,9 @@ public class UserIntegrationTest extends AbstractPostgresqlTest {
         return allRecords;
     }
 
-    private void getLandmarks() {
-
-        String base64Image = getBase64Image();
-
-        var landmarks = faceLandmarkService.getLandmarks(base64Image);
-
-        assertThat(landmarks).isNotNull();
-
-        String objectName = UUID.randomUUID().toString();
-
-        byte[] decodedBytes = Base64.getDecoder().decode(base64Image);
-
-        try (InputStream inputStream = new ByteArrayInputStream(decodedBytes)) {
-            objectStorageService.saveObject(objectName, inputStream, "image/jpeg");
-        } catch (IOException | MinioException | NoSuchAlgorithmException | InvalidKeyException ex) {
-            ex.printStackTrace();
-        }
-
-    }
-
-
-    @SneakyThrows
-    public String getBase64Image() {
-        return Base64.getEncoder().encodeToString(
-                new ClassPathResource("photo.jpeg").getContentAsByteArray());
-    }
-
-    @SneakyThrows
-    public InputStream getImageInputStream() {
-        return new ClassPathResource("photo.jpeg").getInputStream();
-    }
-
     private ProfileRegistrationRequestDto getProfileRegistrationRequestDto() {
         var request = new ProfileRegistrationRequestDto();
+        request.setPrincipalId(UUID.randomUUID());
         request.setAgeMin(18);
         request.setAgeMax(99);
         request.setFirstName("John");
@@ -247,5 +215,11 @@ public class UserIntegrationTest extends AbstractPostgresqlTest {
         request.interestedIn(ProfileRegistrationRequestDto.InterestedInEnum.FEMALE);
         request.setGender(ProfileRegistrationRequestDto.GenderEnum.MALE);
         return request;
+    }
+
+    @SneakyThrows
+    public String getBase64Image() {
+        return Base64.getEncoder().encodeToString(
+                new ClassPathResource("photo.jpeg").getContentAsByteArray());
     }
 }

@@ -4,19 +4,22 @@ import lombok.Setter;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.maxb.soulmate.landmark.dto.LandmarkMatchDto;
 import ru.maxb.soulmate.profile.model.ProfileEntity;
 import ru.maxb.soulmate.profile.util.DateTimeUtil;
 import ru.maxb.soulmate.user.dto.ProfileDto;
 import ru.maxb.soulmate.user.dto.ProfileRegistrationRequestDto;
+import ru.maxb.soulmate.user.dto.ProfileUpdateRequestDto;
 
 import static org.mapstruct.InjectionStrategy.CONSTRUCTOR;
 import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
 
 @Mapper(
         componentModel = SPRING,
-        injectionStrategy = CONSTRUCTOR
+        injectionStrategy = CONSTRUCTOR,
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
 )
 @Setter(onMethod_ = @Autowired)
 public abstract class ProfileMapper {
@@ -33,7 +36,11 @@ public abstract class ProfileMapper {
 
     public abstract ProfileDto from(ProfileEntity profileEntity);
 
+
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "interestedIn", ignore = true)
+    @Mapping(target = "gender", ignore = true)
+    @Mapping(target = "birthDate", ignore = true)
     @Mapping(target = "photos", ignore = true)
     @Mapping(target = "landmarks", ignore = true)
     @Mapping(target = "created", ignore = true)
@@ -42,7 +49,7 @@ public abstract class ProfileMapper {
     public abstract void update(
             @MappingTarget
             ProfileEntity profileEntity,
-            ProfileRegistrationRequestDto dto
+            ProfileUpdateRequestDto dto
     );
 
     @Mapping(target = "radius", ignore = true)

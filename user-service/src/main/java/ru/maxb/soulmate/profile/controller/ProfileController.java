@@ -12,6 +12,7 @@ import ru.maxb.soulmate.profile.service.ProfileService;
 import ru.maxb.soulmate.user.api.ProfileApi;
 import ru.maxb.soulmate.user.dto.ProfileDto;
 import ru.maxb.soulmate.user.dto.ProfileRegistrationRequestDto;
+import ru.maxb.soulmate.user.dto.ProfileUpdateRequestDto;
 
 import java.util.UUID;
 
@@ -35,8 +36,8 @@ public class ProfileController implements ProfileApi {
     }
 
     @Override
-    public ResponseEntity<ProfileDto> update(@NotNull UUID id, @Valid ProfileRegistrationRequestDto profileRegistrationRequestDto) {
-        ProfileDto profileDto = profileService.update(id, profileRegistrationRequestDto);
+    public ResponseEntity<ProfileDto> update(@NotNull UUID id, @Valid ProfileUpdateRequestDto profileUpdateRequestDto) {
+        ProfileDto profileDto = profileService.update(id, profileUpdateRequestDto);
         return ResponseEntity.ok(profileDto);
     }
 

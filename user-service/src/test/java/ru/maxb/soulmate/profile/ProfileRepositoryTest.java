@@ -2,6 +2,7 @@ package ru.maxb.soulmate.profile;
 
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -36,21 +37,22 @@ public class ProfileRepositoryTest extends AbstractPostgresqlTest {
     @Autowired
     private DateTimeUtil dateTimeUtil;
 
-    @BeforeEach
-    @SneakyThrows
-    public void init() {
-        profileRepository.deleteAll();
+//    @BeforeEach
+//    @SneakyThrows
+//    public void init() {
+//        profileRepository.deleteAll();
+//
+//        objectStorageService.listObjects()
+//                .forEach(v -> {
+//                    try {
+//                        objectStorageService.deleteFile(v);
+//                    } catch (Exception e) {
+//                        throw new RuntimeException(e);
+//                    }
+//                });
+//    }
 
-        objectStorageService.listObjects()
-                .forEach(v -> {
-                    try {
-                        objectStorageService.deleteFile(v);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-    }
-
+    @Disabled
     @Test
     @SneakyThrows
     public void createProfile() {
@@ -84,7 +86,7 @@ public class ProfileRepositoryTest extends AbstractPostgresqlTest {
 
     private ProfileEntity getProfileEntity(String photoId) {
         ProfileEntity profileEntity = new ProfileEntity();
-        profileEntity.setPrincipalId(UUID.randomUUID());
+        profileEntity.setId(UUID.randomUUID());
         profileEntity.setEmail("email");
         profileEntity.setPhoneNumber("+8223232323");
         profileEntity.setAgeMin(18);

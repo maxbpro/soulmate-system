@@ -15,6 +15,7 @@ import ru.maxb.soulmate.profile.model.ProfileEntity;
 import ru.maxb.soulmate.profile.repository.ProfileRepository;
 import ru.maxb.soulmate.user.dto.ProfileDto;
 import ru.maxb.soulmate.user.dto.ProfileRegistrationRequestDto;
+import ru.maxb.soulmate.user.dto.ProfileUpdateRequestDto;
 
 import java.util.UUID;
 
@@ -44,7 +45,7 @@ public class ProfileService {
     }
 
     @Transactional
-    public ProfileDto update(UUID id, ProfileRegistrationRequestDto requestDto) {
+    public ProfileDto update(UUID id, ProfileUpdateRequestDto requestDto) {
         var profileEntity = profileRepository.findById(id)
                 .orElseThrow(() -> new ProfileException("Profile not found by id=[%s]", id));
         profileMapper.update(profileEntity, requestDto);

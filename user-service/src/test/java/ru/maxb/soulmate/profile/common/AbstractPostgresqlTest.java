@@ -52,7 +52,7 @@ public class AbstractPostgresqlTest {
     }
 
     @Test
-    void givenContainers_whenSpringContextIsBootstrapped_thenContainerIsRunningWithNoExceptions() {
+    void testContainerIsRunningWithNoExceptions() {
         assertThat(postgresqlContainer.isRunning()).isTrue();
     }
 }
