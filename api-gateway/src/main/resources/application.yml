@@ -16,13 +16,25 @@ spring:
                 - Path=/v1/profiles/feed
                 - Method=GET
 
-            - id: swipe
+            - id: update-profile
+              uri: http://user-service:8082
+              predicates:
+                - Path=/v1/profiles/{id}
+                - Method=PATCH
+
+            - id: update-location
+              uri: http://landmark-service:8084
+              predicates:
+                - Path=/api/v1/profiles/location
+                - Method=PATCH
+
+            - id: create-swipe
               uri: http://swipe-service:8083
               predicates:
                 - Path=/api/v1/swipes
                 - Method=GET,POST
 
-            - id: match
+            - id: get-matches
               uri: http://swipe-service:8083
               predicates:
                 - Path=/api/v1/matches

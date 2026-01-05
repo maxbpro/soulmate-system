@@ -43,7 +43,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'ru.maxb.soulmate.common:common:1.0.32'
+    implementation 'ru.maxb.soulmate.common:common:1.0.38'
 
     implementation("org.springframework.cloud:spring-cloud-starter-gateway")
 
