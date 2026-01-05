@@ -51,7 +51,7 @@ repositories {
 }
 
 dependencies {
-	implementation 'ru.maxb.soulmate.common:common:1.0.35'
+	implementation 'ru.maxb.soulmate.common:common:1.0.38'
 
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.data:spring-data-cassandra:4.5.4'
