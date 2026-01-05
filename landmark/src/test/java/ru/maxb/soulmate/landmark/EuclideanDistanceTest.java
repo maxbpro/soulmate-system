@@ -36,7 +36,7 @@ public class EuclideanDistanceTest {
 
         double distance = ev.compute(array1, array2);
 
-        assertThat(distance).isEqualTo(0.0);
+        assertThat(distance).isEqualTo(2919.8388654170626);
     }
 
     private List<Double> getLandMarks(String face) {

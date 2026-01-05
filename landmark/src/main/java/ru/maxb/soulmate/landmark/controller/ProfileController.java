@@ -30,6 +30,7 @@ public class ProfileController implements ProfileApi {
         return ResponseEntity.ok().build();
     }
 
+
     private UUID getSub() {
         return Optional.ofNullable(SecurityContextHolder.getContext())
                 .map(SecurityContext::getAuthentication)
