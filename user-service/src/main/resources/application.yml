@@ -98,6 +98,10 @@ landmarks:
   name: landmarks
   url: ${LANDMARK_API_URL:http://localhost:}
 
+profile:
+  name: ${PROFILE_API_NAME:person}
+  url: ${PROFILE_API_URL:http://localhost:8082}
+
 otel:
   exporter:
     otlp:
