@@ -7,7 +7,7 @@ servers:
   - url: http://localhost:8082
 
 paths:
-  /v1/profiles:
+  /api/v1/profiles:
     post:
       summary: Регистрация профиля пользователя
       operationId: "registration"
@@ -23,56 +23,6 @@ paths:
       responses:
         '201':
           description: Успешная регистрация
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProfileDto'
-
-  /v1/profiles/feed:
-    get:
-      summary: Get feed of profiles
-      operationId: "getFeed"
-      tags:
-        - Feed
-      parameters:
-        - in: query
-          name: lat
-          required: true
-          schema:
-            type: number
-            format: double
-        - in: query
-          name: lng
-          required: true
-          schema:
-            type: number
-            format: double
-      responses:
-        '200':
-          description: Feed of profiles
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ProfileDto'
-
-  /v1/profiles/{id}:
-    get:
-      summary: Get profile by id
-      operationId: "findById"
-      tags:
-        - Profile
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '201':
-          description: Successfully found
           content:
             application/json:
               schema:
@@ -102,6 +52,56 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProfileDto'
+
+  /api/v1/profiles/feed:
+    get:
+      summary: Get feed of profiles
+      operationId: "getFeed"
+      tags:
+        - Feed
+      parameters:
+        - in: query
+          name: lat
+          required: true
+          schema:
+            type: number
+            format: double
+        - in: query
+          name: lng
+          required: true
+          schema:
+            type: number
+            format: double
+      responses:
+        '200':
+          description: Feed of profiles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProfileDto'
+
+  /api/v1/profiles/{id}:
+    get:
+      summary: Get profile by id
+      operationId: "findById"
+      tags:
+        - Profile
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '201':
+          description: Successfully found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileDto'
     delete:
       summary: soft delete profile by id
       operationId: "delete"
@@ -118,7 +118,7 @@ paths:
         '200':
           description: Successfully deleted
 
-  /v1/profiles/compensate-registration/{id}:
+  /api/v1/profiles/compensate-registration/{id}:
     delete:
       summary: compensate-registration, hard delete profile by id
       operationId: "compensateRegistration"
@@ -135,19 +135,13 @@ paths:
         '200':
           description: Successfully deleted
 
-  /v1/profiles/{id}/photos/{photoId}:
+  /api/v1/photos/{photoId}:
     delete:
       summary: delete photos for users
       operationId: "deleteImage"
       tags:
-        - Profile
+        - Photo
       parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-            format: uuid
         - in: path
           name: photoId
           required: true
@@ -158,12 +152,12 @@ paths:
         '200':
           description: File successfully deleted
 
-  /v1/profiles/{id}/upload:
+  /api/v1/photos/upload:
     post:
       summary: upload photos for users
       operationId: "uploadImage"
       tags:
-        - Profile
+        - Photo
       parameters:
         - in: path
           name: id
@@ -187,8 +181,6 @@ paths:
       responses:
         '200':
           description: File uploaded successfully
-
-
 
 components:
   schemas:
