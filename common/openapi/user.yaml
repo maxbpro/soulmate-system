@@ -135,6 +135,29 @@ paths:
         '200':
           description: Successfully deleted
 
+  /v1/profiles/{id}/photos/{photoId}:
+    delete:
+      summary: delete photos for users
+      operationId: "deleteImage"
+      tags:
+        - Profile
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: photoId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: File successfully deleted
+
   /v1/profiles/{id}/upload:
     post:
       summary: upload photos for users
