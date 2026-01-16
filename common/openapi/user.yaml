@@ -32,13 +32,6 @@ paths:
       operationId: "update"
       tags:
         - Profile
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-            format: uuid
       requestBody:
         required: true
         content:
@@ -158,13 +151,6 @@ paths:
       operationId: "uploadImage"
       tags:
         - Photo
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-            format: uuid
       requestBody:
         required: true
         content:
