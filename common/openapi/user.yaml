@@ -196,6 +196,11 @@ components:
           type: integer
         radius:
           type: integer
+        photos:
+          type: array
+          items:
+            type: string
+
 
     ProfileRegistrationRequestDto:
       type: object
@@ -249,18 +254,11 @@ components:
 
     ProfileUpdateRequestDto:
       type: object
-      required: [
-        firstName,
-        phoneNumber
-      ]
       properties:
         firstName:
           type: string
         lastName:
-          type: string
-        email:
-          type: string
-          format: email
+          type: strin
         phoneNumber:
           type: string
         ageMin:
