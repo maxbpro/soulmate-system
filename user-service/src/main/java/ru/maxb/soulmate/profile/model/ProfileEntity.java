@@ -7,6 +7,7 @@ import org.hibernate.envers.Audited;
 
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -59,7 +60,7 @@ public class ProfileEntity extends BaseEntity {
     private int ageMax;
 
     @Column(name = "photos", columnDefinition = "VARCHAR(64)[]")
-    private List<String> photos;
+    private List<String> photos = new ArrayList<>();
 
     @Column(name = "landmarks")
     private String landmarks;

@@ -99,12 +99,26 @@ public class ProfileService {
     }
 
     @Transactional
-    public void uploadImage(UUID id, MultipartFile file) {
-        var profileEntity = profileRepository.findById(id)
-                .orElseThrow(() -> new ProfileException("Profile not found by id=[%s]", id));
+    public void uploadImage(UUID profileId, MultipartFile file) {
+        var profileEntity = profileRepository.findById(profileId)
+                .orElseThrow(() -> new ProfileException("Profile not found by id=[%s]", profileId));
 
-        String photoId = UUID.randomUUID().toString();
-        profileEntity.getPhotos().add(photoId);
-        objectStorageService.saveObject(photoId, file);
+        UUID photoId = UUID.randomUUID();
+        objectStorageService.saveObject(profileId, photoId, file);
+        profileEntity.getPhotos().add(String.valueOf(photoId));
+    }
+
+    @Transactional
+    public void deleteImage(UUID profileId, UUID photoId) {
+        var profileEntity = profileRepository.findById(profileId)
+                .orElseThrow(() -> new ProfileException("Profile not found by id=[%s]", profileId));
+
+        if (!profileEntity.getPhotos().contains(String.valueOf(photoId))) {
+            throw new ProfileException("Profile doesn't have photo with id=[%s]", photoId);
+        }
+
+        objectStorageService.deleteObject(profileId, photoId);
+
+        profileEntity.getPhotos().removeIf(v -> v.equals(String.valueOf(photoId)));
     }
 }

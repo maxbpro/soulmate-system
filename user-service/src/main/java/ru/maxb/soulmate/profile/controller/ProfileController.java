@@ -60,5 +60,9 @@ public class ProfileController implements ProfileApi {
         return ResponseEntity.ok().build();
     }
 
-
+    @Override
+    public ResponseEntity<Void> deleteImage(@NotNull UUID id, @NotNull UUID photoId) {
+        profileService.deleteImage(id, photoId);
+        return ResponseEntity.ok().build();
+    }
 }

@@ -16,6 +16,8 @@ import org.rnorth.ducttape.unreliables.Unreliables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MinIOContainer;
@@ -32,17 +34,15 @@ import ru.maxb.soulmate.profile.service.ProfileService;
 import ru.maxb.soulmate.user.dto.ProfileDto;
 import ru.maxb.soulmate.user.dto.ProfileRegistrationRequestDto;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 @SpringBootTest
@@ -114,9 +114,6 @@ public class UserIntegrationTest extends AbstractPostgresqlTest {
                 + wireMockContainer.getMappedPort(8080);
 
         dynamicPropertyRegistry.add("face.url", () -> wireMockFaceApiBase);
-
-        dynamicPropertyRegistry.add("minio.secretKey", () -> wireMockFaceApiBase);
-
     }
 
     @Test
@@ -136,6 +133,27 @@ public class UserIntegrationTest extends AbstractPostgresqlTest {
         assertThat(registerProfileDto).isNotNull();
 
         checkKafka();
+    }
+
+    @Test
+    void testPhotoUpload() throws IOException {
+        var request = getProfileRegistrationRequestDto();
+        ProfileDto registerProfileDto = profileService.register(request);
+        UUID profileId = UUID.fromString(Objects.requireNonNull(registerProfileDto.getId()));
+
+        profileService.uploadImage(profileId, createMockImage());
+        ProfileDto profileDto = profileService.findById(profileId);
+
+        assertEquals(1, profileDto.getPhotos().size());
+
+        UUID savedPhotoId = profileDto.getPhotos().stream().findFirst()
+                .map(UUID::fromString)
+                .orElseThrow();
+
+        profileService.deleteImage(profileId, savedPhotoId);
+        profileDto = profileService.findById(profileId);
+
+        assertEquals(0, profileDto.getPhotos().size());
     }
 
     private void checkKafka() {
@@ -221,5 +239,21 @@ public class UserIntegrationTest extends AbstractPostgresqlTest {
     public String getBase64Image() {
         return Base64.getEncoder().encodeToString(
                 new ClassPathResource("photo.jpeg").getContentAsByteArray());
+    }
+
+    public static MockMultipartFile createMockImage() throws IOException {
+//        Path path = Paths.get("src/test/resources/sample-image.png");
+//        String originalFileName = "sample-image.png";
+//        String contentType = MediaType.IMAGE_JPEG_VALUE;
+//
+//        byte[] content = Files.readAllBytes(path);
+        byte[] contentAsByteArray = new ClassPathResource("photo.jpeg").getContentAsByteArray();
+
+        return new MockMultipartFile(
+                "file",
+                "photo.jpeg",
+                MediaType.IMAGE_JPEG_VALUE,
+                contentAsByteArray
+        );
     }
 }
