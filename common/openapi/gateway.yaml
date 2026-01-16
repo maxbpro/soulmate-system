@@ -7,7 +7,7 @@ servers:
   - url: http://localhost:8081
 
 paths:
-  /v1/auth/registration:
+  /api/v1/auth/registration:
     post:
       summary: Регистрация пользователя
       operationId: registration
@@ -39,7 +39,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /v1/auth/login:
+  /api/v1/auth/login:
     post:
       summary: Аутентификация пользователя
       operationId: login
@@ -64,7 +64,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /v1/auth/refresh-token:
+  /api/v1/auth/refresh-token:
     post:
       summary: Обновление токена доступа
       operationId: refreshToken
@@ -89,7 +89,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /v1/auth/me:
+  /api/v1/auth/me:
     get:
       summary: Получение данных текущего пользователя
       operationId: getMe
