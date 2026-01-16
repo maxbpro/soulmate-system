@@ -258,7 +258,7 @@ components:
         firstName:
           type: string
         lastName:
-          type: strin
+          type: string
         phoneNumber:
           type: string
         ageMin:
