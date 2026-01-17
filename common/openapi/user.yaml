@@ -59,12 +59,16 @@ paths:
           schema:
             type: number
             format: double
+            minimum: -90
+            maximum: 90
         - in: query
           name: lng
           required: true
           schema:
             type: number
             format: double
+            minimum: -180
+            maximum: 180
       responses:
         '200':
           description: Feed of profiles
@@ -165,9 +169,18 @@ paths:
               required:
                 - image
       responses:
-        '200':
+        '201':
           description: File uploaded successfully
-
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  url:
+                    type: string
 components:
   schemas:
     ProfileDto:
