@@ -26,6 +26,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SwipeDto'
+        '400':
+          description: Ошибка валидации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
     get:
       summary: Список свайпов пользователя (для отладки)
@@ -93,4 +99,16 @@ components:
         soulmateId:
           type: string
           format: uuid
+
+    ErrorResponse:
+      type: object
+      properties:
+        errorId:
+          type: string
+        status:
+          type: string
+        error:
+          type: string
+        message:
+          type: string
 
