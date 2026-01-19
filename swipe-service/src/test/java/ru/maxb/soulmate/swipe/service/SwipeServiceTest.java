@@ -58,7 +58,7 @@ class SwipeServiceTest {
 
     @Test
     void createSwipe() {
-        when(swipeRepository.hasMatch(eq(swipedUserId+":" + profileId),
+        when(swipeRepository.hasReverseSwipe(eq(swipedUserId + ":" + profileId),
                 eq(swipedUserId),
                 eq(profileId))).thenReturn(Optional.of(true));
 

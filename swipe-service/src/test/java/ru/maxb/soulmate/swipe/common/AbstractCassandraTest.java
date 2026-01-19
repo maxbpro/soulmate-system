@@ -2,13 +2,11 @@ package ru.maxb.soulmate.swipe.common;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.CassandraContainer;
 
-import static org.assertj.core.api.Assertions.assertThat;
 
 
 @Slf4j
@@ -23,11 +21,10 @@ public class AbstractCassandraTest {
             .withExposedPorts(CASSANDRA_PORT)
             .withReuse(true)
             .withInitScript("init.cql")
-            .withNetworkAliases("cassandra")
-            .withEnv("cdc_enabled", "true");
+            .withNetworkAliases("cassandra");
 
     @BeforeAll
-    public static void setUp() {
+    public static void beforeAll() {
         cassandra.start();
         int port = cassandra.getMappedPort(CASSANDRA_PORT);
         log.info("Cassandra server started on port {}", port);
@@ -35,15 +32,9 @@ public class AbstractCassandraTest {
 
     @DynamicPropertySource
     static void cassandraProperties(DynamicPropertyRegistry registry) {
-        System.setProperty("spring.cassandra.keyspace-name", KEYSPACE_NAME);
-        System.setProperty("spring.cassandra.contact-points", cassandra.getContainerIpAddress());
-        System.setProperty("spring.cassandra.port", String.valueOf(cassandra.getMappedPort(CASSANDRA_PORT)));
+        registry.add("spring.cassandra.keyspace-name", () -> KEYSPACE_NAME);
+        registry.add("spring.cassandra.contact-points", cassandra::getContainerIpAddress);
+        registry.add("spring.cassandra.port", () -> String.valueOf(cassandra.getMappedPort(CASSANDRA_PORT)));
+        registry.add("spring.cassandra.local-datacenter", () -> "datacenter1");
     }
-
-
-    @Test
-    void givenCassandraContainer_whenSpringContextIsBootstrapped_thenContainerIsRunningWithNoExceptions() {
-        assertThat(cassandra.isRunning()).isTrue();
-    }
-
 }

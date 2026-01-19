@@ -2,6 +2,7 @@ package ru.maxb.soulmate.swipe.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -34,6 +35,13 @@ public class ResourceServerSecurityConfig {
                         ).hasAuthority("ROLE_soulmateapp.user")
                         .anyRequest()
                         .authenticated()
+                ).exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.sendError(HttpStatus.UNAUTHORIZED.value(), "Unauthorized");
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.sendError(HttpStatus.FORBIDDEN.value(), "Forbidden");
+                        })
                 );
 
         return http.build();

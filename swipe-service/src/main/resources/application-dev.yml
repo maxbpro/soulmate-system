@@ -1,0 +1,14 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${RESOURCE_SERVER_ISSUER_URI:http://localhost:8080/realms/customer}
+          jwk-set-uri: ${RESOURCE_SERVER_JWK_SET_URI:http://localhost:8080/realms/customer/protocol/openid-connect/certs}
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

@@ -1,46 +1,56 @@
 server:
   port: 8083
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024
+  tomcat:
+    connection-timeout: 10s
+    keep-alive-timeout: 30s
+    max-connections: 10000
+    threads:
+      max: 200
+      min-spare: 10
 
 spring:
   application:
     name: swipe-service
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${RESOURCE_SERVER_ISSUER_URI:http://localhost:8080/realms/customer}
-          jwk-set-uri: ${RESOURCE_SERVER_JWK_SET_URI:http://localhost:8080/realms/customer/protocol/openid-connect/certs}
-  cassandra:
-    keyspaceName: ${CASSANDRA_KEYSPACE:swipe}
-    port: ${CASSANDRA_PORT:9042}
-    contactPoints: ${CASSANDRA_HOST:http://cassandra.default.svc.cluster.local}
-    localDatacenter: ${CASSANDRA_DATACENTER:datacenter1}
-  kafka:
-    bootstrap-servers: ${KAFKA:http://localhost:9092}
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
-    consumer:
-      group-id: my-group-id
-      auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      enable-auto-commit: true
-      auto-commit-interval: 1000
 
-test:
-  topic: "event"
+  # Cassandra configuration
+  cassandra:
+    keyspace-name: ${CASSANDRA_KEYSPACE:swipe}
+    contact-points: ${CASSANDRA_CONTACT_POINTS:localhost:9042}
+    port: ${CASSANDRA_PORT:9042}
+    local-datacenter: ${CASSANDRA_DATACENTER:datacenter1}
+    schema-action: ${CASSANDRA_SCHEMA_ACTION:CREATE_IF_NOT_EXISTS}
+    connection:
+      connect-timeout: ${CASSANDRA_CONNECT_TIMEOUT:10s}
+      init-query-timeout: ${CASSANDRA_INIT_QUERY_TIMEOUT:10s}
 
 management:
   server:
     port: 8083
+
   endpoints:
     web:
+      base-path: /internal/actuator
       exposure:
-        include: "*"
+        include: health,info,metrics,prometheus,loggers
+        exclude: shutdown,env,beans,configprops,mappings
   endpoint:
     prometheus:
       access: read_only
+  metrics:
+    enable:
+      jvm: true
+      system: true
+      logback: true
+      kafka: true
+      cassandra: true
+      http: true
+      jdbc: true
+      process: true
+      tomcat: true
   tracing:
     enabled: true
     sampling:
@@ -49,6 +59,8 @@ management:
     metrics:
       export:
         enabled: true
+        step: 60s
+        descriptions: true
   otlp:
     tracing:
       endpoint: ${ALLOY_OTLP_TRACING_ENDPOINT:http://alloy:4318/v1/traces}

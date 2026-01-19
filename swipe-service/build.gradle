@@ -51,49 +51,52 @@ repositories {
 }
 
 dependencies {
-	implementation 'ru.maxb.soulmate.common:common:1.0.38'
 
+	// Internal dependencies
+	implementation 'ru.maxb.soulmate.common:common:1.0.46'
+
+	// Spring Boot Starters
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	implementation 'org.springframework.data:spring-data-cassandra:4.5.4'
-	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
-	implementation("org.springframework.boot:spring-boot-starter-aop")
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation("org.springframework.boot:spring-boot-starter-validation")
-	implementation "io.micrometer:micrometer-registry-prometheus"
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+
+	// Data
+	implementation 'org.springframework.data:spring-data-cassandra'
+
+	// Monitoring & Observability
+	implementation 'io.micrometer:micrometer-registry-prometheus'
+	implementation 'io.micrometer:micrometer-observation'
+	implementation 'io.micrometer:micrometer-tracing-bridge-otel'
+	implementation "io.opentelemetry:opentelemetry-exporter-otlp"
+	implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter:${opentelemetrySpringBootVersion}"
+
+	// Resilience
 	implementation "io.github.resilience4j:resilience4j-spring-boot3:${resilience4jSpringBoot3Version}"
 
-	implementation 'org.springframework.kafka:spring-kafka:3.3.10'
-
-	compileOnly("org.projectlombok:lombok")
-	compileOnly("org.mapstruct:mapstruct:${mapstructVersion}")
-	annotationProcessor("org.projectlombok:lombok")
-	annotationProcessor("org.mapstruct:mapstruct-processor:${mapstructVersion}")
-
+	// Utilities
 	implementation "net.logstash.logback:logstash-logback-encoder:$logstashVersion"
-	implementation("javax.validation:validation-api:${javaxValidationApiVersion}")
+	compileOnly 'org.projectlombok:lombok'
+	compileOnly "org.mapstruct:mapstruct:${mapstructVersion}"
 
-	implementation("io.opentelemetry:opentelemetry-exporter-otlp")
-	implementation("io.micrometer:micrometer-observation")
-	implementation("io.micrometer:micrometer-tracing")
-	implementation("io.micrometer:micrometer-tracing-bridge-otel")
-	runtimeOnly("io.micrometer:micrometer-registry-prometheus")
-	implementation("io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter")
+	// Annotation Processors
+	annotationProcessor 'org.projectlombok:lombok'
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
+	// Test Dependencies
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	testImplementation 'org.springframework.security:spring-security-test:6.5.7'
+	testImplementation 'org.springframework.security:spring-security-test'
 
-	testImplementation 'io.debezium:debezium-testing-testcontainers:3.3.1.Final'
-	testImplementation 'org.testcontainers:cassandra:1.21.3'
-	testImplementation 'org.testcontainers:postgresql:1.21.3'
-	testImplementation 'org.testcontainers:kafka:1.21.3'
-	testImplementation("org.testcontainers:junit-jupiter:1.21.3")
-
-	testImplementation 'org.postgresql:postgresql'
+	// Testcontainers
+	testImplementation 'org.testcontainers:junit-jupiter'
+	testImplementation 'org.testcontainers:cassandra'
 
 	testCompileOnly 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'
 
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 test {

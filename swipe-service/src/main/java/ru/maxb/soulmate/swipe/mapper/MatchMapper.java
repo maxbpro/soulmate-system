@@ -25,7 +25,9 @@ public abstract class MatchMapper {
 
     public abstract MatchDto toDto(MatchEntity match);
 
-    @Mapping(target = "soulmateId", source = "swipeEntity.swipedUserId")
+    @Mapping(target = "user1Id", source = "swipeEntity.userId")
+    @Mapping(target = "user2Id", source = "swipeEntity.swipedUserId")
     @Mapping(target = "createdAt", expression = "java(dateTimeUtil.now())")
-    public abstract MatchEntity toEntity(UUID id, SwipeEntity swipeEntity);
+    @Mapping(target = "userPair", source = "userPair")
+    public abstract MatchEntity toEntity(SwipeEntity swipeEntity, String userPair);
 }

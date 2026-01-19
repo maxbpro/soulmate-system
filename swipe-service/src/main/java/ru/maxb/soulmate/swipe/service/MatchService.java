@@ -17,7 +17,7 @@ public class MatchService {
     private final MatchRepository matchRepository;
 
     public List<MatchEntity> getMatches(UUID userId) {
-        return matchRepository.findAllBySoulmateId(userId).stream()
+        return matchRepository.findAllInvolvingUser(userId).stream()
                 .toList();
     }
 }

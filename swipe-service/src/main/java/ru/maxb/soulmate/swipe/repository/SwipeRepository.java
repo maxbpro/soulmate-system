@@ -17,7 +17,9 @@ public interface SwipeRepository extends CassandraRepository<SwipeEntity, MapId>
 
     @Consistency(DefaultConsistencyLevel.LOCAL_QUORUM)
     @Query("SELECT liked FROM swipe WHERE userPair = ?0 AND userId = ?1 AND swipedUserId = ?2")
-    Optional<Boolean> hasMatch(String userPair, UUID userId, UUID swipedUserId);
+    Optional<Boolean> hasReverseSwipe(String userPair, UUID userId, UUID swipedUserId);
+
+    Optional<SwipeEntity> findByUserPairAndUserIdAndSwipedUserId(String userPair, UUID userId, UUID swipedUserId);
 
     //for test, use with Caution
     @Query("SELECT * FROM swipe WHERE userId = ?0 ALLOW FILTERING")
