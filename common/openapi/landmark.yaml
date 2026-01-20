@@ -72,6 +72,17 @@ paths:
             enum:
               - MALE
               - FEMALE
+        - in: query
+          name: page
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: pageNumber
+          required: true
+          schema:
+            type: integer
+
       responses:
         '200':
           description: Список матчей
