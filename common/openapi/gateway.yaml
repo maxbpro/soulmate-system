@@ -143,6 +143,11 @@ components:
 
     TokenResponse:
       type: object
+      required: [
+        access_token,
+        refresh_token,
+        expires_in
+      ]
       properties:
         access_token:
           type: string
@@ -233,11 +238,6 @@ components:
           format: date-time
           description: ISO-8601 timestamp when the error occurred
           example: 2024-01-15T10:30:00Z
-        requestId:
-          type: string
-          format: uuid
-          description: Unique request identifier for correlation and debugging
-          example: 550e8400-e29b-41d4-a716-446655440000
         path:
           type: string
           description: API endpoint path where the error occurred
