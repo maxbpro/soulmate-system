@@ -27,11 +27,11 @@ public class LandmarkMatch {
     private String soulmateId;
     private String landmarksOfSoulmateId;
 
+    //distance between landmarks
+    private double distance;
+
     private GeoPoint location;
     private Gender gender;
-    private Integer ageMin;
-    private Integer ageMax;
-    private Integer radius;
 
     @Field(type = FieldType.Date, format = DateFormat.date)
     private LocalDate dateOfBirth;

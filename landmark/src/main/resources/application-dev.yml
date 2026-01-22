@@ -1,0 +1,11 @@
+spring:
+  kafka:
+    admin:
+      properties:
+        auto.create.topics.enable: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

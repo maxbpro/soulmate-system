@@ -2,6 +2,7 @@ package ru.maxb.soulmate.landmark.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,9 @@ import ru.maxb.soulmate.landmark.repository.ProfileRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -34,6 +38,21 @@ public class MatchService {
     private final ProfileService profileService;
 
     private final double THRESHOLD = 0.25;
+
+    private final int corePoolSize = Runtime.getRuntime().availableProcessors();
+    private final int maxPoolSize = corePoolSize * 2;
+    private final int queueCapacity = 1000;
+    private final long keepAliveTime = 60L;
+
+    private ThreadPoolExecutor executor = new ThreadPoolExecutor(
+            corePoolSize,
+            maxPoolSize,
+            keepAliveTime,
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(queueCapacity),
+            new ThreadPoolExecutor.CallerRunsPolicy() // Important: handle queue overflow
+    );
+
 
     public void updateProfileRecord(ProfileCreatedDto profileCreatedDto) throws JsonProcessingException {
         Optional<Profile> profileOptional = profileReadService.findById(profileCreatedDto.id());
@@ -56,40 +75,88 @@ public class MatchService {
         FaceResponseFacesInnerLandmark landmarks = objectMapper.readValue(profile.landmarks(),
                 FaceResponseFacesInnerLandmark.class);
 
-        int pageSize = 10;
+        int pageSize = 100;
         int currentPage = 0;
+        long totalProfiles = profileReadService.getCount();
 
-        long count = profileReadService.getCount();
-        int totalPages = (int) Math.ceil((double) count / pageSize);
+        log.debug("Starting matching for {} against {} existing profiles", profile.id(), totalProfiles);
 
-        while (currentPage < totalPages) {
+        while ((long) currentPage * pageSize < totalProfiles) {
             int from = currentPage * pageSize;
             List<Profile> profiles = profileReadService.searchAll(from, pageSize);
             processProfiles(profiles, landmarks, profileEntity);
             currentPage++;
+
+            if (currentPage % 10 == 0) {
+                log.debug("Processed {}/{} profiles for {}",
+                        Math.min((long) currentPage * pageSize, totalProfiles),
+                        totalProfiles, profile.id());
+            }
+        }
+
+        log.info("Completed matching process for {}", profile.id());
+    }
+
+    //todo Backpressure Control
+    private void processProfiles(List<Profile> profiles, FaceResponseFacesInnerLandmark landmarks,
+                                 Profile profileEntity) {
+        List<Profile> filteredProfiles = profiles.stream()
+                .filter(p -> !p.getProfileId().equals(profileEntity.getProfileId()))
+                .toList();
+
+        for (Profile otherProfile : filteredProfiles) {
+            executor.submit(() -> {
+                try {
+                    processSingleProfile(otherProfile, landmarks, profileEntity);
+                } catch (Exception e) {
+                    log.error("Failed to compare profiles {} and {}: {}",
+                            profileEntity.getProfileId(), otherProfile.getProfileId(),
+                            e.getMessage());
+                }
+            });
         }
     }
 
-    private void processProfiles(List<Profile> profiles, FaceResponseFacesInnerLandmark landmarks,
-                                 Profile profileEntity) {
-        for (Profile otherProfile : profiles) {
-            if (otherProfile.getProfileId().equals(profileEntity.getProfileId())) {
-                continue;
+    private void processSingleProfile(Profile otherProfile,
+                                      FaceResponseFacesInnerLandmark landmarks,
+                                      Profile profileEntity) throws JsonProcessingException {
+
+        FaceResponseFacesInnerLandmark otherProfileLandmarks = objectMapper.readValue(
+                otherProfile.getLandmarks(), FaceResponseFacesInnerLandmark.class);
+
+        double distance = euclideanDistanceService.compare(landmarks, otherProfileLandmarks);
+
+        if (distance < THRESHOLD) {
+            saveLandmarkMatch(profileEntity, otherProfile, distance);
+        }
+    }
+
+    private void saveLandmarkMatch(Profile profile1, Profile profile2, double distance) {
+        Optional<Boolean> exists = landmarkMatchRepository.existsMatchBetweenProfiles(
+                profile1.getProfileId(), profile2.getProfileId());
+
+        if (exists.isEmpty() || !exists.get()) {
+            var landmarkMatch = landmarkMapper.toLandmarkMatch(profile1, profile2, distance);
+            landmarkMatchRepository.save(landmarkMatch);
+
+            log.debug("Match found: {} <-> {} (distance: {})",
+                    profile1.getProfileId(), profile2.getProfileId(), distance);
+        } else {
+            log.debug("Match already exists between {} and {}",
+                    profile1.getProfileId(), profile2.getProfileId());
+        }
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
             }
-
-            try {
-                FaceResponseFacesInnerLandmark otherProfileLandmarks = objectMapper.readValue(otherProfile.getLandmarks(), FaceResponseFacesInnerLandmark.class);
-                double compared = euclideanDistanceService.compare(landmarks, otherProfileLandmarks);
-
-                if (compared < THRESHOLD) {
-                    var landmarkMatch = landmarkMapper.toLandmarkMatch(profileEntity, otherProfile);
-                    landmarkMatchRepository.save(landmarkMatch);
-                    log.info("New LandmarkMatch saved between {} and {}", profileEntity.getProfileId(), otherProfile.getProfileId());
-                }
-
-            } catch (Exception ex) {
-                log.error(ex.getMessage());
-            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+            Thread.currentThread().interrupt();
         }
     }
 }

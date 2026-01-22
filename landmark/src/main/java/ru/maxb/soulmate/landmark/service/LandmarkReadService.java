@@ -1,6 +1,7 @@
 package ru.maxb.soulmate.landmark.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
@@ -26,6 +27,7 @@ public class LandmarkReadService {
 
     public List<LandmarkMatch> findByParams(double lat, double lon, int distance,
                                             int ageMin, int ageMax, Gender interestedIn,
+                                            int page, int pageSize,
                                             UUID excludeProfileId) {
         IndexCoordinates index = IndexCoordinates.of("landmark_match");
 
@@ -40,7 +42,7 @@ public class LandmarkReadService {
                         .and(Criteria.where("profileId").notIn(excludeProfileId))
                         .and(new Criteria("dateOfBirth").between(lowerDate, upperDate))
         );
-        //criteriaQuery.setPageable(PageRequest.of(page, pageSize));
+        criteriaQuery.setPageable(PageRequest.of(page, pageSize));
 
         SearchHits<LandmarkMatch> searchHits = elasticsearchOperations.search(criteriaQuery, LandmarkMatch.class, index);
 

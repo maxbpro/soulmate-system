@@ -19,11 +19,9 @@ public interface LandmarkMapper {
     @Mapping(target = "landmarksOfSoulmateId", source = "otherProfile.landmarks")
     @Mapping(target = "location", source = "profile.location")
     @Mapping(target = "gender", source = "profile.gender")
-    @Mapping(target = "ageMin", source = "profile.ageMin")
-    @Mapping(target = "ageMax", source = "profile.ageMin")
-    @Mapping(target = "radius", source = "profile.radius")
     @Mapping(target = "dateOfBirth", source = "profile.dateOfBirth")
-    LandmarkMatch toLandmarkMatch(Profile profile, Profile otherProfile);
+    @Mapping(target = "distance", source = "distance")
+    LandmarkMatch toLandmarkMatch(Profile profile, Profile otherProfile, double distance);
 
     LandmarkMatchDto toLandmarkMatchDto(LandmarkMatch landmarkMatch);
 }

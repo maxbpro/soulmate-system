@@ -75,7 +75,7 @@ public class LandmarkMatchRepositoryTest extends AbstractElasticSearchTest {
 
 
         List<LandmarkMatch> byParams = landmarkReadService.findByParams(12, 10, 1000,
-                18, 35, Gender.FEMALE, profileId);
+                18, 35, Gender.FEMALE, 0, 100, profileId);
 
         assertFalse(byParams.contains(profile));
         assertFalse(byParams.contains(soulmateNotMatched));

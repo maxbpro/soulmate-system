@@ -3,6 +3,7 @@ package ru.maxb.soulmate.landmark.config;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.ReadingConverter;
 import org.springframework.data.convert.WritingConverter;
@@ -16,6 +17,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+@Configuration
 @EnableElasticsearchRepositories(basePackages = "ru.maxb.soulmate.landmark.repository")
 public class ElasticsearchConfiguration extends ElasticsearchConfigurationSupport {
 
@@ -57,10 +59,7 @@ public class ElasticsearchConfiguration extends ElasticsearchConfigurationSuppor
 
         @Override
         public ZonedDateTime convert(String source) {
-            if (source == null) {
-                return null;
-            }
-            return Instant.parse(source).atZone(ZoneId.systemDefault());
+            return source != null ? Instant.parse(source).atZone(ZoneId.of("UTC")) : null;
         }
     }
 
