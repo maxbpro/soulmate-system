@@ -3,7 +3,7 @@
     {
       "request": {
         "method": "POST",
-        "urlPath": "/v1/profiles",
+        "urlPath": "/api/v1/profiles",
         "bodyPatterns": [
           { "matchesJsonPath": "$[?(@.email =~ /.+@.+\\..+/)]" }
         ]
@@ -17,7 +17,7 @@
     {
       "request": {
         "method": "DELETE",
-        "urlPathPattern": "/v1/profiles/compensate-registration/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})"
+        "urlPathPattern": "/api/v1/profiles/compensate-registration/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})"
       },
       "response": {
         "status": 200

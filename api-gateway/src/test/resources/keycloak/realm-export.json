@@ -86,7 +86,7 @@
           ],
           "client": {
             "individual": [
-              "individual.user"
+              "soulmateapp.user"
             ],
             "account": [
               "manage-account",
@@ -100,7 +100,7 @@
       },
       {
         "id": "8d45f9a2-1b3a-4c99-994a-619fc1fcd7ca",
-        "name": "individual.user",
+        "name": "soulmateapp.user",
         "description": "",
         "composite": false,
         "clientRole": false,
@@ -341,7 +341,7 @@
         },
         {
           "id": "b786731b-68c2-408a-8cd3-c6cbc8995239",
-          "name": "individual.user",
+          "name": "soulmateapp.user",
           "description": "",
           "composite": false,
           "clientRole": true,

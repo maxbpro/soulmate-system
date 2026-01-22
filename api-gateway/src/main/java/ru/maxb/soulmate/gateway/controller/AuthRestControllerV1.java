@@ -21,7 +21,7 @@ import ru.maxb.soulmate.gateway.service.TokenService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1/auth")
+@RequestMapping("/api/v1/auth")
 public class AuthRestControllerV1 {
 
     private final TokenService tokenService;

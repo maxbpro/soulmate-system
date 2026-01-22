@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
-public class AuthRestControllerV1Test extends AbstractKeycloakTest {
+public class ApiGatewayIntegrationTest extends AbstractKeycloakTest {
 
     @Autowired
     private GatewayApiTestService gatewayApiTestService;

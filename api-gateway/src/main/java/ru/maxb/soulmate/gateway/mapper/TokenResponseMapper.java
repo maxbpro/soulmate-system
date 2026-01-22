@@ -3,7 +3,8 @@ package ru.maxb.soulmate.gateway.mapper;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import ru.maxb.soulmate.keycloak.dto.TokenResponse;
+import ru.maxb.soulmate.gateway.dto.TokenResponse;
+import ru.maxb.soulmate.keycloak.dto.KeycloakTokenResponse;
 
 import static org.mapstruct.InjectionStrategy.CONSTRUCTOR;
 import static org.mapstruct.MappingConstants.ComponentModel.SPRING;
@@ -16,7 +17,5 @@ public interface TokenResponseMapper {
     @Mapping(target = "refreshToken", source = "refreshToken")
     @Mapping(target = "expiresIn", source = "expiresIn")
     @Mapping(target = "tokenType", source = "tokenType")
-    ru.maxb.soulmate.gateway.dto.TokenResponse toTokenResponse(
-            TokenResponse src
-    );
+    TokenResponse toTokenResponse(KeycloakTokenResponse keycloakTokenResponse);
 }

@@ -13,14 +13,26 @@ spring:
             - id: profiles-feed
               uri: http://user-service:8082
               predicates:
-                - Path=/v1/profiles/feed
+                - Path=/api/v1/profiles/feed
                 - Method=GET
 
             - id: update-profile
               uri: http://user-service:8082
               predicates:
-                - Path=/v1/profiles/{id}
+                - Path=/api/v1/profiles
                 - Method=PATCH
+
+            - id: upload-photo
+              uri: http://user-service:8082
+              predicates:
+                - Path=/api/v1/photos/upload
+                - Method=POST
+
+            - id: delete-photo
+              uri: http://user-service:8082
+              predicates:
+                - Path=/api/v1/photos/{photoId}
+                - Method=DELETE
 
             - id: update-location
               uri: http://landmark-service:8084
@@ -103,7 +115,11 @@ users:
 #end keycloak
 
 profile:
-  name: ${PROFILE_API_NAME:person}
+  name: person
+  url: ${PROFILE_API_URL:http://localhost:8082}
+
+photo:
+  name: photo
   url: ${PROFILE_API_URL:http://localhost:8082}
 
 swipe:

@@ -32,27 +32,33 @@ public class GatewayApiTestService {
         return "http://localhost:" + port;
     }
 
-    @SneakyThrows
     public TokenResponse register(GatewayRegistrationRequestDto request) {
-        var tokenResponseResponseEntity = restTemplate.postForEntity(
-                baseUrl() + "/v1/auth/registration", request, TokenResponse.class);
+        try {
+            var tokenResponseResponseEntity = restTemplate.postForEntity(
+                    baseUrl() + "/api/v1/auth/registration", request, TokenResponse.class);
 
-        return tokenResponseResponseEntity.getBody();
+            return tokenResponseResponseEntity.getBody();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     public TokenResponse login(UserLoginRequest request) {
-        return restTemplate.postForObject(baseUrl() + "/v1/auth/login", request, TokenResponse.class);
+        return restTemplate.postForObject(baseUrl() + "/api/v1/auth/login", request, TokenResponse.class);
     }
 
     public UserInfoResponse getMe(String accessToken) {
         var headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
-        var resp = restTemplate.exchange(baseUrl() + "/v1/auth/me", HttpMethod.GET, new HttpEntity<>(headers),
+        var resp = restTemplate.exchange(baseUrl() + "/api/v1/auth/me", HttpMethod.GET, new HttpEntity<>(headers),
                 UserInfoResponse.class);
         return resp.getBody();
     }
 
     public TokenResponse refreshToken(TokenRefreshRequest request) {
-        return restTemplate.postForObject(baseUrl() + "/v1/auth/refresh-token", request, TokenResponse.class);
+        return restTemplate.postForObject(baseUrl() + "/api/v1/auth/refresh-token", request, TokenResponse.class);
     }
 }

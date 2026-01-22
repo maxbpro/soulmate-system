@@ -29,16 +29,16 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
-                                "/v1/auth/registration",
-                                "/v1/auth/login",
-                                "/v1/auth/refresh-token"
+                                "/api/v1/auth/registration",
+                                "/api/v1/auth/login",
+                                "/api/v1/auth/refresh-token"
                         ).permitAll()
 
                         .pathMatchers(
-                                "/v1/auth/me",
+                                "/api/v1/auth/me",
                                 "/api/v1/matches",
                                 "/api/v1/swipes",
-                                "/v1/profiles/feed"
+                                "/api/v1/profiles/feed"
                         ).hasAuthority("ROLE_soulmateapp.user")
                         .anyExchange().authenticated()
                 )

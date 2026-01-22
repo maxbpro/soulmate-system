@@ -43,50 +43,70 @@ repositories {
 }
 
 dependencies {
-    implementation 'ru.maxb.soulmate.common:common:1.0.38'
 
-    implementation("org.springframework.cloud:spring-cloud-starter-gateway")
+    // ============ PROJECT DEPENDENCIES ============
+    implementation 'ru.maxb.soulmate.common:common:1.0.52'
 
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("org.springframework.boot:spring-boot-starter-aop")
-    implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
-
-
-    implementation("org.keycloak:keycloak-admin-client:$keycloakAdminClientVersion")
+    // ============ SPRING BOOT STARTERS ============
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+    // ============ SPRING CLOUD ============
+    implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
     implementation "org.springframework.cloud:spring-cloud-starter-openfeign:${springCloudStarterOpenFeignVersion}"
-    implementation "io.github.resilience4j:resilience4j-spring-boot3:${resilience4jSpringBoot3Version}"
 
+    // ============ KEYCLOAK ============
+    implementation "org.keycloak:keycloak-admin-client:${keycloakAdminClientVersion}"
+
+    // ============ OPENFEIGN CLIENTS ============
     implementation "io.github.openfeign:feign-okhttp:${feignOkhttpVersion}"
     implementation "io.github.openfeign:feign-jackson:${feignJacksonVersion}"
     implementation "org.openapitools:jackson-databind-nullable:${jacksonDatabindNullableVersion}"
 
-    compileOnly("org.projectlombok:lombok")
-    compileOnly("org.mapstruct:mapstruct:${mapstructVersion}")
-    annotationProcessor("org.projectlombok:lombok")
-    annotationProcessor("org.mapstruct:mapstruct-processor:${mapstructVersion}")
+    // ============ RESILIENCE & CIRCUIT BREAKER ============
+    implementation "io.github.resilience4j:resilience4j-spring-boot3:${resilience4jSpringBoot3Version}"
 
-    implementation("io.opentelemetry:opentelemetry-exporter-otlp")
-    implementation("io.micrometer:micrometer-observation")
-    implementation("io.micrometer:micrometer-tracing")
-    implementation("io.micrometer:micrometer-tracing-bridge-otel")
-    runtimeOnly("io.micrometer:micrometer-registry-prometheus")
-    implementation("io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter")
+    // ============ OBSERVABILITY & MONITORING ============
+    // Micrometer
+    implementation 'io.micrometer:micrometer-observation'
+    implementation 'io.micrometer:micrometer-tracing'
+    implementation 'io.micrometer:micrometer-tracing-bridge-otel'
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    // OpenTelemetry
+    implementation 'io.opentelemetry:opentelemetry-exporter-otlp'
+    implementation 'io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter'
 
+    // ============ CODE GENERATION & ANNOTATION PROCESSING ============
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    compileOnly "org.mapstruct:mapstruct:${mapstructVersion}"
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+
+    // ============ TEST DEPENDENCIES ============
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+
+    // Testcontainers
+    testImplementation 'org.testcontainers:junit-jupiter:1.21.3'
+    testImplementation 'org.testcontainers:testcontainers:1.21.3'
+    testImplementation 'org.testcontainers:postgresql:1.21.3'
+
+    // Testcontainers for specific services
     testImplementation 'com.github.dasniko:testcontainers-keycloak:2.1.2'
     testImplementation 'org.wiremock.integrations.testcontainers:wiremock-testcontainers-module:1.0-alpha-15'
-    testImplementation 'org.testcontainers:postgresql:1.21.3'
-    testImplementation 'org.testcontainers:testcontainers:1.21.3'
-    testImplementation("org.testcontainers:junit-jupiter:1.21.3")
 
+    // Test Lombok
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
+
+    // JUnit Platform
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 
