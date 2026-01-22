@@ -39,7 +39,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TokenResponse'
+                $ref: '#/components/schemas/KeycloakTokenResponse'
         '400':
           description: Неверные параметры запроса
           content:
@@ -70,7 +70,7 @@ paths:
           description: Успех
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/TokenResponse' }
+              schema: { $ref: '#/components/schemas/KeycloakTokenResponse' }
         '401':
           description: Просроченный/недействительный refresh token
           content:
@@ -269,7 +269,7 @@ components:
         refresh_token:
           type: string
 
-    TokenResponse:
+    KeycloakTokenResponse:
       type: object
       required:
         - access_token
