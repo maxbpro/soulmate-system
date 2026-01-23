@@ -47,9 +47,6 @@ public class SwipeIntegrationTest extends AbstractCassandraTest {
         userA = UUID.randomUUID();
         userB = UUID.randomUUID();
         userC = UUID.randomUUID();
-
-        // swipeRepository.deleteAll();
-        // matchRepository.deleteAll();
     }
 
     @Test
