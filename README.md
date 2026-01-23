@@ -25,7 +25,6 @@ The Soulmate System consists of several interconnected microservices:
 ## 📋 Services
 
 ### User Service
-- **Port**: 8082
 - **Database**: PostgreSQL with Liquibase migrations
 - **Features**:
   - User registration and profile management
