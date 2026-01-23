@@ -30,6 +30,7 @@ public class OutboxService {
         outboxEntity.setAggregateId(aggregateId);
         outboxEntity.setType(type);
         outboxEntity.setPayload(payload);
+        outboxEntity.setCreated(Instant.now());
 
         outboxRepository.save(outboxEntity);
         log.debug("Saved outbox event: {} for aggregate: {}", type, aggregateId);

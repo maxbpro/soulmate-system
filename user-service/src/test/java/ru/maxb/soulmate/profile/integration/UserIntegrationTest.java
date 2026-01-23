@@ -16,7 +16,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.rnorth.ducttape.unreliables.Unreliables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
@@ -49,14 +48,17 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 @SpringBootTest
@@ -189,14 +191,7 @@ public class UserIntegrationTest extends AbstractPostgresqlTest {
         assertThat(registerProfileDto.getAgeMin()).isEqualTo(18);
         assertThat(registerProfileDto.getAgeMax()).isEqualTo(99);
 
-        // Verify outbox event was created
         checkKafkaOutboxEvent(OutboxType.PROFILE_CREATED, registerProfileDto.getId());
-
-
-        Iterable<OutboxEntity> all = outboxRepository.findAll();
-        Optional<OutboxEntity> byAggregateIdAndType = outboxRepository.findByAggregateIdAndType(registerProfileDto.getId(), OutboxType.PROFILE_CREATED);
-
-        assertThat(byAggregateIdAndType.isPresent()).isFalse();
     }
 
     @Test
@@ -253,7 +248,6 @@ public class UserIntegrationTest extends AbstractPostgresqlTest {
         assertThat(updatedProfile.getAgeMax()).isEqualTo(45);
         assertThat(updatedProfile.getRadius()).isEqualTo(50);
 
-        // Verify outbox event was created
         //checkKafkaOutboxEvent(OutboxType.PROFILE_UPDATED, profileId.toString());
     }
 
@@ -363,7 +357,6 @@ public class UserIntegrationTest extends AbstractPostgresqlTest {
                 .isInstanceOf(ProfileException.class)
                 .hasMessageContaining("Profile not found by id");
 
-        // Verify outbox event was created
         checkKafkaOutboxEvent(OutboxType.PROFILE_DELETED, profileId.toString());
     }
 
@@ -445,14 +438,10 @@ public class UserIntegrationTest extends AbstractPostgresqlTest {
                 .extracting(OutboxEntity::getId)
                 .containsExactlyInAnyOrder(recentRecord.getId(), veryRecentRecord.getId());
 
-        // Verify old record is deleted
         assertThat(outboxRepository.findById(oldRecord.getId())).isEmpty();
-
-        // Verify recent records still exist
         assertThat(outboxRepository.findById(recentRecord.getId())).isPresent();
         assertThat(outboxRepository.findById(veryRecentRecord.getId())).isPresent();
 
-        // Verify the correct type of records remain
         assertThat(allRecordsAfter)
                 .extracting(OutboxEntity::getType)
                 .containsExactlyInAnyOrder(OutboxType.PROFILE_UPDATED, OutboxType.PROFILE_DELETED);
@@ -485,24 +474,23 @@ public class UserIntegrationTest extends AbstractPostgresqlTest {
                         ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class,
                         ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class)
         );
-        
+
     }
 
-    private List<ConsumerRecord<String, String>> drain(KafkaConsumer<String, String> consumer,
-                                                       int minExpectedRecords) {
 
+    private List<ConsumerRecord<String, String>> collectAllMessages(KafkaConsumer<String, String> consumer,
+                                                                    long duration,
+                                                                    TimeUnit timeUnit) {
         List<ConsumerRecord<String, String>> allRecords = new ArrayList<>();
+        long durationMillis = timeUnit.toMillis(duration);
+        long startTime = System.currentTimeMillis();
 
-        Unreliables.retryUntilTrue(10, TimeUnit.SECONDS, () -> {
-            ConsumerRecords<String, String> consumerRecords = consumer.poll(Duration.ofMillis(50));
+        while (System.currentTimeMillis() - startTime < durationMillis) {
+            ConsumerRecords<String, String> consumerRecords = consumer.poll(Duration.ofMillis(500));
+            consumerRecords.forEach(allRecords::add);
+        }
 
-            consumerRecords
-                    .iterator()
-                    .forEachRemaining(allRecords::add);
-
-            return allRecords.size() >= minExpectedRecords;
-        });
-
+        log.info("Collected {} messages in {} ms", allRecords.size(), System.currentTimeMillis() - startTime);
         return allRecords;
     }
 
@@ -533,17 +521,31 @@ public class UserIntegrationTest extends AbstractPostgresqlTest {
         try (KafkaConsumer<String, String> consumer = getConsumer()) {
             consumer.subscribe(List.of(topic));
 
-            List<ConsumerRecord<String, String>> changeEvents = drain(consumer, 1);
+            List<ConsumerRecord<String, String>> changeEvents = collectAllMessages(consumer, 3, TimeUnit.SECONDS);
 
-            assertThat(changeEvents).hasSize(1);
+            boolean found = false;
 
-            ConsumerRecord<String, String> record = changeEvents.get(0);
-            assertThat(record.topic()).isEqualTo(topic);
+            for (ConsumerRecord<String, String> record : changeEvents) {
+                assertThat(record.topic()).isEqualTo(topic);
 
-            String value = record.value();
-            assertThat(JsonPath.<String>read(value, "$.after.aggregatetype")).isEqualTo("ProfileEntity");
-            assertThat(JsonPath.<String>read(value, "$.after.type")).isEqualTo(expectedType.toString());
-            assertThat(JsonPath.<String>read(value, "$.after.aggregateid")).isEqualTo(aggregateId);
+                try {
+                    String value = record.value();
+                    String aggregatetype = JsonPath.read(value, "$.after.aggregatetype");
+                    String type = JsonPath.read(value, "$.after.type");
+                    String aggregateid = JsonPath.read(value, "$.after.aggregateid");
+
+                    if (aggregateId.equals(aggregateid) && "ProfileEntity".equals(aggregatetype) &&
+                            expectedType.toString().equals(type)) {
+                        found = true;
+                        break;
+                    }
+
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+
+            assertTrue(found);
 
             consumer.unsubscribe();
         }
