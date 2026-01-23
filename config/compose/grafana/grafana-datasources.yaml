@@ -32,7 +32,7 @@ datasources:
     version: 1
     editable: false
     apiVersion: 1
-    uid: tempo-streaming-disabled
+    uid: tempo-streaming
     jsonData:
       httpMethod: GET
       serviceMap:

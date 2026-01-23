@@ -51,52 +51,72 @@ repositories {
 }
 
 dependencies {
-	implementation 'ru.maxb.soulmate.common:common:1.0.41'
+	// Internal dependencies
+	implementation 'ru.maxb.soulmate.common:common:1.0.52'
 
+	// Spring Boot Starters
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation("org.springframework.boot:spring-boot-starter-aop")
-	implementation("org.springframework.boot:spring-boot-starter-validation")
-	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-	implementation "io.github.resilience4j:resilience4j-spring-boot3:${resilience4jSpringBoot3Version}"
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 
-	compileOnly("org.projectlombok:lombok")
-	compileOnly("org.mapstruct:mapstruct:${mapstructVersion}")
-	annotationProcessor("org.projectlombok:lombok")
-	annotationProcessor("org.mapstruct:mapstruct-processor:${mapstructVersion}")
-
-	implementation "net.logstash.logback:logstash-logback-encoder:$logstashVersion"
-
-	implementation 'org.hibernate:hibernate-envers:6.6.30.Final'
-	implementation("javax.validation:validation-api:${javaxValidationApiVersion}")
-	implementation 'org.postgresql:postgresql:42.7.3'
-	implementation 'org.liquibase:liquibase-core:5.0.0'
-	implementation 'org.springframework.kafka:spring-kafka:3.3.10'
+	// Spring Cloud
 	implementation "org.springframework.cloud:spring-cloud-starter-openfeign:${springCloudStarterOpenFeignVersion}"
+	implementation 'org.springframework.kafka:spring-kafka'
 
-	implementation "io.minio:minio:$minioVersion"
+	// Resilience
+	implementation "io.github.resilience4j:resilience4j-spring-boot3:${resilience4jSpringBoot3Version}"
 
-	implementation("io.opentelemetry:opentelemetry-exporter-otlp")
-	implementation("io.micrometer:micrometer-observation")
-	implementation("io.micrometer:micrometer-tracing")
-	implementation("io.micrometer:micrometer-tracing-bridge-otel")
-	runtimeOnly("io.micrometer:micrometer-registry-prometheus")
-	implementation("io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter")
+	// Database
+	implementation 'org.postgresql:postgresql'
+	implementation 'org.liquibase:liquibase-core'
+	implementation "org.hibernate:hibernate-envers:${enversVersion}"
 
+	// Object Storage
+	implementation "io.minio:minio:${minioVersion}"
+
+	// Observability
+	implementation 'io.opentelemetry:opentelemetry-exporter-otlp'
+	implementation 'io.micrometer:micrometer-observation'
+	implementation 'io.micrometer:micrometer-tracing'
+	implementation 'io.micrometer:micrometer-tracing-bridge-otel'
+	implementation 'io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter'
+	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+
+	// Logging
+	implementation "net.logstash.logback:logstash-logback-encoder:${logstashVersion}"
+
+	// Utilities
+	implementation "javax.validation:validation-api:${javaxValidationApiVersion}"
+
+	// Development tools
+	compileOnly 'org.projectlombok:lombok'
+	compileOnly "org.mapstruct:mapstruct:${mapstructVersion}"
+	annotationProcessor 'org.projectlombok:lombok'
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+
+	// Test dependencies
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testImplementation 'org.springframework.kafka:spring-kafka-test'
 
+	// Testcontainers
+	testImplementation 'org.testcontainers:postgresql'
+	testImplementation 'org.testcontainers:kafka'
+	testImplementation 'org.testcontainers:minio'
+	testImplementation 'org.testcontainers:junit-jupiter'
+	testImplementation "org.wiremock.integrations.testcontainers:wiremock-testcontainers-module:${wiremockTestcontainersVersion}"
+
+	// Additional test utilities
 	testImplementation 'io.debezium:debezium-testing-testcontainers:3.3.1.Final'
-	testImplementation 'org.testcontainers:postgresql:1.21.3'
-	testImplementation 'org.testcontainers:kafka:1.21.3'
-	testImplementation 'org.testcontainers:minio:1.21.3'
 
-	testImplementation 'org.wiremock.integrations.testcontainers:wiremock-testcontainers-module:1.0-alpha-15'
-	testImplementation("org.testcontainers:junit-jupiter:1.21.3")
-
+	// Test development tools
 	testCompileOnly 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'
+
+	// Test runtime
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
 }
 

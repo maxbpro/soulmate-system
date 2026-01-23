@@ -119,7 +119,7 @@ public class MatchService {
 
     private void processSingleProfile(Profile otherProfile,
                                       FaceResponseFacesInnerLandmark landmarks,
-                                      Profile profileEntity) throws JsonProcessingException {
+                                      Profile profileEntity) throws Exception {
 
         FaceResponseFacesInnerLandmark otherProfileLandmarks = objectMapper.readValue(
                 otherProfile.getLandmarks(), FaceResponseFacesInnerLandmark.class);

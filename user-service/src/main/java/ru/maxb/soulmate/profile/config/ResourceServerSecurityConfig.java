@@ -26,11 +26,11 @@ public class ResourceServerSecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
-                                "/v1/profiles/compensate-registration/*",
-                                "/v1/profiles" //todo!
+                                "/api/v1/profiles/compensate-registration/*",
+                                "/api/v1/profiles" //todo!
                         ).permitAll() // Permit access to public paths
 
-                        .requestMatchers("/v1/profiles/feed"
+                        .requestMatchers("/api/v1/profiles/feed"
                         ).hasAuthority("ROLE_soulmateapp.user")
                         .anyRequest()
                         .authenticated()

@@ -7,6 +7,7 @@ services:
       args:
         GITHUB_ACTOR: "maxbpro"
         PERSONAL_ACCESS_TOKEN: ${PERSONAL_ACCESS_TOKEN}
+        SPRING_PROFILE: dev
     environment:
       JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8091"
       KEYCLOAK_SERVER_URL: http://keycloak:8080
@@ -41,6 +42,7 @@ services:
       args:
         GITHUB_ACTOR: "maxbpro"
         PERSONAL_ACCESS_TOKEN: ${PERSONAL_ACCESS_TOKEN}
+        SPRING_PROFILE: dev
     environment:
       JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8092"
       POSTGRES_HOST: postgres
@@ -83,6 +85,7 @@ services:
       args:
         GITHUB_ACTOR: "maxbpro"
         PERSONAL_ACCESS_TOKEN: ${PERSONAL_ACCESS_TOKEN}
+        SPRING_PROFILE: dev
     depends_on:
       elasticsearch:
         condition: service_healthy
@@ -117,6 +120,7 @@ services:
       args:
         GITHUB_ACTOR: "maxbpro"
         PERSONAL_ACCESS_TOKEN: ${PERSONAL_ACCESS_TOKEN}
+        SPRING_PROFILE: dev
     depends_on:
       cassandra:
         condition: service_healthy

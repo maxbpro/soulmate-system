@@ -1,31 +1,33 @@
 package ru.maxb.soulmate.profile.model;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.envers.NotAudited;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import javax.validation.constraints.NotNull;
 import java.time.Instant;
 
 @Getter
 @Setter
 @MappedSuperclass
+@EntityListeners(AuditingEntityListener.class)
 public class BaseEntity {
 
-    @NotNull
-    @ColumnDefault("true")
     @Column(name = "active", nullable = false)
-    private Boolean active;
+    private boolean active;
 
-    @NotNull
-    @ColumnDefault("(now) AT TIME ZONE 'utc'::text")
+    @NotAudited
+    @CreatedDate
     @Column(name = "created", nullable = false)
     private Instant created;
 
-    @NotNull
-    @ColumnDefault("(now) AT TIME ZONE 'utc'::text")
+    @NotAudited
+    @LastModifiedDate
     @Column(name = "updated", nullable = false)
     private Instant updated;
 

@@ -26,7 +26,7 @@ public class FeedService {
     private final LandmarksApiClient landmarksApiClient;
     private final ProfileMapper profileMapper;
 
-    public List<ProfileDto> getProfiles(UUID profileId, double lat, double lng) {
+    public List<ProfileDto> getProfiles(UUID profileId, double lat, double lng, int page, int size) {
 
         //get profile preferences
         ProfileEntity profile = profileRepository.findById(profileId)
@@ -38,7 +38,7 @@ public class FeedService {
         int radius = profile.getRadius();
 
         ResponseEntity<List<LandmarkMatchDto>> landmarkMatchesResponse = landmarksApiClient.getLandmarkMatches(lat, lng, radius,
-                ageMin, ageMax, interestedIn.name());
+                ageMin, ageMax, interestedIn.name(), page, size);
 
         List<LandmarkMatchDto> landmarkMatches = landmarkMatchesResponse.getBody();
 

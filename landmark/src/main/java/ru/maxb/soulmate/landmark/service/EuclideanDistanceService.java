@@ -18,8 +18,7 @@ public class EuclideanDistanceService {
 
     private final ObjectMapper objectMapper;
 
-    @SneakyThrows
-    public double compare(FaceResponseFacesInnerLandmark face1, FaceResponseFacesInnerLandmark face2) {
+    public double compare(FaceResponseFacesInnerLandmark face1, FaceResponseFacesInnerLandmark face2) throws Exception {
         EuclideanDistance ev = new EuclideanDistance();
 
         String face1String = objectMapper.writeValueAsString(face1);

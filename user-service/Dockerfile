@@ -2,6 +2,7 @@
 FROM gradle:jdk24-alpine AS builder
 ARG PERSONAL_ACCESS_TOKEN
 ARG GITHUB_ACTOR
+ARG SPRING_PROFILE
 ENV PERSONAL_ACCESS_TOKEN=$PERSONAL_ACCESS_TOKEN
 ENV GITHUB_ACTOR=$GITHUB_ACTOR
 WORKDIR /app
@@ -13,4 +14,4 @@ WORKDIR /app
 COPY --from=builder /app/build/libs/*.jar app.jar
 # por for debug
 EXPOSE 8092
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT java -jar app.jar --spring.profiles.active=${SPRING_PROFILE:-dev}

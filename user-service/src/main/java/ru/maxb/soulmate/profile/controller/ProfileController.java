@@ -5,10 +5,10 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 import ru.maxb.soulmate.profile.model.OutboxType;
 import ru.maxb.soulmate.profile.service.OutboxService;
 import ru.maxb.soulmate.profile.service.ProfileService;
+import ru.maxb.soulmate.profile.util.SecurityUtils;
 import ru.maxb.soulmate.user.api.ProfileApi;
 import ru.maxb.soulmate.user.dto.ProfileDto;
 import ru.maxb.soulmate.user.dto.ProfileRegistrationRequestDto;
@@ -22,6 +22,7 @@ public class ProfileController implements ProfileApi {
 
     private final ProfileService profileService;
     private final OutboxService outboxService;
+    private final SecurityUtils securityUtils;
 
     @Override
     public ResponseEntity<ProfileDto> registration(@Valid ProfileRegistrationRequestDto profileRegistrationRequestDto) {
@@ -35,9 +36,11 @@ public class ProfileController implements ProfileApi {
         return ResponseEntity.ok(profileDto);
     }
 
+
     @Override
-    public ResponseEntity<ProfileDto> update(@NotNull UUID id, @Valid ProfileUpdateRequestDto profileUpdateRequestDto) {
-        ProfileDto profileDto = profileService.update(id, profileUpdateRequestDto);
+    public ResponseEntity<ProfileDto> update(@Valid ProfileUpdateRequestDto profileUpdateRequestDto) {
+        UUID currentUserId = securityUtils.getCurrentUserId();
+        ProfileDto profileDto = profileService.update(currentUserId, profileUpdateRequestDto);
         return ResponseEntity.ok(profileDto);
     }
 
@@ -45,24 +48,12 @@ public class ProfileController implements ProfileApi {
     public ResponseEntity<Void> compensateRegistration(@NotNull UUID id) {
         profileService.hardDelete(id);
         outboxService.hardDelete(id, OutboxType.PROFILE_CREATED);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
     public ResponseEntity<Void> delete(@NotNull UUID id) {
         profileService.softDelete(id);
-        return null;
-    }
-
-    @Override
-    public ResponseEntity<Void> uploadImage(@NotNull UUID id, MultipartFile file) {
-        profileService.uploadImage(id, file);
-        return ResponseEntity.ok().build();
-    }
-
-    @Override
-    public ResponseEntity<Void> deleteImage(@NotNull UUID id, @NotNull UUID photoId) {
-        profileService.deleteImage(id, photoId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }
