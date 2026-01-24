@@ -3,18 +3,41 @@ kind: Application
 metadata:
   name: api-gateway
   namespace: argocd
+  labels:
+    app: api-gateway
+    component: gateway
+    managed-by: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+    description: "API Gateway for Soulmate application"
+  finalizers:
+    - resources-finalizer.argoproj.io/foreground
 spec:
-  destination:
-    namespace: default
-    server: https://kubernetes.default.svc
   project: default
   source:
-    path: ./api-gateway/k8s
     repoURL: https://github.com/maxbpro/soulmate-system.git
     targetRevision: HEAD
+    path: ./api-gateway/k8s
+    directory:
+      recurse: true
+      include: '*.yaml'
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+      allowEmpty: false
     syncOptions:
       - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+      - Validate=true
+      - ServerSideApply=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
