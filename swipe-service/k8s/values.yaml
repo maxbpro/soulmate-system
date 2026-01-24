@@ -1,5 +1,48 @@
+# Application settings
 appName: swipe-service
-appVersion: 1.0.0
 appPort: 8083
-cassandraHost: soulmate-cassandra-db.default.svc.cluster.local
+debugPort: 8093
+replicaCount: 1
+springProfile: dev
+
+# Image configuration
+image:
+  repository: ghcr.io/maxbpro/swipe-service
+  tag: latest
+  pullPolicy: Always
+
+# Cassandra configuration
+cassandraHost: cassandra
 cassandraPort: 9142
+cassandraDataCenter: datacenter1
+cassandraKeyspace: swipe
+
+# Keycloak configuration
+keycloak:
+  issuerUri: http://keycloak:8080/realms/customer
+  jwkSetUri: http://keycloak:8080/realms/customer/protocol/openid-connect/certs
+
+# Service endpoints
+services:
+  auth:
+    url: http://keycloak:8080
+  users:
+    name: http://keycloak:8080
+  profile:
+    url: http://user-service:8082
+  swipe:
+    url: http://swipe-service:8083
+  feed:
+    url: http://landmark-service:8084
+
+# Java debug options
+javaDebugOptions: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8093"
+
+# Resource settings
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "500m"

@@ -1,25 +1,106 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.appName }}
+  name: {{ .Values.appName  }}
+  labels:
+    app: {{ .Values.appName  }}
+    component: swipe-service
+    managed-by: helm
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Values.appName }}
+      app: {{ .Values.appName  }}
   template:
     metadata:
       labels:
         app: {{ .Values.appName }}
+        component: swipe-service
     spec:
       containers:
         - name: {{ .Values.appName }}
-          image: ghcr.io/maxbpro/swipe-service:latest
-          imagePullPolicy: Always
+          image: "{{ .Values.image.repository }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+
           ports:
-            - containerPort: {{ .Values.appPort }}
+            - name: http
+              containerPort: {{ .Values.appPort }}
+              protocol: TCP
+            - name: debug
+              containerPort: {{ .Values.debugPort }}
+              protocol: TCP
+
           env:
+            - name: JAVA_TOOL_OPTIONS
+              value: {{ .Values.javaDebugOptions }}
+
+            # Cassandra configuration
             - name: CASSANDRA_HOST
               value: {{ .Values.cassandraHost }}
             - name: CASSANDRA_PORT
               value: "{{ .Values.cassandraPort }}"
+            - name: CASSANDRA_DATACENTER
+              value: "{{ .Values.cassandraDataCenter }}"
+            - name: CASSANDRA_KEYSPACE
+              value: "{{ .Values.cassandraKeyspace }}"
+
+            # Keycloak
+            - name: RESOURCE_SERVER_ISSUER_URI
+              value: {{ .Values.keycloak.issuerUri | quote }}
+            - name: RESOURCE_SERVER_JWK_SET_URI
+              value: {{ .Values.keycloak.jwkSetUri | quote }}
+
+            # Service URLs (should be configurable per environment)
+            - name: AUTH_API_URL
+              value: {{ .Values.services.auth.url  }}
+            - name: USERS_API_NAME
+              value: {{ .Values.services.users.name }}
+            - name: PROFILE_API_URL
+              value: {{ .Values.services.profile.url }}
+            - name: SWIPE_API_URL
+              value: {{ .Values.services.swipe.url }}
+            - name: FEED_API_URL
+              value: {{ .Values.services.feed.url }}
+
+            - name: SPRING_PROFILES_ACTIVE
+              value: {{ .Values.springProfile }}
+
+          # Health check
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: {{ .Values.appPort }}
+              scheme: HTTP
+            initialDelaySeconds: 40  # matches start_period: 40s
+            periodSeconds: 20        # matches interval: 20s
+            timeoutSeconds: 5        # matches timeout: 5s
+            failureThreshold: 5      # matches retries: 5
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: {{ .Values.appPort }}
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          # Resource limits
+          resources:
+            requests:
+              memory: "128Mi"   # matches mem_reservation: 128M
+              cpu: "100m"
+            limits:
+              memory: "256Mi"   # matches mem_limit: 256M
+              cpu: "500m"
+
+          # Security context (best practice)
+{{/*          securityContext:*/}}
+{{/*            allowPrivilegeEscalation: false*/}}
+{{/*            readOnlyRootFilesystem: true*/}}
+{{/*            runAsNonRoot: true*/}}
+{{/*            runAsUser: 1000*/}}
+{{/*            capabilities:*/}}
+{{/*              drop:*/}}
+{{/*                - ALL*/}}

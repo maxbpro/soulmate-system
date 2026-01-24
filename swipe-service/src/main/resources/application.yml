@@ -33,7 +33,6 @@ management:
 
   endpoints:
     web:
-      base-path: /internal/actuator
       exposure:
         include: health,info,metrics,prometheus,loggers
         exclude: shutdown,env,beans,configprops,mappings
@@ -45,7 +44,6 @@ management:
       jvm: true
       system: true
       logback: true
-      kafka: true
       cassandra: true
       http: true
       jdbc: true
