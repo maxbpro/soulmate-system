@@ -11,7 +11,7 @@ on:
 
 env:
   IMAGE_NAME: landmark-service
-  ROOT_PATH: landmark-service
+  ROOT_PATH: landmark
 
 jobs:
   build-and-push-image:
