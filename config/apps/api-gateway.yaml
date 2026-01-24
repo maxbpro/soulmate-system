@@ -20,7 +20,7 @@ spec:
     path: ./api-gateway/k8s
     helm:
       valueFiles:
-        - ./api-gateway/k8s/values.yaml
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: default
