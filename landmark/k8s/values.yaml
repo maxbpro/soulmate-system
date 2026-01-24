@@ -14,8 +14,7 @@ image:
 # elasticSearch configuration
 elasticSearch:
   uris: soulmate-elasticsearch-db.default.svc.cluster.local:9200
-#userName: elastic
-#password: password
+  secretName: "elasticsearch-secrets"
 
 
 # Kafka configuration
