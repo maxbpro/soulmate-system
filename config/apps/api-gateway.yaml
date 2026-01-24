@@ -21,6 +21,9 @@ spec:
     directory:
       recurse: true
       include: '*.yaml'
+    helm:
+      valueFiles:
+        ./api-gateway/k8s/values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: default
