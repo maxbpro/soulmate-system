@@ -113,7 +113,6 @@ dependencies {
 
 	// JUnit Platform
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
 }
 
 test {
