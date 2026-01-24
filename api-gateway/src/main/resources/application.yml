@@ -135,7 +135,6 @@ management:
     port: 8081
   endpoints:
     web:
-      base-path: /internal/actuator
       exposure:
         include: health,info,metrics,prometheus,loggers
         exclude: shutdown,env,beans,configprops,mappings
