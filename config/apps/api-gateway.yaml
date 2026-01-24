@@ -18,9 +18,6 @@ spec:
     repoURL: https://github.com/maxbpro/soulmate-system.git
     targetRevision: HEAD
     path: ./api-gateway/k8s
-    directory:
-      recurse: true
-      include: '*.yaml'
     helm:
       valueFiles:
         - ./api-gateway/k8s/values.yaml
