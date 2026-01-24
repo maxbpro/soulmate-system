@@ -1,4 +1,53 @@
+# Application settings
 appName: landmark-service
-appVersion: 1.0.0
 appPort: 8084
-elasticSearchUris: soulmate-elasticsearch-db.default.svc.cluster.local:9200
+debugPort: 8094
+replicaCount: 1
+springProfile: dev
+
+# Image configuration
+image:
+  repository: ghcr.io/maxbpro/landmark-service
+  tag: latest
+  pullPolicy: Always
+
+# elasticSearch configuration
+elasticSearch:
+  uris: soulmate-elasticsearch-db.default.svc.cluster.local:9200
+#userName: elastic
+#password: password
+
+
+# Kafka configuration
+kafka:
+  bootstrapServers: kafka:9092
+
+# Keycloak configuration
+keycloak:
+  issuerUri: http://keycloak:8080/realms/customer
+  jwkSetUri: http://keycloak:8080/realms/customer/protocol/openid-connect/certs
+
+# Service endpoints
+services:
+  auth:
+    url: http://keycloak:8080
+  users:
+    name: http://keycloak:8080
+  profile:
+    url: http://user-service:8082
+  swipe:
+    url: http://swipe-service:8083
+  feed:
+    url: http://landmark-service:8084
+
+# Java debug options
+javaDebugOptions: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8094"
+
+# Resource settings
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "500m"
