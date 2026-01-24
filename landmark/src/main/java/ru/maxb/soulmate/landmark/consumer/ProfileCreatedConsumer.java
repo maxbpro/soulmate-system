@@ -32,21 +32,18 @@ public class ProfileCreatedConsumer {
             String payload = extractPayload(debeziumEventRecord);
             ProfileCreatedDto profileCreatedDto = objectMapper.readValue(payload, ProfileCreatedDto.class);
 
-            log.info("Processing profileId='{}', offset={}, timestamp={}",
-                    profileCreatedDto.id(), offset, timestamp);
+            log.info("Processing profileId='{}', offset={}, timestamp={}", profileCreatedDto.id(), offset, timestamp);
 
             matchService.updateProfileRecord(profileCreatedDto);
 
             ack.acknowledge();
-            log.debug("Successfully processed: profileId={}, offset={}",
-                    profileCreatedDto.id(), offset);
+            log.debug("Successfully processed: profileId={}, offset={}", profileCreatedDto.id(), offset);
 
         } catch (JsonProcessingException e) {
             // Will NOT be retried (not retryable)
             throw new ValidationException("Invalid JSON format", e);
         } catch (ValidationException e) {
-            // Will NOT be retried (not retryable)
-            // But will go to DLT
+            // Will NOT be retried (not retryable) But will go to DLT
             throw e;
         } catch (Exception e) {
             // Unknown error - will be retried
