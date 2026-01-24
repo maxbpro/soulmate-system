@@ -1,3 +1,48 @@
+#appVersion: 1.0.0
+
+
+# Application settings
 appName: api-gateway
-appVersion: 1.0.0
 appPort: 8081
+debugPort: 8091
+replicaCount: 1
+springProfile: dev
+
+# Image configuration
+image:
+  repository: ghcr.io/maxbpro/soulmate-api-gateway
+  tag: latest
+  pullPolicy: Always
+
+# Keycloak configuration
+keycloak:
+  serverUrl: http://keycloak:8080
+  realm: customer
+  clientId: soulmate
+  secretName: keycloak-secrets
+  authApiUrl: http://keycloak:8080
+
+# Service endpoints
+services:
+  auth:
+    url: http://keycloak:8080
+  users:
+    name: http://keycloak:8080
+  profile:
+    url: http://user-service:8082
+  swipe:
+    url: http://swipe-service:8083
+  feed:
+    url: http://landmark-service:8084
+
+# Java debug options
+javaDebugOptions: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8091"
+
+# Resource settings
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "500m"
