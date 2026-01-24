@@ -1,5 +1,72 @@
+# Application settings
 appName: user-service
-appVersion: 1.0.0
 appPort: 8082
-postgresqlHost: soulmate-postgresql-db.default.svc.cluster.local
-postgresqlPort: 5433
+debugPort: 8092
+replicaCount: 1
+springProfile: dev
+
+# Image configuration
+image:
+  repository: ghcr.io/maxbpro/user-service
+  tag: latest
+  pullPolicy: Always
+
+
+#postgresqlHost: soulmate-postgresql-db.default.svc.cluster.local
+#postgresqlPort: 5433
+
+# Postgresql configuration
+database:
+  host: postgres
+  port: 5432
+  name: postgres
+  secretName: postgres-secrets
+
+# Kafka configuration
+kafka:
+  bootstrapServers: kafka:9092
+
+# MinIO configuration
+minio:
+  endpoint: http://minio:9000
+  bucket: user-photos
+  secretName: minio-secrets
+
+# Face API configuration
+faceApi:
+  url: http://faceplusplus-api:8080
+  secretName: face-api-secrets
+
+# Landmark API
+landmarkApi:
+  url: http://landmark-service:8084
+
+# Keycloak configuration
+keycloak:
+  issuerUri: http://keycloak:8080/realms/customer
+  jwkSetUri: http://keycloak:8080/realms/customer/protocol/openid-connect/certs
+
+# Service endpoints
+services:
+  auth:
+    url: http://keycloak:8080
+  users:
+    name: http://keycloak:8080
+  profile:
+    url: http://user-service:8082
+  swipe:
+    url: http://swipe-service:8083
+  feed:
+    url: http://landmark-service:8084
+
+# Java debug options
+javaDebugOptions: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8092"
+
+# Resource settings
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "500m"

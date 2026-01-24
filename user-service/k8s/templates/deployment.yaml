@@ -1,25 +1,161 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.appName }}
+  name: {{ .Values.appName  }}
+  labels:
+    app: {{ .Values.appName  }}
+    component: user-service
+    managed-by: helm
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Values.appName }}
+      app: {{ .Values.appName  }}
   template:
     metadata:
       labels:
         app: {{ .Values.appName }}
+        component: user-service
     spec:
+      # Init container to wait for dependencies
+{{/*      initContainers:*/}}
+{{/*        - name: wait-for-dependencies*/}}
+{{/*          image: busybox:1.35*/}}
+{{/*          command: ['sh', '-c',*/}}
+{{/*            'until nc -z {{ .Values.database.host }} {{ .Values.database.port }}; do echo "Waiting for PostgreSQL..."; sleep 2; done;*/}}
+{{/*             until nc -z kafka 9092; do echo "Waiting for Kafka..."; sleep 2; done;*/}}
+{{/*             until nc -z minio 9000; do echo "Waiting for MinIO..."; sleep 2; done;']*/}}
+
       containers:
         - name: {{ .Values.appName }}
-          image: ghcr.io/maxbpro/user-service:latest
-          imagePullPolicy: Always
+          image: "{{ .Values.image.repository }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+
           ports:
-            - containerPort: {{ .Values.appPort }}
+            - name: http
+              containerPort: {{ .Values.appPort }}
+              protocol: TCP
+            - name: debug
+              containerPort: {{ .Values.debugPort }}
+              protocol: TCP
+
           env:
+            - name: JAVA_TOOL_OPTIONS
+              value: {{ .Values.javaDebugOptions }}
+
+            # Postgres configuration
             - name: POSTGRES_HOST
-              value: {{ .Values.postgresqlHost }}
+              value: {{ .Values.database.host }}
             - name: POSTGRES_PORT
-              value: "{{ .Values.postgresqlPort }}"
+              value: {{ .Values.database.port }}
+            - name: POSTGRES_DB
+              value: {{ .Values.database.name }}
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.secretName }}
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.secretName }}
+                  key: password
+
+            # Kafka
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: {{ .Values.kafka.bootstrapServers }}
+            - name: KAFKA  # Keep for compatibility
+              value: {{ .Values.kafka.bootstrapServers }}
+
+            # MinIO
+            - name: MINIO_ENDPOINT
+              value: {{ .Values.minio.endpoint }}
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.minio.secretName }}
+                  key: access-key
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.minio.secretName }}
+                  key: secret-key
+
+            # Face API
+            - name: FACE_API_URL
+              value: {{ .Values.faceApi.url | quote }}
+            - name: FACE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.faceApi.secretName }}
+                  key: api-key
+            - name: FACE_API_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.faceApi.secretName }}
+                  key: api-secret
+
+            # Landmark API
+            - name: LANDMARK_API_URL
+              value: {{ .Values.landmarkApi.url }}
+
+            # Keycloak
+            - name: RESOURCE_SERVER_ISSUER_URI
+              value: {{ .Values.keycloak.issuerUri | quote }}
+            - name: RESOURCE_SERVER_JWK_SET_URI
+              value: {{ .Values.keycloak.jwkSetUri | quote }}
+
+            # Service URLs (should be configurable per environment)
+            - name: AUTH_API_URL
+              value: {{ .Values.services.auth.url  }}
+            - name: USERS_API_NAME
+              value: {{ .Values.services.users.name }}
+            - name: PROFILE_API_URL
+              value: {{ .Values.services.profile.url }}
+            - name: SWIPE_API_URL
+              value: {{ .Values.services.swipe.url }}
+            - name: FEED_API_URL
+              value: {{ .Values.services.feed.url }}
+
+            - name: SPRING_PROFILES_ACTIVE
+              value: {{ .Values.springProfile }}
+
+          # Health check
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: {{ .Values.appPort }}
+              scheme: HTTP
+            initialDelaySeconds: 40  # matches start_period: 40s
+            periodSeconds: 20        # matches interval: 20s
+            timeoutSeconds: 5        # matches timeout: 5s
+            failureThreshold: 5      # matches retries: 5
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: {{ .Values.appPort }}
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          # Resource limits
+          resources:
+            requests:
+              memory: "128Mi"   # matches mem_reservation: 128M
+              cpu: "100m"
+            limits:
+              memory: "256Mi"   # matches mem_limit: 256M
+              cpu: "500m"
+
+          # Security context (best practice)
+{{/*          securityContext:*/}}
+{{/*            allowPrivilegeEscalation: false*/}}
+{{/*            readOnlyRootFilesystem: true*/}}
+{{/*            runAsNonRoot: true*/}}
+{{/*            runAsUser: 1000*/}}
+{{/*            capabilities:*/}}
+{{/*              drop:*/}}
+{{/*                - ALL*/}}
