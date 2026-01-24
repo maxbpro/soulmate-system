@@ -23,7 +23,7 @@ public class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchangeSpec -> exchangeSpec
                         .pathMatchers(
-                                "/actuator/health",
+                                "/actuator/health/**",
                                 "/actuator/prometheus",
                                 "/actuator/info",
                                 "/v3/api-docs/**",
