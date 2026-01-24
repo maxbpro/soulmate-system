@@ -16,11 +16,6 @@ spec:
       labels:
         app: {{ .Values.appName }}
         component: gateway
-      annotations:
-        # Prometheus scraping annotations if using metrics
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "8081"
-        prometheus.io/path: "/actuator/prometheus"
     spec:
       containers:
         - name: {{ .Values.appName }}

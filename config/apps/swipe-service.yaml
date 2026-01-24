@@ -1,15 +1,15 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: user-service
+  name: swipe-service
   namespace: argocd
   labels:
-    app: user-service
-    component: user-service
+    app: swipe-service
+    component: swipe-service
     managed-by: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "0"
-    description: "User service for Soulmate application"
+    description: "Swipe service for Soulmate application"
   finalizers:
     - resources-finalizer.argoproj.io/foreground
 spec:
@@ -17,7 +17,7 @@ spec:
   source:
     repoURL: https://github.com/maxbpro/soulmate-system.git
     targetRevision: HEAD
-    path: ./user-service/k8s
+    path: ./swipe-service/k8s
     helm:
       valueFiles:
         - values.yaml
