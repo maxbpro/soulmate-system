@@ -17,7 +17,7 @@ spec:
   source:
     repoURL: https://github.com/maxbpro/soulmate-system.git
     targetRevision: HEAD
-    path: ./landmark-service/k8s
+    path: ./landmark/k8s
     helm:
       valueFiles:
         - values.yaml
