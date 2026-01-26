@@ -1,0 +1,70 @@
+global:
+  postgresql:
+    auth:
+      postgresPassword: "postgres"
+      username: "postgres"
+      password: "postgres"
+      database: "postgres"
+
+primary:
+  extraEnvVars:
+    - name: POSTGRES_USER
+      value: "postgres"
+    - name: POSTGRES_PASSWORD
+      value: "postgres"
+    - name: POSTGRES_DB
+      value: "postgres"
+
+  # Enable logical replication (for Debezium/CDC)
+  extendedConfiguration: |
+    wal_level = logical
+    max_wal_senders = 10
+    max_replication_slots = 10
+
+  # Health checks matching Docker Compose
+  startupProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "500m"
+
+  volumePermissions:
+    enabled: true
+
+  # Persistent volume
+  persistence:
+    enabled: true
+    size: 8Gi
+    accessModes:
+      - ReadWriteOnce
+
+# Service configuration
+service:
+  type: ClusterIP
+  ports:
+    postgresql: 5432
+
+# Disable replication (single instance for development)
+readReplicas:
+  enabled: false

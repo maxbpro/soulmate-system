@@ -1,0 +1,137 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: debezium-connect
+  namespace: soulmate-infra
+  labels:
+    app: debezium-connect
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: debezium-connect
+  template:
+    metadata:
+      labels:
+        app: debezium-connect
+    spec:
+      containers:
+        - name: debezium-connect
+          image: quay.io/debezium/connect:3.3.1.Final
+          ports:
+            - containerPort: 8083
+              name: http
+          env:
+            - name: BOOTSTRAP_SERVERS
+              value: "kafka:9091"
+            - name: GROUP_ID
+              value: "1"
+            - name: CONFIG_STORAGE_TOPIC
+              value: "connect_configs"
+            - name: STATUS_STORAGE_TOPIC
+              value: "connect_statuses"
+            - name: OFFSET_STORAGE_TOPIC
+              value: "connect_offsets"
+            - name: KEY_CONVERTER
+              value: "org.apache.kafka.connect.json.JsonConverter"
+            - name: VALUE_CONVERTER
+              value: "org.apache.kafka.connect.json.JsonConverter"
+            - name: ENABLE_DEBEZIUM_SCRIPTING
+              value: "true"
+#            - name: JMX_OPTS
+#              value: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.port=1099 -Dcom.sun.management.jmxremote.rmi.port=1099 -Djava.rmi.server.hostname=localhost"
+            - name: JAVA_OPTS
+              value: "-Xms1g -Xmx2g -XX:+UseG1GC -XX:MaxGCPauseMillis=20"
+
+          startupProbe:
+            httpGet:
+              path: /connectors
+              port: 8083
+              scheme: HTTP
+            failureThreshold: 60  # 60 * 10 = 600 seconds (10 minutes)
+            periodSeconds: 10
+            initialDelaySeconds: 30
+            timeoutSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /connectors
+              port: 8083
+            initialDelaySeconds: 90
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /connectors
+              port: 8083
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+
+#          resources:
+#            requests:
+#              memory: "768Mi"
+#              cpu: "300m"
+#            limits:
+#              memory: "1536Mi"
+#              cpu: "500m"
+
+          resources:
+            requests:
+              memory: "3Gi"
+              cpu: "500m"
+            limits:
+              memory: "4Gi"
+              cpu: "1000m"
+
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/bash
+                  - -c
+                  - |
+                    echo "=== postStart: Waiting for Debezium to be ready ==="
+                    
+                    # Wait for Debezium REST API to be ready
+                    for i in {1..60}; do
+                      if curl -s http://localhost:8083/connectors > /dev/null; then
+                        echo "Debezium Connect is ready!"
+                        break
+                      fi
+                      echo "Attempt $i/60: Waiting 5 seconds..."
+                      sleep 5
+                    done
+                    
+                    # Register the connector
+                    echo "Registering PostgreSQL connector..."
+                    
+                    cat > /tmp/connector.json <<EOF
+                    {
+                      "name": "soulmate-user-connector",
+                      "config": {
+                        "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+                        "plugin.name": "pgoutput",
+                        "topic.prefix": "dbserver",
+                        "tasks.max": "1",
+                        "database.hostname": "postgres-postgresql",
+                        "database.port": "5432",
+                        "database.user": "postgres",
+                        "database.password": "postgres",
+                        "database.dbname": "postgres",
+                        "database.server.name": "dbserver1",
+                        "database.history.kafka.bootstrap.servers": "kafka:9091"
+                      }
+                    }
+                    EOF
+                    
+                    # Register connector (idempotent - 409 means already exists)
+                    curl -s -o /dev/null -w "HTTP Status: %{http_code}\n" \
+                      -X POST \
+                      -H "Content-Type: application/json" \
+                      http://localhost:8083/connectors \
+                      -d @/tmp/connector.json
+                    
+                    echo "=== postStart completed ==="

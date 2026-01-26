@@ -12,10 +12,8 @@ CREATE TABLE IF NOT EXISTS swipe
 
 CREATE TABLE IF NOT EXISTS match
 (
-    id         uuid PRIMARY KEY,
-    userId     uuid,
-    soulmateId uuid,
+    userPair   text PRIMARY KEY, -- partition key
+    user1Id    uuid,
+    user2Id    uuid,
     createdAt  timestamp
 );
-
-CREATE INDEX IF NOT EXISTS ON match (soulmateId);

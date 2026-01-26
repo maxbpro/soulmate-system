@@ -1,0 +1,68 @@
+# Access credentials
+rootUser: "user"
+rootPassword: "password"
+
+# Mode - standalone (single node) for development
+mode: standalone
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 9000
+  consolePort: 9001
+
+# Console (web UI) configuration
+console:
+  enabled: true
+  service:
+    type: ClusterIP
+    port: 9001
+
+healthCheck:
+  startup:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 30
+    timeoutSeconds: 20
+    failureThreshold: 3
+  liveness:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    timeoutSeconds: 20
+    failureThreshold: 3
+  readiness:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    timeoutSeconds: 20
+    failureThreshold: 3
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "500m"
+
+# Persistent storage
+persistence:
+  enabled: true
+  size: 10Gi
+  accessMode: ReadWriteOnce
+
+# Buckets to create automatically
+buckets:
+  - name: test-ruser-photos
+    policy: none
+    purge: false
+
+# Environment variables
+extraEnvVars:
+  - name: MINIO_BROWSER
+    value: "on"
+  - name: MINIO_ROOT_USER
+    value: "user"
+  - name: MINIO_ROOT_PASSWORD
+    value: "password"
