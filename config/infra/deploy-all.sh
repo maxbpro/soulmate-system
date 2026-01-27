@@ -24,8 +24,36 @@ kubectl create namespace soulmate-infra --dry-run=client -o yaml | kubectl apply
 #kafka/deploy-kafka.sh
 
 ##Deploy debezium-connect
-chmod +x debezium/deploy-debezium.sh
-debezium/deploy-debezium.sh
+#chmod +x debezium/deploy-debezium.sh
+#debezium/deploy-debezium.sh
+
+##Deploy keycloak
+#chmod +x keycloak/deploy-keycloak.sh
+#keycloak/deploy-keycloak.sh
+
+## Deploy elasticsearch
+#chmod +x elasticsearch/deploy-elasticsearch.sh
+#elasticsearch/deploy-elasticsearch.sh
+
+##Deploy prometheus
+#chmod +x monitoring/prometheus/deploy-prometheus.sh
+#monitoring/prometheus/deploy-prometheus.sh
+
+##Deploy Tempo
+#chmod +x monitoring/tempo/deploy-tempo.sh
+#monitoring/tempo/deploy-tempo.sh
+
+##Deploy Loki
+#chmod +x monitoring/loki/deploy-loki.sh
+#monitoring/loki/deploy-loki.sh
+
+##Deploy Alloy
+#chmod +x monitoring/alloy/deploy-alloy.sh
+#monitoring/alloy/deploy-alloy.sh
+
+#Deploy grafana
+chmod +x monitoring/grafana/deploy-grafana.sh
+monitoring/grafana/deploy-grafana.sh
 
 echo "=== Creating secrets ==="
 

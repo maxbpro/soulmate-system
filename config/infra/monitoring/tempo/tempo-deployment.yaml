@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tempo
+  namespace: soulmate-infra
+  labels:
+    app: tempo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tempo
+  template:
+    metadata:
+      labels:
+        app: tempo
+    spec:
+      containers:
+        - name: tempo
+          image: grafana/tempo:latest
+          command: ["/tempo"]
+          args: ["-config.file=/etc/tempo/tempo.yaml"]
+          ports:
+            - containerPort: 3200
+              name: http
+            - containerPort: 4317
+              name: otlp-grpc
+            - containerPort: 4318
+              name: otlp-http
+          volumeMounts:
+            - name: tempo-config
+              mountPath: /etc/tempo/tempo.yaml
+              subPath: tempo.yaml
+              readOnly: true
+            - name: tempo-storage
+              mountPath: /var/tempo
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: 3200
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 3200
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            timeoutSeconds: 3
+      volumes:
+        - name: tempo-config
+          configMap:
+            name: tempo-config
+        - name: tempo-storage
+          emptyDir: {}  # For development
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tempo
+  namespace: soulmate-infra
+  labels:
+    app: tempo
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3200
+      targetPort: 3200
+      name: http
+    - port: 4317
+      targetPort: 4317
+      name: otlp-grpc
+    - port: 4318
+      targetPort: 4318
+      name: otlp-http
+  selector:
+    app: tempo

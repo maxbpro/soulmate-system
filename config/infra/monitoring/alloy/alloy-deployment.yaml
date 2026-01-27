@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alloy
+  namespace: soulmate-infra
+  labels:
+    app: alloy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alloy
+  template:
+    metadata:
+      labels:
+        app: alloy
+    spec:
+      containers:
+        - name: alloy
+          image: grafana/alloy:latest
+          args:
+            - run
+            - --server.http.listen-addr=0.0.0.0:12345
+            - --storage.path=/var/lib/alloy/data
+            - /etc/alloy/config.alloy
+          ports:
+            - containerPort: 12345
+              name: http
+            - containerPort: 4317
+              name: otlp-grpc
+            - containerPort: 4318
+              name: otlp-http
+          volumeMounts:
+            - name: alloy-config
+              mountPath: /etc/alloy/config.alloy
+              subPath: config.alloy
+              readOnly: true
+            - name: alloy-storage
+              mountPath: /var/lib/alloy/data
+          # Note: In Kubernetes, we typically don't mount Docker socket
+          # Instead, we use Kubernetes service discovery
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "250m"
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: 12345
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: 12345
+            initialDelaySeconds: 15
+            periodSeconds: 5
+      volumes:
+        - name: alloy-config
+          configMap:
+            name: alloy-config
+        - name: alloy-storage
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alloy
+  namespace: soulmate-infra
+  labels:
+    app: alloy
+spec:
+  type: ClusterIP
+  ports:
+    - port: 12345
+      targetPort: 12345
+      name: http
+    - port: 4317
+      targetPort: 4317
+      name: otlp-grpc
+    - port: 4318
+      targetPort: 4318
+      name: otlp-http
+  selector:
+    app: alloy

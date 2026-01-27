@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elasticsearch
+  namespace: soulmate-infra
+  labels:
+    app: elasticsearch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      containers:
+        - name: elasticsearch
+          image: elasticsearch:8.19.5
+          env:
+            - name: discovery.type
+              value: single-node
+            - name: xpack.security.enabled
+              value: "false"
+            - name: ELASTIC_PASSWORD
+              value: password
+            - name: ES_JAVA_OPTS
+              value: "-Xms256m -Xmx256m"
+          ports:
+            - containerPort: 9200
+              name: http
+            - containerPort: 9300
+              name: transport
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 9200
+            initialDelaySeconds: 120  # Wait 2 minutes after container starts
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          # Fix readiness probe
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 9200
+            initialDelaySeconds: 60  # Wait 1 minute after container starts
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "1"
+          volumeMounts:
+            - name: esdata
+              mountPath: /usr/share/elasticsearch/data
+      volumes:
+        - name: esdata
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch
+  namespace: soulmate-infra
+  labels:
+    app: elasticsearch
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9200
+      targetPort: 9200
+      name: http
+    - port: 9300
+      targetPort: 9300
+      name: transport
+  selector:
+    app: elasticsearch

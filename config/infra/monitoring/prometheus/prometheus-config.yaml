@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: soulmate-infra
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+
+    scrape_configs:
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['prometheus:9090']
+      - job_name: 'node-exporter'
+        static_configs:
+          - targets: ['node-exporter:9100']
+      - job_name: 'tempo'
+        static_configs:
+          - targets: ['tempo:3200']
+      - job_name: 'api-gateway'
+        metrics_path: '/actuator/prometheus'
+        scrape_interval: 15s
+        static_configs:
+          - targets: ['api-gateway:8081']
+      - job_name: 'user-service'
+        metrics_path: '/actuator/prometheus'
+        scrape_interval: 15s
+        static_configs:
+          - targets: ['user-service:8082']
+      - job_name: 'swipe-service'
+        metrics_path: '/actuator/prometheus'
+        scrape_interval: 15s
+        static_configs:
+          - targets: ['swipe-service:8083']
+      - job_name: 'landmark-service'
+        metrics_path: '/actuator/prometheus'
+        scrape_interval: 15s
+        static_configs:
+          - targets: ['landmark-service:8084']
+      - job_name: 'keycloak'
+        metrics_path: '/metrics'
+        scrape_interval: 15s
+        static_configs:
+          - targets: ['keycloak:9000']
+      - job_name: 'loki'  
+        static_configs:
+          - targets: ['loki:3100']
+        scrape_interval: 15s
+      - job_name: 'alloy'
+        static_configs:
+          - targets: ['alloy:12345']
+        scrape_interval: 15s
+      - job_name: 'kafka'  
+        static_configs:
+          - targets: ['kafka:9099']  # Kafka JMX metrics port
+        scrape_interval: 15s

@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loki
+  namespace: soulmate-infra
+  labels:
+    app: loki
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: loki
+  template:
+    metadata:
+      labels:
+        app: loki
+    spec:
+      containers:
+        - name: loki
+          image: grafana/loki:latest
+          args:
+            - -config.file=/etc/loki/loki-config.yaml
+          ports:
+            - containerPort: 3100
+              name: http
+            - containerPort: 9096
+              name: grpc
+          volumeMounts:
+            - name: loki-config
+              mountPath: /etc/loki/loki-config.yaml
+              subPath: loki-config.yaml
+              readOnly: true
+            - name: loki-storage
+              mountPath: /tmp/loki
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: 3100
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 3100
+            initialDelaySeconds: 15
+            periodSeconds: 5
+      volumes:
+        - name: loki-config
+          configMap:
+            name: loki-config
+        - name: loki-storage
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: loki
+  namespace: soulmate-infra
+  labels:
+    app: loki
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3100
+      targetPort: 3100
+      name: http
+    - port: 9096
+      targetPort: 9096
+      name: grpc
+  selector:
+    app: loki
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: loki-nodeport
+  namespace: soulmate-infra
+  labels:
+    app: loki
+spec:
+  type: NodePort
+  ports:
+    - port: 3100
+      targetPort: 3100
+      nodePort: 31000
+      name: http
+  selector:
+    app: loki

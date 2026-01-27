@@ -38,8 +38,6 @@ spec:
               value: "org.apache.kafka.connect.json.JsonConverter"
             - name: ENABLE_DEBEZIUM_SCRIPTING
               value: "true"
-#            - name: JMX_OPTS
-#              value: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.port=1099 -Dcom.sun.management.jmxremote.rmi.port=1099 -Djava.rmi.server.hostname=localhost"
             - name: JAVA_OPTS
               value: "-Xms1g -Xmx2g -XX:+UseG1GC -XX:MaxGCPauseMillis=20"
 
