@@ -19,7 +19,7 @@ elasticSearch:
 
 # Kafka configuration
 kafka:
-  bootstrapServers: kafka.soulmate-infra.svc.cluster.local:9092
+  bootstrapServers: kafka.soulmate-infra.svc.cluster.local:9091
 
 # Keycloak configuration
 keycloak:
