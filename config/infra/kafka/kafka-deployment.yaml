@@ -55,11 +55,6 @@ spec:
               value: "1"
             - name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
               value: "1"
-            # Optional: Performance tuning
-            - name: KAFKA_HEAP_OPTS
-              value: "-Xmx512m -Xms256m"
-            - name: KAFKA_JVM_PERFORMANCE_OPTS
-              value: "-XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -Djava.awt.headless=true"
           volumeMounts:
             - name: kafka-data
               mountPath: /var/lib/kafka/data
@@ -86,11 +81,11 @@ spec:
             failureThreshold: 3
           resources:
             requests:
-              memory: "384Mi"
-              cpu: "200m"
+              cpu: "500m"
+              memory: "1Gi"
             limits:
-              memory: "512Mi"
-              cpu: "400m"
+              cpu: "1"
+              memory: "1.5Gi"
   volumeClaimTemplates:
     - metadata:
         name: kafka-data

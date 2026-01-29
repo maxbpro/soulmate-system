@@ -53,12 +53,12 @@ spec:
             - name: KC_DB_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: postgres-secrets
+                  name: keycloak-postgres-secrets
                   key: username
             - name: KC_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-secrets
+                  name: keycloak-postgres-secrets
                   key: password
             
             # Optional: Additional settings

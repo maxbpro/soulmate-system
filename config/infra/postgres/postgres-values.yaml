@@ -4,7 +4,7 @@ global:
       postgresPassword: "postgres"
       username: "postgres"
       password: "postgres"
-      database: "postgres"
+      database: "profile_db"
 
 primary:
   extraEnvVars:

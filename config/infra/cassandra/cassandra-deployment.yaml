@@ -1,31 +1,3 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: cassandra-init-script
-  namespace: soulmate-infra
-data:
-  init.cql: |
-    -- Initialize keyspace and tables
-    CREATE KEYSPACE IF NOT EXISTS swipe WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'};
-    
-    USE swipe;
-    
-    CREATE TABLE IF NOT EXISTS swipe (
-                                         userPair     text, -- partition key: smaller_id:larger_id
-                                         userId       uuid, -- clustering key
-                                         swipedUserId uuid, -- clustering key
-                                         liked        boolean,
-                                         createdAt    timestamp,
-                                         PRIMARY KEY ((userPair), userId, swipedUserId)
-    );
-    
-    CREATE TABLE IF NOT EXISTS match (
-                                         userPair   text PRIMARY KEY, -- partition key
-                                         user1Id    uuid,
-                                         user2Id    uuid,
-                                         createdAt  timestamp
-    );
----
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -63,7 +35,7 @@ spec:
             - name: CASSANDRA_CLUSTER_NAME
               value: "SoulmateCluster"
             - name: CASSANDRA_DC
-              value: "DC1"
+              value: "datacenter1"
             - name: CASSANDRA_SEEDS
               value: "cassandra-0.cassandra.soulmate-infra.svc.cluster.local"
             - name: CASSANDRA_LISTEN_ADDRESS
@@ -118,72 +90,39 @@ metadata:
   name: cassandra
   namespace: soulmate-infra
 spec:
-  clusterIP: None  # Headless service for StatefulSet
+  clusterIP: None
   selector:
     app: cassandra
   ports:
     - port: 9042
       targetPort: 9042
       name: cql
+
 ---
-apiVersion: batch/v1
-kind: Job
+apiVersion: v1
+kind: ConfigMap
 metadata:
-  name: cassandra-init-verification
+  name: cassandra-init-script
   namespace: soulmate-infra
-  annotations:
-    helm.sh/hook-weight: "1"
-    helm.sh/hook-delete-policy: before-hook-creation
-spec:
-  template:
-    spec:
-      containers:
-        - name: cqlsh
-          image: cassandra:3.11.2
-          command: ["/bin/bash", "-c"]
-          args:
-            - |
-              echo "Waiting for Cassandra to be ready..."
-              max_retries=30
-              for i in $(seq 1 $max_retries); do
-                if cqlsh cassandra.soulmate-infra.svc.cluster.local 9042 \
-                   -u cassandra_user \
-                   -p cassandra_password \
-                   -e "DESCRIBE KEYSPACES;" 2>/dev/null; then
-                  echo "Cassandra is ready!"
-              
-                  echo "Checking if swipe keyspace exists..."
-                  if cqlsh cassandra.soulmate-infra.svc.cluster.local 9042 \
-                     -u cassandra_user \
-                     -p cassandra_password \
-                     -e "DESCRIBE KEYSPACES;" 2>/dev/null | grep -q "swipe"; then
-                    echo "✅ Keyspace 'swipe' already exists"
-                  else
-                    echo "Creating keyspace and tables..."
-                    cqlsh cassandra.soulmate-infra.svc.cluster.local 9042 \
-                      -u cassandra_user \
-                      -p cassandra_password \
-                      -f /init/init.cql
-                    echo "✅ Initialization complete"
-                  fi
-              
-                  echo "Verifying tables..."
-                  cqlsh cassandra.soulmate-infra.svc.cluster.local 9042 \
-                    -u cassandra_user \
-                    -p cassandra_password \
-                    -e "USE swipe; DESCRIBE TABLES;"
-                  exit 0
-                fi
-                echo "Attempt $i/$max_retries: Cassandra not ready yet..."
-                sleep 10
-              done
-              echo "❌ Failed to connect to Cassandra after $max_retries attempts"
-              exit 1
-          volumeMounts:
-            - name: init-script
-              mountPath: /init
-      volumes:
-        - name: init-script
-          configMap:
-            name: cassandra-init-script
-      restartPolicy: OnFailure
+data:
+  init.cql: |
+    -- Initialize keyspace and tables
+    CREATE KEYSPACE IF NOT EXISTS swipe WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'};
+    
+    USE swipe;
+    
+    CREATE TABLE IF NOT EXISTS swipe (
+                                         userPair     text, -- partition key: smaller_id:larger_id
+                                         userId       uuid, -- clustering key
+                                         swipedUserId uuid, -- clustering key
+                                         liked        boolean,
+                                         createdAt    timestamp,
+                                         PRIMARY KEY ((userPair), userId, swipedUserId)
+    );
+    
+    CREATE TABLE IF NOT EXISTS match (
+                                         userPair   text PRIMARY KEY, -- partition key
+                                         user1Id    uuid,
+                                         user2Id    uuid,
+                                         createdAt  timestamp
+    );

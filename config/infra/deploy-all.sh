@@ -55,9 +55,9 @@ kubectl create namespace soulmate-infra --dry-run=client -o yaml | kubectl apply
 #chmod +x monitoring/grafana/deploy-grafana.sh
 #monitoring/grafana/deploy-grafana.sh
 
-#Deploy faceplusplus-api
-chmod +x faceplusplus-api/deploy-faceplusplus-api.sh
-faceplusplus-api/deploy-faceplusplus-api.sh
+##Deploy faceplusplus-api
+#chmod +x faceplusplus-api/deploy-faceplusplus-api.sh
+#faceplusplus-api/deploy-faceplusplus-api.sh
 
 echo "=== Creating secrets ==="
 
@@ -65,33 +65,28 @@ echo "=== Creating secrets ==="
 kubectl create secret generic postgres-secrets \
   --from-literal=username=postgres \
   --from-literal=password=postgres \
-  --namespace=soulmate-infra \
   --dry-run=client -o yaml | kubectl apply -f -
 
 # Create MinIO secret with default credentials
 kubectl create secret generic minio-secrets \
   --from-literal=access-key=user \
   --from-literal=secret-key=password \
-  --namespace=soulmate-infra \
   --dry-run=client -o yaml | kubectl apply -f -
 
 # Create Face API secret
 kubectl create secret generic face-api-secrets \
   --from-literal=api-key=test \
   --from-literal=api-secret=secret \
-  --namespace=soulmate-infra \
   --dry-run=client -o yaml | kubectl apply -f -
 
 # Elasticsearch secret
 kubectl create secret generic elasticsearch-secrets \
   --from-literal=username=elastic \
   --from-literal=password=password \
-  --namespace=soulmate-infra \
   --dry-run=client -o yaml | kubectl apply -f -
 
 # Cassandra secret
 #kubectl create secret generic cassandra-secrets \
 #  --from-literal=username=cassandra_user \
 #  --from-literal=password=cassandra_password \
-#  --namespace=soulmate-infra \
 #  --dry-run=client -o yaml | kubectl apply -f -
