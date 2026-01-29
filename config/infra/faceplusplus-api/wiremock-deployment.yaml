@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: faceplusplus-api
+  namespace: soulmate-infra
+  labels:
+    app: faceplusplus-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: faceplusplus-api
+  template:
+    metadata:
+      labels:
+        app: faceplusplus-api
+    spec:
+      containers:
+        - name: wiremock
+          image: wiremock/wiremock:3.13.0
+          args:
+            - "--root-dir"
+            - "/home/wiremock"
+            - "--verbose"
+          ports:
+            - containerPort: 8080
+              name: http
+          volumeMounts:
+            - name: wiremock-mappings
+              mountPath: /home/wiremock/mappings
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
+      volumes:
+        - name: wiremock-mappings
+          configMap:
+            name: wiremock-mappings
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: faceplusplus-api
+  namespace: soulmate-infra
+  labels:
+    app: faceplusplus-api
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8099
+      targetPort: 8080
+      name: http
+  selector:
+    app: faceplusplus-api

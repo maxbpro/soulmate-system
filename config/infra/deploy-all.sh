@@ -51,9 +51,13 @@ kubectl create namespace soulmate-infra --dry-run=client -o yaml | kubectl apply
 #chmod +x monitoring/alloy/deploy-alloy.sh
 #monitoring/alloy/deploy-alloy.sh
 
-#Deploy grafana
-chmod +x monitoring/grafana/deploy-grafana.sh
-monitoring/grafana/deploy-grafana.sh
+##Deploy grafana
+#chmod +x monitoring/grafana/deploy-grafana.sh
+#monitoring/grafana/deploy-grafana.sh
+
+#Deploy faceplusplus-api
+chmod +x faceplusplus-api/deploy-faceplusplus-api.sh
+faceplusplus-api/deploy-faceplusplus-api.sh
 
 echo "=== Creating secrets ==="
 

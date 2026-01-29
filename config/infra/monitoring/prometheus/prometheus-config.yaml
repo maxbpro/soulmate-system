@@ -56,3 +56,7 @@ data:
         static_configs:
           - targets: ['kafka:9099']  # Kafka JMX metrics port
         scrape_interval: 15s
+      - job_name: 'faceplusplus-api'
+        static_configs:
+          - targets: ['faceplusplus-api:8080']
+        scrape_interval: 15s

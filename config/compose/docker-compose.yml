@@ -192,10 +192,9 @@ services:
     ports:
       - "8099:8080"
     volumes:
-      # Mount local 'mappings' directory to the container's '/home/wiremock/mappings'
       - ../../user-service/src/test/resources/mappings:/home/wiremock/mappings
-    mem_limit: 128M # Hard limit of 512MB
-    mem_reservation: 64M # Soft limit of 256MB
+    mem_limit: 128M
+    mem_reservation: 64M 
     networks:
       - soulmate-network
 
