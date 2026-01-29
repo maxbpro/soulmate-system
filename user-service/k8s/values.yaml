@@ -17,7 +17,7 @@ image:
 
 # Postgresql configuration
 database:
-  host: postgres-postgresql
+  host: postgres-postgresql.soulmate-infra.svc.cluster.local
   port: 5432
   name: postgres
   secretName: postgres-secrets
@@ -34,7 +34,7 @@ minio:
 
 # Face API configuration
 faceApi:
-  url: http://faceplusplus-api:8080
+  url: http://faceplusplus-api:8099
   secretName: face-api-secrets
 
 # Landmark API
