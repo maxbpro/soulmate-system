@@ -64,16 +64,22 @@ spec:
             - name: SPRING_PROFILES_ACTIVE
               value: {{ .Values.springProfile }}
 
+            # alloy
+            - name: ALLOY_OTLP_ENDPOINT
+              value: {{ .Values.alloy.otlpEndpoint | quote }}
+            - name: ALLOY_OTLP_TRACING_ENDPOINT
+              value: {{ .Values.alloy.tracingEndpoint | quote }}
+
           # Health check
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
               port: {{ .Values.appPort }}
               scheme: HTTP
-            initialDelaySeconds: 40  # matches start_period: 40s
-            periodSeconds: 20        # matches interval: 20s
-            timeoutSeconds: 5        # matches timeout: 5s
-            failureThreshold: 5      # matches retries: 5
+            initialDelaySeconds: 40
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 5
 
           readinessProbe:
             httpGet:
@@ -88,10 +94,10 @@ spec:
           # Resource limits
           resources:
             requests:
-              memory: "128Mi"   # matches mem_reservation: 128M
-              cpu: "100m"
+              memory: "256Mi"
+              cpu: "200m"
             limits:
-              memory: "256Mi"   # matches mem_limit: 256M
+              memory: "512Mi"
               cpu: "500m"
 
           # Security context (best practice)

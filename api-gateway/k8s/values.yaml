@@ -1,6 +1,3 @@
-#appVersion: 1.0.0
-
-
 # Application settings
 appName: api-gateway
 appPort: 8081
@@ -16,18 +13,18 @@ image:
 
 # Keycloak configuration
 keycloak:
-  serverUrl: http://keycloak:8080
+  serverUrl: http://keycloak.soulmate-infra.svc.cluster.local:8080
   realm: customer
   clientId: soulmate
   secretName: keycloak-secrets
-  authApiUrl: http://keycloak:8080
+  authApiUrl: http://keycloak.soulmate-infra.svc.cluster.local:8080
 
 # Service endpoints
 services:
   auth:
-    url: http://keycloak:8080
+    url: http://keycloak.soulmate-infra.svc.cluster.local:8080
   users:
-    name: http://keycloak:8080
+    name: http://keycloak.soulmate-infra.svc.cluster.local:8080
   profile:
     url: http://user-service:8082
   swipe:
@@ -38,11 +35,6 @@ services:
 # Java debug options
 javaDebugOptions: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8091"
 
-# Resource settings
-resources:
-  requests:
-    memory: "128Mi"
-    cpu: "100m"
-  limits:
-    memory: "256Mi"
-    cpu: "500m"
+alloy:
+  otlpEndpoint: http://alloy.soulmate-infra.svc.cluster.local:4318
+  tracingEndpoint: http://alloy.soulmate-infra.svc.cluster.local:4318/v1/traces
