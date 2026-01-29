@@ -22,6 +22,7 @@ public class ResourceServerSecurityConfig {
                 )
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/actuator/health",
+                                "/actuator/health/**",
                                 "/actuator/prometheus",
                                 "/actuator/info",
                                 "/v3/api-docs/**",

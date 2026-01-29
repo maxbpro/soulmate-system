@@ -12,22 +12,22 @@ image:
   pullPolicy: Always
 
 # Cassandra configuration
-cassandraHost: cassandra
-cassandraPort: 9142
+cassandraHost: cassandra.soulmate-infra.svc.cluster.local
+cassandraPort: 9042
 cassandraDataCenter: datacenter1
 cassandraKeyspace: swipe
 
 # Keycloak configuration
 keycloak:
-  issuerUri: http://keycloak:8080/realms/customer
-  jwkSetUri: http://keycloak:8080/realms/customer/protocol/openid-connect/certs
+  issuerUri: http://keycloak.soulmate-infra.svc.cluster.local:8080/realms/customer
+  jwkSetUri: http://keycloak.soulmate-infra.svc.cluster.local:8080/realms/customer/protocol/openid-connect/certs
 
 # Service endpoints
 services:
   auth:
-    url: http://keycloak:8080
+    url: http://keycloak.soulmate-infra.svc.cluster.local:8080
   users:
-    name: http://keycloak:8080
+    name: http://keycloak.soulmate-infra.svc.cluster.local:8080
   profile:
     url: http://user-service:8082
   swipe:
@@ -38,11 +38,6 @@ services:
 # Java debug options
 javaDebugOptions: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8093"
 
-# Resource settings
-resources:
-  requests:
-    memory: "128Mi"
-    cpu: "100m"
-  limits:
-    memory: "256Mi"
-    cpu: "500m"
+alloy:
+  otlpEndpoint: http://alloy.soulmate-infra.svc.cluster.local:4318
+  tracingEndpoint: http://alloy.soulmate-infra.svc.cluster.local:4318/v1/traces
