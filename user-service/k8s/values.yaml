@@ -17,7 +17,7 @@ image:
 
 # Postgresql configuration
 database:
-  host: postgres
+  host: postgres-postgresql
   port: 5432
   name: postgres
   secretName: postgres-secrets
