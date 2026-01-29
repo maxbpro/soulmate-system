@@ -62,11 +62,3 @@ javaDebugOptions: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address
 alloy:
   otlpEndpoint: http://alloy.soulmate-infra.svc.cluster.local:4318
   tracingEndpoint: http://alloy.soulmate-infra.svc.cluster.local:4318/v1/traces
-
-resources:
-  requests:
-    memory: "256Mi"
-    cpu: "200m"
-  limits:
-    memory: "512Mi"
-    cpu: "500m"

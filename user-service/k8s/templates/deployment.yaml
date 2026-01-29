@@ -141,10 +141,10 @@ spec:
           # Resource limits
           resources:
             requests:
-              memory: "128Mi"   # matches mem_reservation: 128M
-              cpu: "100m"
+              memory: "256Mi"
+              cpu: "200m"
             limits:
-              memory: "256Mi"   # matches mem_limit: 256M
+              memory: "512Mi"
               cpu: "500m"
 
           # Security context (best practice)
