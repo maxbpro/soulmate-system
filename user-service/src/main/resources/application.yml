@@ -111,7 +111,6 @@ otel:
   exporter:
     otlp:
       endpoint: ${ALLOY_OTLP_ENDPOINT:http://alloy:4318}
-      #endpoint: http://alloy.monitoring.svc.cluster.local:4318
       protocol: http/protobuf
   logs:
     exporter: none

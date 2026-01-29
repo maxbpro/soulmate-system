@@ -17,15 +17,6 @@ spec:
         app: {{ .Values.appName }}
         component: user-service
     spec:
-      # Init container to wait for dependencies
-{{/*      initContainers:*/}}
-{{/*        - name: wait-for-dependencies*/}}
-{{/*          image: busybox:1.35*/}}
-{{/*          command: ['sh', '-c',*/}}
-{{/*            'until nc -z {{ .Values.database.host }} {{ .Values.database.port }}; do echo "Waiting for PostgreSQL..."; sleep 2; done;*/}}
-{{/*             until nc -z kafka 9092; do echo "Waiting for Kafka..."; sleep 2; done;*/}}
-{{/*             until nc -z minio 9000; do echo "Waiting for MinIO..."; sleep 2; done;']*/}}
-
       containers:
         - name: {{ .Values.appName }}
           image: "{{ .Values.image.repository }}"
@@ -119,6 +110,12 @@ spec:
 
             - name: SPRING_PROFILES_ACTIVE
               value: {{ .Values.springProfile }}
+
+            # alloy
+            - name: ALLOY_OTLP_ENDPOINT
+              value: {{ .Values.alloy.otlpEndpoint | quote }}
+            - name: ALLOY_OTLP_TRACING_ENDPOINT
+              value: {{ .Values.alloy.tracingEndpoint | quote }}
 
           # Health check
           livenessProbe:

@@ -12,9 +12,6 @@ image:
   pullPolicy: Always
 
 
-#postgresqlHost: soulmate-postgresql-db.default.svc.cluster.local
-#postgresqlPort: 5433
-
 # Postgresql configuration
 database:
   host: postgres-postgresql.soulmate-infra.svc.cluster.local
@@ -24,17 +21,17 @@ database:
 
 # Kafka configuration
 kafka:
-  bootstrapServers: kafka:9092
+  bootstrapServers: kafka.soulmate-infra.svc.cluster.local:9092
 
 # MinIO configuration
 minio:
-  endpoint: http://minio:9000
+  endpoint: http://minio.soulmate-infra.svc.cluster.local:9000
   bucket: user-photos
   secretName: minio-secrets
 
 # Face API configuration
 faceApi:
-  url: http://faceplusplus-api:8099
+  url: http://faceplusplus-api.soulmate-infra.svc.cluster.local:8099
   secretName: face-api-secrets
 
 # Landmark API
@@ -43,15 +40,15 @@ landmarkApi:
 
 # Keycloak configuration
 keycloak:
-  issuerUri: http://keycloak:8080/realms/customer
-  jwkSetUri: http://keycloak:8080/realms/customer/protocol/openid-connect/certs
+  issuerUri: http://keycloak.soulmate-infra.svc.cluster.local:8080/realms/customer
+  jwkSetUri: http://keycloak.soulmate-infra.svc.cluster.local:8080/realms/customer/protocol/openid-connect/certs
 
 # Service endpoints
 services:
   auth:
-    url: http://keycloak:8080
+    url: http://keycloak.soulmate-infra.svc.cluster.local:8080
   users:
-    name: http://keycloak:8080
+    name: http://keycloak.soulmate-infra.svc.cluster.local:8080
   profile:
     url: http://user-service:8082
   swipe:
@@ -62,11 +59,14 @@ services:
 # Java debug options
 javaDebugOptions: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8092"
 
-# Resource settings
+alloy:
+  otlpEndpoint: http://alloy.soulmate-infra.svc.cluster.local:4318
+  tracingEndpoint: http://alloy.soulmate-infra.svc.cluster.local:4318/v1/traces
+
 resources:
   requests:
-    memory: "128Mi"
-    cpu: "100m"
-  limits:
     memory: "256Mi"
+    cpu: "200m"
+  limits:
+    memory: "512Mi"
     cpu: "500m"
