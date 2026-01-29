@@ -80,8 +80,6 @@ management:
   otlp:
     tracing:
       endpoint: ${ALLOY_OTLP_TRACING_ENDPOINT:http://alloy:4318/v1/traces}
-      compression: gzip
-      timeout: 10s
 
 otel:
   exporter:
@@ -92,7 +90,7 @@ otel:
     exporter: none
   metrics:
     exporter: none
-    
+
 logging:
   level:
     io.opentelemetry.exporter.internal: WARN
