@@ -26,6 +26,8 @@ spring:
     connection:
       connect-timeout: ${CASSANDRA_CONNECT_TIMEOUT:10s}
       init-query-timeout: ${CASSANDRA_INIT_QUERY_TIMEOUT:10s}
+    username: ${CASSANDRA_USERNAME:cassandra_user}
+    password: ${CASSANDRA_PASSWORD:cassandra_password}
 
 management:
   server:

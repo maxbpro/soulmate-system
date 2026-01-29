@@ -43,6 +43,10 @@ spec:
               value: "{{ .Values.cassandraDataCenter }}"
             - name: CASSANDRA_KEYSPACE
               value: "{{ .Values.cassandraKeyspace }}"
+            - name: CASSANDRA_USERNAME
+              value: "{{ .Values.cassandraUsername }}"
+            - name: CASSANDRA_PASSWORD
+              value: "{{ .Values.cassandraPassword }}"
 
             # Keycloak
             - name: RESOURCE_SERVER_ISSUER_URI
