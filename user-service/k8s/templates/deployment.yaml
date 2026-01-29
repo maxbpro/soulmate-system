@@ -118,25 +118,25 @@ spec:
               value: {{ .Values.alloy.tracingEndpoint | quote }}
 
           # Health check
-          livenessProbe:
-            httpGet:
-              path: /actuator/health/liveness
-              port: {{ .Values.appPort }}
-              scheme: HTTP
-            initialDelaySeconds: 40  # matches start_period: 40s
-            periodSeconds: 20        # matches interval: 20s
-            timeoutSeconds: 5        # matches timeout: 5s
-            failureThreshold: 5      # matches retries: 5
+{{/*          livenessProbe:*/}}
+{{/*            httpGet:*/}}
+{{/*              path: /actuator/health/liveness*/}}
+{{/*              port: {{ .Values.appPort }}*/}}
+{{/*              scheme: HTTP*/}}
+{{/*            initialDelaySeconds: 40  # matches start_period: 40s*/}}
+{{/*            periodSeconds: 20        # matches interval: 20s*/}}
+{{/*            timeoutSeconds: 5        # matches timeout: 5s*/}}
+{{/*            failureThreshold: 5      # matches retries: 5*/}}
 
-          readinessProbe:
-            httpGet:
-              path: /actuator/health/readiness
-              port: {{ .Values.appPort }}
-              scheme: HTTP
-            initialDelaySeconds: 10
-            periodSeconds: 5
-            timeoutSeconds: 3
-            failureThreshold: 3
+{{/*          readinessProbe:*/}}
+{{/*            httpGet:*/}}
+{{/*              path: /actuator/health/readiness*/}}
+{{/*              port: {{ .Values.appPort }}*/}}
+{{/*              scheme: HTTP*/}}
+{{/*            initialDelaySeconds: 10*/}}
+{{/*            periodSeconds: 5*/}}
+{{/*            timeoutSeconds: 3*/}}
+{{/*            failureThreshold: 3*/}}
 
           # Resource limits
           resources:
