@@ -12,7 +12,7 @@ image:
   pullPolicy: Always
 
 # Cassandra configuration
-cassandraHost: cassandra.soulmate-infra.svc.cluster.local
+cassandraContactPoints: cassandra.soulmate-infra.svc.cluster.local
 cassandraPort: 9042
 cassandraDataCenter: datacenter1
 cassandraKeyspace: swipe

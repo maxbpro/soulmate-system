@@ -35,8 +35,8 @@ spec:
               value: {{ .Values.javaDebugOptions }}
 
             # Cassandra configuration
-            - name: CASSANDRA_HOST
-              value: {{ .Values.cassandraHost }}
+            - name: CASSANDRA_CONTACT_POINTS
+              value: {{ .Values.cassandraContactPoints }}
             - name: CASSANDRA_PORT
               value: "{{ .Values.cassandraPort }}"
             - name: CASSANDRA_DATACENTER
