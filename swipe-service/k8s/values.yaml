@@ -14,7 +14,7 @@ image:
 # Cassandra configuration
 cassandraContactPoints: cassandra.soulmate-infra.svc.cluster.local
 cassandraPort: 9042
-cassandraDataCenter: DC1
+cassandraDataCenter: datacenter1
 cassandraKeyspace: swipe
 cassandraUsername: cassandra_user
 cassandraPassword: cassandra_password
