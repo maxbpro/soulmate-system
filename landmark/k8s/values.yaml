@@ -13,25 +13,25 @@ image:
 
 # elasticSearch configuration
 elasticSearch:
-  uris: soulmate-elasticsearch-db.default.svc.cluster.local:9200
+  uris: elasticsearch.soulmate-infra.svc.cluster.local:9200
   secretName: "elasticsearch-secrets"
 
 
 # Kafka configuration
 kafka:
-  bootstrapServers: kafka:9092
+  bootstrapServers: kafka.soulmate-infra.svc.cluster.local:9092
 
 # Keycloak configuration
 keycloak:
-  issuerUri: http://keycloak:8080/realms/customer
-  jwkSetUri: http://keycloak:8080/realms/customer/protocol/openid-connect/certs
+  issuerUri: http://keycloak.soulmate-infra.svc.cluster.local:8080/realms/customer
+  jwkSetUri: http://keycloak.soulmate-infra.svc.cluster.local:8080/realms/customer/protocol/openid-connect/certs
 
 # Service endpoints
 services:
   auth:
-    url: http://keycloak:8080
+    url: http://keycloak.soulmate-infra.svc.cluster.local:8080
   users:
-    name: http://keycloak:8080
+    name: http://keycloak.soulmate-infra.svc.cluster.local:8080
   profile:
     url: http://user-service:8082
   swipe:
@@ -42,11 +42,6 @@ services:
 # Java debug options
 javaDebugOptions: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8094"
 
-# Resource settings
-resources:
-  requests:
-    memory: "128Mi"
-    cpu: "100m"
-  limits:
-    memory: "256Mi"
-    cpu: "500m"
+alloy:
+  otlpEndpoint: http://alloy.soulmate-infra.svc.cluster.local:4318
+  tracingEndpoint: http://alloy.soulmate-infra.svc.cluster.local:4318/v1/traces
