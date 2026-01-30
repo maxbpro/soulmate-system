@@ -1,8 +1,5 @@
 #!/bin/bash
 
-echo "Pulling Cassandra image..."
-docker pull cassandra:3.11.2
-
 # Delete any existing Cassandra resources
 echo "Cleaning up any existing Cassandra..."
 kubectl delete statefulset cassandra -n soulmate-infra --ignore-not-found

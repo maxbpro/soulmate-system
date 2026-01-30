@@ -91,10 +91,10 @@ spec:
         name: kafka-data
       spec:
         accessModes: [ "ReadWriteOnce" ]
-        storageClassName: hostpath
+        storageClassName: local-path #local-path  # ← Use K3s default, hostpath - for docker
         resources:
           requests:
-            storage: 10Gi
+            storage: 1Gi
 ---
 apiVersion: v1
 kind: Service
