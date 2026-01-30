@@ -81,3 +81,8 @@ kubectl create secret generic elasticsearch-secrets \
   --from-literal=username=elastic \
   --from-literal=password=password \
   --dry-run=client -o yaml | kubectl apply -f -
+
+# keycloak secret
+kubectl create secret generic keycloak-secrets \
+  --from-literal=client-secret=s58oVwOCNpThoThUXKWtE8flEW4Aq368 \
+  --namespace=default  # or your app namespace
