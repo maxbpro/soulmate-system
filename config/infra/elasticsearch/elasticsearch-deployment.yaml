@@ -51,11 +51,11 @@ spec:
             failureThreshold: 3
           resources:
             requests:
-              memory: "1Gi"
-              cpu: "500m"
+              memory: 512Mi
+              cpu: 250m
             limits:
-              memory: "2Gi"
-              cpu: "1"
+              memory: 1Gi
+              cpu: 500m     
           volumeMounts:
             - name: esdata
               mountPath: /usr/share/elasticsearch/data

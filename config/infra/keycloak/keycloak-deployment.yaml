@@ -94,13 +94,13 @@ spec:
 #            periodSeconds: 5
           
           resources:
-            limits:
-              memory: 1Gi
-              cpu: "1"
             requests:
+              memory: 256Mi
+              cpu: 250m
+            limits:
               memory: 512Mi
-              cpu: "500m"
-      
+              cpu: 500m     
+
       # ADD this volumes section!
       volumes:
         - name: realm-import

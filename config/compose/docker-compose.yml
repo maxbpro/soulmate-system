@@ -156,7 +156,8 @@ services:
       - start-dev
       - --import-realm
     volumes:
-      - ./keycloak/:/opt/keycloak/data/import/
+      - ./keycloak/export/:/opt/keycloak/data/import/
+#      - ./keycloak/libs/custom-platform-keycloak-authenticator-1.0.0.jar:/opt/keycloak/providers/custom-platform-keycloak-authenticator.jar
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
@@ -194,7 +195,7 @@ services:
     volumes:
       - ../../user-service/src/test/resources/mappings:/home/wiremock/mappings
     mem_limit: 128M
-    mem_reservation: 64M 
+    mem_reservation: 64M
     networks:
       - soulmate-network
 
